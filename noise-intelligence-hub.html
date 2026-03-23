@@ -191,7 +191,59 @@
   }
   .p1-sb-new:hover { background: var(--accent); color: white; border-style: solid; }
   .p1-sb-divider { height: 1px; background: var(--border); margin: 0 16px; }
-  .p1-list { flex: 1; overflow-y: auto; padding: 6px 8px; }
+  .p1-list { overflow-y: auto; padding: 6px 8px; flex-shrink: 0; }
+  .p1-sb-sections { flex: 1; overflow-y: auto; display: flex; flex-direction: column; }
+
+  /* Ideas section */
+  .sb-section-label {
+    font-family: 'Reddit Mono', monospace; font-size: 9px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-muted);
+    padding: 12px 16px 6px; flex-shrink: 0;
+  }
+  .sb-filter-row {
+    display: flex; gap: 4px; padding: 0 12px 8px; flex-wrap: wrap; flex-shrink: 0;
+  }
+  .sb-filter {
+    padding: 3px 8px; border-radius: 10px; font-size: 9px; font-weight: 600;
+    font-family: 'Reddit Mono', monospace; cursor: pointer;
+    border: 1px solid var(--border); background: transparent; color: var(--text-muted);
+    transition: all 0.2s; text-transform: uppercase; letter-spacing: 0.3px;
+  }
+  .sb-filter:hover { border-color: var(--text-muted); color: var(--text); }
+  .sb-filter.active { background: var(--text); color: white; border-color: var(--text); }
+  .sb-ideas { padding: 0 8px 8px; display: flex; flex-direction: column; gap: 4px; }
+  .sb-idea {
+    padding: 8px 10px; border-radius: 8px; cursor: pointer;
+    border: 1px solid var(--border); background: var(--surface);
+    transition: all 0.2s;
+  }
+  .sb-idea:hover { border-color: var(--accent); background: var(--accent-light); transform: translateY(-1px); box-shadow: var(--shadow-sm); }
+  .sb-idea-title { font-size: 11.5px; font-weight: 500; color: var(--text); line-height: 1.3; }
+  .sb-idea-cat {
+    display: inline-block; margin-top: 4px; padding: 1px 6px; border-radius: 4px;
+    font-size: 8px; font-weight: 600; font-family: 'Reddit Mono', monospace;
+    text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .sb-idea-cat.social { background: rgba(59,130,246,0.1); color: #3B82F6; }
+  .sb-idea-cat.strategy { background: rgba(139,92,246,0.1); color: #8B5CF6; }
+  .sb-idea-cat.creative { background: rgba(236,72,153,0.1); color: #EC4899; }
+  .sb-idea-cat.analytics { background: rgba(34,197,94,0.1); color: #16A34A; }
+  .sb-idea-cat.production { background: rgba(245,158,11,0.1); color: #D97706; }
+
+  /* Connectors section */
+  .sb-connectors { padding: 0 8px 12px; }
+  .sb-conn {
+    display: flex; align-items: center; gap: 8px; padding: 6px 10px;
+    border-radius: 6px; transition: background 0.15s;
+  }
+  .sb-conn:hover { background: var(--surface2); }
+  .sb-conn-icon { font-size: 14px; width: 20px; text-align: center; flex-shrink: 0; }
+  .sb-conn-name { font-size: 11px; font-weight: 500; color: var(--text); flex: 1; }
+  .sb-conn-status {
+    width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0;
+  }
+  .sb-conn-status.on { background: var(--green); }
+  .sb-conn-status.off { background: var(--border); }
 
   /* Sidebar thread items */
   .sb-thread {
@@ -564,6 +616,13 @@
     </div>
     <div class="p1-sb-divider"></div>
     <div class="p1-list" id="sbL"></div>
+    <div class="p1-sb-sections">
+      <div class="sb-section-label">Ideas</div>
+      <div class="sb-filter-row" id="ideaFilters"></div>
+      <div class="sb-ideas" id="ideaList"></div>
+      <div class="sb-section-label">Connected</div>
+      <div class="sb-connectors" id="connList"></div>
+    </div>
   </div>
   <div class="p1-main">
     <div class="hub-chat-area">
@@ -1029,6 +1088,104 @@ function renderThreadBar() {
   });
 }
 
+/* ============ IDEAS & CONNECTORS ============ */
+var IDEAS = [
+  { title: 'Create a social strategy deck', cat: 'social', prompt: 'Create a social media strategy deck for {client}' },
+  { title: 'Draft a campaign brief', cat: 'strategy', prompt: 'Draft a campaign brief for {client}' },
+  { title: 'Build a content calendar', cat: 'creative', prompt: 'Build a monthly content calendar for {client}' },
+  { title: 'Analyze competitor activity', cat: 'analytics', prompt: 'Analyze competitor social media activity for {client}' },
+  { title: 'Write social copy', cat: 'creative', prompt: 'Write social media copy for {client}' },
+  { title: 'Monthly performance report', cat: 'analytics', prompt: 'Create a monthly performance report for {client}' },
+  { title: 'Plan a product launch', cat: 'strategy', prompt: 'Create a product launch plan for {client}' },
+  { title: 'Design an email sequence', cat: 'creative', prompt: 'Design a nurture email sequence for {client}' },
+  { title: 'Audience insight report', cat: 'analytics', prompt: 'Generate an audience insight report for {client}' },
+  { title: 'Create a pitch deck', cat: 'strategy', prompt: 'Create a new business pitch deck for {client}' },
+  { title: 'Influencer brief', cat: 'social', prompt: 'Draft an influencer collaboration brief for {client}' },
+  { title: 'Paid media plan', cat: 'strategy', prompt: 'Create a paid media plan for {client}' },
+  { title: 'Shoot production schedule', cat: 'production', prompt: 'Create a shoot production schedule for {client}' },
+  { title: 'Brand guidelines summary', cat: 'creative', prompt: 'Summarize the brand guidelines for {client}' },
+  { title: 'Hashtag research', cat: 'social', prompt: 'Do hashtag research and recommendations for {client}' },
+  { title: 'SEO content plan', cat: 'analytics', prompt: 'Create an SEO content plan for {client}' },
+];
+
+var CONNECTORS = [
+  { icon: '📊', name: 'Google Analytics', on: true },
+  { icon: '📱', name: 'Meta Business Suite', on: true },
+  { icon: '🎨', name: 'Canva', on: true },
+  { icon: '📁', name: 'Google Drive', on: true },
+  { icon: '💬', name: 'Slack', on: true },
+  { icon: '🎬', name: 'Frame.io', on: false },
+  { icon: '📋', name: 'Asana', on: true },
+  { icon: '🎯', name: 'Sprout Social', on: false },
+];
+
+var ideaFilter = 'all';
+
+function renderIdeas() {
+  // Render filter chips
+  var cats = ['all', 'social', 'strategy', 'creative', 'analytics', 'production'];
+  var filterEl = document.getElementById('ideaFilters');
+  filterEl.innerHTML = cats.map(function(c) {
+    return '<span class="sb-filter' + (ideaFilter === c ? ' active' : '') + '" onclick="setIdeaFilter(\'' + c + '\')">' + (c === 'all' ? 'All' : c.charAt(0).toUpperCase() + c.slice(1)) + '</span>';
+  }).join('');
+
+  // Render idea cards
+  var listEl = document.getElementById('ideaList');
+  var filtered = ideaFilter === 'all' ? IDEAS : IDEAS.filter(function(i) { return i.cat === ideaFilter; });
+  listEl.innerHTML = filtered.map(function(idea, idx) {
+    return '<div class="sb-idea" onclick="useIdea(' + IDEAS.indexOf(idea) + ')">'
+      + '<div class="sb-idea-title">' + idea.title + '</div>'
+      + '<span class="sb-idea-cat ' + idea.cat + '">' + idea.cat + '</span>'
+      + '</div>';
+  }).join('');
+}
+
+function setIdeaFilter(cat) {
+  ideaFilter = cat;
+  renderIdeas();
+}
+
+function useIdea(idx) {
+  var idea = IDEAS[idx];
+  if (!idea) return;
+  // Determine the client from the current thread or prompt for one
+  var threads = currentUser ? getUserThreads(currentUser.name) : [];
+  var currentThread = threads.find(function(t) { return t.id === currentThreadId; });
+  var client = currentThread && currentThread.client ? currentThread.client : null;
+
+  if (!client) {
+    // Show a quick client picker
+    var clientName = prompt('Which client is this for? (e.g. Davines, Olaplex, or leave blank for general)');
+    if (clientName && clientName.trim()) {
+      client = clientName.trim();
+      startNewThread(idea.title, client);
+    } else {
+      startNewThread(idea.title, null);
+    }
+  }
+
+  var prompt_text = idea.prompt.replace('{client}', client || 'the client');
+  document.getElementById('wI').value = prompt_text;
+  hubSend();
+}
+
+function renderConnectors() {
+  var el = document.getElementById('connList');
+  el.innerHTML = CONNECTORS.map(function(c) {
+    return '<div class="sb-conn">'
+      + '<span class="sb-conn-icon">' + c.icon + '</span>'
+      + '<span class="sb-conn-name">' + c.name + '</span>'
+      + '<span class="sb-conn-status ' + (c.on ? 'on' : 'off') + '"></span>'
+      + '</div>';
+  }).join('');
+}
+
+function renderSidebar() {
+  renderThreadBar();
+  renderIdeas();
+  renderConnectors();
+}
+
 function initThreadsForUser(userName) {
   var threads = getUserThreads(userName);
   if (threads.length === 0) {
@@ -1090,7 +1247,7 @@ function selectUser(u) {
   } else {
     addMsgTo(hubChatEl, 'Hey ' + u.name.split(' ')[0] + '! What are you working on today?', false);
   }
-  renderThreadBar();
+  renderSidebar();
 }
 
 /* ============ PAGE NAV ============ */
@@ -1206,7 +1363,7 @@ function renderSharedThreadsList(el, filter) {
 }
 
 // Init sidebar
-renderThreadBar();
+renderSidebar();
 
 /* ============ CHAT SYSTEM ============ */
 function addMsgTo(container, text, isUser, senderInfo) {

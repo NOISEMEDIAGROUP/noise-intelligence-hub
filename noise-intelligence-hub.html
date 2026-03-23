@@ -361,12 +361,13 @@
 
   /* ============ SLIDE PAGINATION ============ */
   .p2-dc { position: relative; }
-  .p2-dc.slide-active { padding: 16px 50px; align-items: stretch; }
+  .p2-dc.slide-active { padding: 16px 50px; align-items: center; justify-content: center; }
   .p2-dc.slide-active .doc-paper {
     padding: 0; border-radius: 10px; overflow: hidden;
-    max-width: 100%; aspect-ratio: 16/9; min-height: unset;
+    width: 100%; max-width: 900px; aspect-ratio: 16/9;
+    min-height: unset; max-height: calc(100% - 32px);
     display: flex; flex-direction: column;
-    position: relative;
+    position: relative; border: none;
   }
   .slide-nav {
     position: absolute; top: 50%; transform: translateY(-50%);
@@ -407,7 +408,7 @@
     text-transform: uppercase; color: #C73C1E; margin-bottom: 20px;
   }
   .doc-slide.slide-title h1 {
-    font-family: 'Reddit Mono', monospace; font-size: 28px; font-weight: 700;
+    font-family: 'Reddit Mono', monospace; font-size: clamp(18px, 3vw, 28px); font-weight: 700;
     color: white; margin: 0 0 8px 0; line-height: 1.2;
   }
   .doc-slide.slide-title .sub {
@@ -1874,7 +1875,10 @@ function showSlides(html, dc) {
   tmp.innerHTML = html;
 
   /* Find dark blocks — title (first) and end (last) */
-  var darkBlocks = Array.from(tmp.querySelectorAll('div[style*="background:#1B1B1B"]'));
+  var darkBlocks = Array.from(tmp.querySelectorAll('div[style*="background"]')).filter(function(el) {
+    var bg = (el.getAttribute('style') || '').toLowerCase();
+    return bg.includes('#1b1b1b') || bg.includes('#1B1B1B') || bg.includes('#222') || bg.includes('#111') || bg.includes('#000') || bg.includes('rgb(27');
+  });
   var titleEl = darkBlocks.length >= 1 ? darkBlocks[0] : null;
   var endEl = darkBlocks.length >= 2 ? darkBlocks[darkBlocks.length - 1] : null;
 

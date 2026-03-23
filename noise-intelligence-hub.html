@@ -145,6 +145,7 @@
     border: 1px solid var(--border); color: var(--text-muted); background: transparent;
   }
   .header-btn:hover { border-color: var(--accent); color: var(--text); }
+  .header-btn.active { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
   .hdr-user {
     display: flex; align-items: center; gap: 8px; cursor: pointer;
     padding: 4px 10px 4px 4px; border-radius: 20px;
@@ -212,6 +213,14 @@
   .mem-text { font-size: 12.5px; line-height: 1.5; color: var(--text); }
   .mem-meta { font-size: 10px; color: var(--text-muted); margin-top: 4px; display: flex; justify-content: space-between; }
   .mem-del { cursor: pointer; color: var(--accent); font-weight: 700; padding: 0 4px; }
+  .mem-cat { display: inline-block; padding: 2px 6px; border-radius: 3px; font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-right: 4px; }
+  .mem-cat.decision { background: rgba(199,60,30,0.1); color: #C73C1E; }
+  .mem-cat.process { background: rgba(43,108,176,0.1); color: #2B6CB0; }
+  .mem-cat.client { background: rgba(45,138,78,0.1); color: #2D8A4E; }
+  .mem-cat.general { background: var(--surface2); color: var(--text-muted); }
+  .thread-mode-btn { padding: 4px 10px; font-size: 11px; font-weight: 600; cursor: pointer; color: var(--text-muted); border-bottom: 2px solid transparent; transition: all 0.2s; }
+  .thread-mode-btn:hover { color: var(--text); }
+  .thread-mode-btn.active { color: var(--text); border-bottom-color: var(--accent); }
 
   /* Hub chat area */
   .p1-main { flex: 1; display: flex; flex-direction: column; padding: 0; overflow: hidden; min-height: 0; }
@@ -490,10 +499,10 @@
 <!-- HEADER (hidden on login page) -->
 <div class="header hidden" id="mainHeader">
   <div class="logo" onclick="goPage(1)">NM<span class="dot">.</span></div>
-  <span class="header-title" onclick="goPage(1)">Noise Intelligence</span>
+  <span class="header-title" onclick="goPage(1)">Noise Intelligence <span id="modeIndicator" style="font-size:11px;opacity:0.6;"></span></span>
   <div class="header-right">
-    <button class="header-btn" onclick="goPage(1)">Hub</button>
-    <button class="header-btn" onclick="goPage(2)">Workspace</button>
+    <button class="header-btn" id="modeBtn1" onclick="switchMode('chat')">Noise Chat</button>
+    <button class="header-btn" id="modeBtn2" onclick="switchMode('cowork')">Noise Co-Work</button>
     <button class="header-btn" onclick="showSettings()" title="AI Settings" style="font-size:16px;padding:6px 10px;">&#9881;</button>
     <div class="hdr-user" id="hdrUser" onclick="goPage(0)"></div>
   </div>
@@ -516,6 +525,7 @@
       <div class="p1-tab active" onclick="swTab('clients')">Clients</div>
       <div class="p1-tab" onclick="swTab('team')">Team</div>
       <div class="p1-tab" onclick="swTab('connectors')">Connectors</div>
+      <div class="p1-tab" onclick="swTab('shared')">Shared</div>
       <div class="p1-tab" onclick="swTab('memory')">Memory</div>
     </div>
     <div class="p1-search"><input type="text" id="sbS" placeholder="Search clients..." oninput="rSb(this.value)"></div>
@@ -666,6 +676,8 @@ const CONN = [
 /* ============ STATE ============ */
 let currentUser = null;
 let sbTab = 'clients';
+var currentMode = 'chat'; // 'chat' or 'cowork'
+var threadViewMode = 'my'; // 'my' or 'team' — which threads to show in thread bar
 
 /* ============ PERSISTENT MEMORY ============ */
 const STORE_KEY = 'noise_intelligence';
@@ -723,6 +735,46 @@ function getMemoryContext() {
   return '\n\nSAVED MEMORIES:\n' + all.map(function(m) { return '- ' + m.text; }).join('\n');
 }
 
+/* ============ ORGANISATIONAL MEMORY ============ */
+function getOrgMemory() {
+  var store = loadStore();
+  if (!store.orgMemory) store.orgMemory = [];
+  return store.orgMemory;
+}
+
+function addOrgMemory(text, category) {
+  var store = loadStore();
+  if (!store.orgMemory) store.orgMemory = [];
+  var item = {
+    text: text,
+    author: currentUser ? currentUser.name : 'Unknown',
+    category: category || 'general',
+    time: new Date().toISOString()
+  };
+  store.orgMemory.unshift(item);
+  saveStore(store);
+}
+
+function deleteOrgMemory(index) {
+  var store = loadStore();
+  if (store.orgMemory) {
+    store.orgMemory.splice(index, 1);
+    saveStore(store);
+  }
+}
+
+function searchOrgMemory(query) {
+  var q = query.toLowerCase();
+  return getOrgMemory().filter(function(m) { return m.text.toLowerCase().includes(q) || m.category.toLowerCase().includes(q); });
+}
+
+// Include org memory in AI system prompt
+function getOrgMemoryContext() {
+  var mems = getOrgMemory();
+  if (mems.length === 0) return '';
+  return '\n\nTEAM KNOWLEDGE BASE:\n' + mems.map(function(m) { return '- (' + m.category.toUpperCase() + ', ' + m.author + ') ' + m.text; }).join('\n');
+}
+
 /* ============ THREAD SYSTEM ============ */
 var currentThreadId = null;
 
@@ -740,6 +792,65 @@ function saveUserThreads(userName, threads) {
   saveStore(store);
 }
 
+function getSharedThreads() {
+  var store = loadStore();
+  if (!store.sharedThreads) store.sharedThreads = [];
+  return store.sharedThreads;
+}
+
+function saveSharedThreads(threads) {
+  var store = loadStore();
+  store.sharedThreads = threads;
+  saveStore(store);
+}
+
+function shareThread(threadId) {
+  if (!currentUser) return;
+  var threads = getUserThreads(currentUser.name);
+  var th = threads.find(function(t) { return t.id === threadId; });
+  if (!th) return;
+
+  if (th.shared) {
+    // Unshare: move back to personal
+    th.shared = false;
+    th.contributors = [currentUser.name];
+    saveUserThreads(currentUser.name, threads);
+    var shared = getSharedThreads();
+    shared = shared.filter(function(s) { return s.id !== threadId; });
+    saveSharedThreads(shared);
+  } else {
+    // Share: move to shared storage
+    th.shared = true;
+    if (!th.contributors) th.contributors = [];
+    if (!th.contributors.includes(currentUser.name)) th.contributors.push(currentUser.name);
+    var shared = getSharedThreads();
+    shared.unshift(th);
+    saveSharedThreads(shared);
+    threads = threads.filter(function(t) { return t.id !== threadId; });
+    saveUserThreads(currentUser.name, threads);
+  }
+  renderThreadBar();
+}
+
+function getAllTeamThreads() {
+  var allThreads = [];
+  TEAM.forEach(function(t) {
+    var personal = getUserThreads(t.name);
+    var sharedVersions = personal.filter(function(p) { return p.shared; });
+    allThreads = allThreads.concat(sharedVersions);
+  });
+  var shared = getSharedThreads();
+  allThreads = allThreads.concat(shared);
+  // Remove duplicates by ID
+  var seen = {};
+  allThreads = allThreads.filter(function(t) {
+    if (seen[t.id]) return false;
+    seen[t.id] = true;
+    return true;
+  });
+  return allThreads;
+}
+
 function createThread(userName, label, client) {
   var threads = getUserThreads(userName);
   var thread = {
@@ -747,7 +858,9 @@ function createThread(userName, label, client) {
     label: label || 'New chat',
     client: client || null,
     html: '',
-    created: new Date().toISOString()
+    created: new Date().toISOString(),
+    shared: false,
+    contributors: [userName]
   };
   threads.unshift(thread);
   saveUserThreads(userName, threads);
@@ -758,9 +871,19 @@ function saveCurrentThread() {
   if (!currentUser || !currentThreadId) return;
   var threads = getUserThreads(currentUser.name);
   var th = threads.find(function(t) { return t.id === currentThreadId; });
+
   if (th) {
     th.html = document.getElementById('hubChat').innerHTML;
     saveUserThreads(currentUser.name, threads);
+    return;
+  }
+
+  // Check if it's in shared threads
+  var shared = getSharedThreads();
+  th = shared.find(function(t) { return t.id === currentThreadId; });
+  if (th) {
+    th.html = document.getElementById('hubChat').innerHTML;
+    saveSharedThreads(shared);
   }
 }
 
@@ -769,8 +892,16 @@ function switchThread(threadId) {
   saveCurrentThread();
   conversationHistory = [];
 
+  // Look in personal threads first, then shared
   var threads = getUserThreads(currentUser.name);
   var th = threads.find(function(t) { return t.id === threadId; });
+
+  if (!th) {
+    // Check shared threads
+    var shared = getSharedThreads();
+    th = shared.find(function(t) { return t.id === threadId; });
+  }
+
   if (!th) return;
 
   currentThreadId = th.id;
@@ -824,18 +955,40 @@ function deleteThread(threadId, ev) {
 
 function renderThreadBar() {
   if (!currentUser) return;
-  var threads = getUserThreads(currentUser.name);
   var bar = document.getElementById('threadBar');
-  var html = '<div class="thread-chip new-thread" onclick="promptNewThread()">+ New</div>';
+  var html = '';
+
+  // Add view toggle buttons for the thread bar
+  html += '<div style="display:flex;gap:6px;padding:8px 0;border-bottom:1px solid var(--border);margin-bottom:8px;">';
+  html += '<span class="thread-mode-btn' + (threadViewMode === 'my' ? ' active' : '') + '" onclick="setThreadViewMode(\'my\')">My Threads</span>';
+  html += '<span class="thread-mode-btn' + (threadViewMode === 'team' ? ' active' : '') + '" onclick="setThreadViewMode(\'team\')">Team Threads</span>';
+  html += '</div>';
+
+  html += '<div class="thread-chip new-thread" onclick="promptNewThread()">+ New</div>';
+
+  var threads;
+  if (threadViewMode === 'team') {
+    threads = getAllTeamThreads();
+  } else {
+    threads = getUserThreads(currentUser.name);
+  }
+
   threads.forEach(function(th) {
     var active = th.id === currentThreadId ? ' active' : '';
     var clientTag = th.client ? '<span class="thread-client">' + th.client + '</span>' : '';
+    var shareIcon = th.shared ? '🔗' : '';
     html += '<div class="thread-chip' + active + '" onclick="switchThread(\'' + th.id + '\')" title="' + th.label + '">'
-      + th.label + clientTag
-      + (threads.length > 1 ? '<span style="margin-left:6px;opacity:0.4;font-size:9px;" onclick="deleteThread(\'' + th.id + '\', event)">&times;</span>' : '')
+      + th.label + clientTag + shareIcon
+      + (threadViewMode === 'my' && threads.length > 1 ? '<span style="margin-left:6px;opacity:0.4;font-size:9px;" onclick="deleteThread(\'' + th.id + '\', event)">&times;</span>' : '')
+      + (threadViewMode === 'my' ? '<span style="margin-left:4px;opacity:0.5;cursor:pointer;font-size:11px;" onclick="shareThread(\'' + th.id + '\', event)" title="Share thread">🔗</span>' : '')
       + '</div>';
   });
   bar.innerHTML = html;
+}
+
+function setThreadViewMode(mode) {
+  threadViewMode = mode;
+  renderThreadBar();
 }
 
 function initThreadsForUser(userName) {
@@ -914,6 +1067,33 @@ function goPage(n) {
   if (n===2) document.getElementById('cI').focus();
 }
 
+/* ============ MODE SWITCHING ============ */
+function switchMode(mode) {
+  currentMode = mode;
+  var btn1 = document.getElementById('modeBtn1');
+  var btn2 = document.getElementById('modeBtn2');
+  var indicator = document.getElementById('modeIndicator');
+
+  if (mode === 'chat') {
+    btn1.classList.add('active');
+    btn2.classList.remove('active');
+    indicator.textContent = '';
+    threadViewMode = 'my';
+    if (sbTab === 'shared') swTab('clients');
+  } else {
+    btn1.classList.remove('active');
+    btn2.classList.add('active');
+    indicator.textContent = '(TEAM)';
+    threadViewMode = 'team';
+    sbTab = 'shared';
+    var s = document.getElementById('sbS');
+    s.placeholder = 'Search shared threads...';
+    s.value = '';
+  }
+  renderThreadBar();
+  rSb('');
+}
+
 /* ============ SIDEBAR ============ */
 function swTab(tab) {
   sbTab = tab;
@@ -922,6 +1102,8 @@ function swTab(tab) {
   var s = document.getElementById('sbS');
   if (tab === 'memory') {
     s.placeholder = 'Add a note...';
+  } else if (tab === 'shared') {
+    s.placeholder = 'Search shared threads...';
   } else {
     s.placeholder = tab==='clients'?'Search clients...':tab==='team'?'Search team...':'Search connectors...';
   }
@@ -957,6 +1139,8 @@ function rSb(q) {
       d.innerHTML = '<div class="si-team-av" style="background:' + t.color + '">' + t.init + '</div><div><div class="si-team-n">' + t.name + '</div><div class="si-team-r">' + t.role + '</div></div>';
       el.appendChild(d);
     });
+  } else if (sbTab==='shared') {
+    renderSharedThreadsList(el, ql);
   } else if (sbTab==='memory') {
     renderMemoryList(el, ql);
   } else {
@@ -973,8 +1157,9 @@ function renderMemoryList(el, filter) {
   if (!currentUser) return;
   var mems = getMemories(currentUser.name);
   var globalMems = getMemories('_global');
+  var orgMems = getOrgMemory();
 
-  if (mems.length === 0 && globalMems.length === 0) {
+  if (mems.length === 0 && globalMems.length === 0 && orgMems.length === 0) {
     el.innerHTML = '<div style="padding:16px;color:var(--text-muted);font-size:12px;line-height:1.6;">No memories saved yet.<br><br>Tell the bot to <strong>"remember that..."</strong> or type a note in the search bar above and press Enter to save it.</div>';
     return;
   }
@@ -993,9 +1178,25 @@ function renderMemoryList(el, filter) {
     });
   }
 
+  if (orgMems.length > 0) {
+    var th = document.createElement('div');
+    th.style.cssText = 'padding:8px 12px;font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-top:12px;';
+    th.textContent = 'Team Knowledge';
+    el.appendChild(th);
+    orgMems.forEach(function(m, i) {
+      if (filter && !m.text.toLowerCase().includes(filter) && !m.category.toLowerCase().includes(filter)) return;
+      var d = document.createElement('div');
+      d.className = 'mem-item';
+      var catColor = {'decision':'rgba(199,60,30,0.1)','process':'rgba(43,108,176,0.1)','client':'rgba(45,138,78,0.1)','general':'var(--surface2)'}[m.category] || 'var(--surface2)';
+      var catText = {'decision':'#C73C1E','process':'#2B6CB0','client':'#2D8A4E','general':'var(--text-muted)'}[m.category] || 'var(--text-muted)';
+      d.innerHTML = '<div class="mem-text"><span class="mem-cat" style="background:' + catColor + ';color:' + catText + ';">' + m.category + '</span>' + m.text + '</div><div class="mem-meta">' + m.author + ' · ' + new Date(m.time).toLocaleDateString('en-GB',{day:'numeric',month:'short'}) + ' <span class="mem-del" onclick="deleteOrgMemory(' + i + ');rSb();">x</span></div>';
+      el.appendChild(d);
+    });
+  }
+
   if (mems.length > 0) {
     var ph = document.createElement('div');
-    ph.style.cssText = 'padding:8px 12px;font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;';
+    ph.style.cssText = 'padding:8px 12px;font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;' + (orgMems.length > 0 ? 'margin-top:12px;' : '');
     ph.textContent = currentUser.name.split(' ')[0] + '\'s Notes';
     el.appendChild(ph);
     mems.forEach(function(m, i) {
@@ -1006,6 +1207,33 @@ function renderMemoryList(el, filter) {
       el.appendChild(d);
     });
   }
+}
+
+function renderSharedThreadsList(el, filter) {
+  var shared = getAllTeamThreads();
+  if (shared.length === 0) {
+    el.innerHTML = '<div style="padding:16px;color:var(--text-muted);font-size:12px;line-height:1.6;">No shared threads yet.<br><br>Create a thread and click the 🔗 icon to share it with the team.</div>';
+    return;
+  }
+
+  var createBtn = document.createElement('div');
+  createBtn.style.cssText = 'padding:8px 12px;margin-bottom:8px;background:var(--accent-light);border:1px solid var(--accent);border-radius:6px;cursor:pointer;text-align:center;font-size:12px;font-weight:600;color:var(--accent);';
+  createBtn.textContent = '+ Create Team Thread';
+  createBtn.onclick = function() { promptNewThread(); };
+  el.appendChild(createBtn);
+
+  shared.forEach(function(th) {
+    if (filter && !th.label.toLowerCase().includes(filter)) return;
+    var d = document.createElement('div');
+    d.className = 'si';
+    d.style.cursor = 'pointer';
+    d.onclick = function() { switchThread(th.id); };
+    var contributorCount = th.contributors ? th.contributors.length : 1;
+    var lastUpdate = th.created ? new Date(th.created).toLocaleDateString('en-GB',{day:'numeric',month:'short'}) : 'Unknown';
+    var clientTag = th.client ? '<span class="thread-client" style="margin-right:6px;">' + th.client + '</span>' : '';
+    d.innerHTML = '<span class="si-name">' + th.label + '</span><br><span style="font-size:11px;color:var(--text-muted);">' + clientTag + contributorCount + ' contributors · ' + lastUpdate + '</span>';
+    el.appendChild(d);
+  });
 }
 
 // Allow adding memories from the search bar when on Memory tab
@@ -1020,13 +1248,29 @@ document.getElementById('sbS').addEventListener('keypress', function(e) {
 rSb();
 
 /* ============ CHAT SYSTEM ============ */
-function addMsgTo(container, text, isUser) {
+function addMsgTo(container, text, isUser, senderInfo) {
   var el = document.createElement('div');
   el.className = 'msg ' + (isUser ? 'msg-u' : 'msg-b');
-  var avCol = isUser && currentUser ? currentUser.color : '#1B1B1B';
-  var avInit = isUser && currentUser ? currentUser.init : 'NI';
-  var avCls = isUser ? 'm-av-u' : 'm-av-b';
+
+  var avCol, avInit, avCls;
+
+  if (senderInfo && isUser) {
+    // Use provided sender info (for shared threads)
+    avCol = senderInfo.color || '#666666';
+    avInit = senderInfo.init || '?';
+    avCls = 'm-av-u';
+  } else if (isUser && currentUser) {
+    avCol = currentUser.color;
+    avInit = currentUser.init;
+    avCls = 'm-av-u';
+  } else {
+    avCol = '#1B1B1B';
+    avInit = 'NI';
+    avCls = 'm-av-b';
+  }
+
   el.innerHTML = '<div class="m-av ' + avCls + '" style="background:' + avCol + '">' + avInit + '</div><div class="m-body">' + text + '</div>';
+  if (senderInfo) el.setAttribute('data-sender', JSON.stringify(senderInfo));
   container.appendChild(el);
   container.scrollTop = container.scrollHeight;
 }
@@ -1061,6 +1305,22 @@ async function hubSend() {
   if (!text) return;
   input.value = '';
   var hc = document.getElementById('hubChat');
+
+  // Handle team note commands
+  var teamNoteMatch = text.match(/^(?:team note|remember for the team)[\s:]+(.+)/i);
+  if (teamNoteMatch) {
+    var note = teamNoteMatch[1];
+    var cat = 'general';
+    if (note.match(/decision|choice|decided/i)) cat = 'decision';
+    else if (note.match(/process|procedure|step|how to/i)) cat = 'process';
+    else if (note.match(/client|account|project/i)) cat = 'client';
+    addOrgMemory(note, cat);
+    addMsgTo(hc, text, true);
+    addMsgTo(hc, 'Saved to Team Knowledge. All team members can see this in the Memory tab.', false);
+    saveCurrentThread();
+    if (sbTab === 'memory') rSb('');
+    return;
+  }
 
   // Handle "remember" commands locally
   var remMatch = text.match(/^remember\s+(that\s+)?(.+)/i);
@@ -1205,7 +1465,7 @@ function buildSystemPrompt() {
     return info;
   }).join('\n');
   var teamData = TEAM.map(function(t) { return t.name + ' — ' + t.role; }).join('\n');
-  return 'You are Noise Intelligence, the internal AI assistant for Noise Media, a creative agency. You are chatting with ' + (currentUser ? currentUser.name + ' (' + currentUser.role + ')' : 'a team member') + '.\n\nBe conversational, warm, and concise. Answer like a knowledgeable colleague — no bullet points or formal formatting in chat. Keep responses short (1-3 sentences) unless they ask for detail. When asked about strategy, brand positioning, audiences, paid media, partnerships, or campaign approach for a client, use the STRATEGY DEEP-DIVE DATA below to give informed, specific answers.\n\nYou can answer questions about clients, team, assets, campaigns, strategy, brand positioning, and generate documents. When asked to create a document (email, brief, social copy, proposal, cost allocation, report, meeting agenda, presentation/deck/slides), respond with ONLY a JSON object like: {"doc_type":"email","client":"BARBRI","variant":"general"}\nFor presentations, include a topic field: {"doc_type":"presentation","client":"Thortful","topic":"Campaign"}\n\nValid doc_type values: email, brief, social, proposal, cost, report, agenda, presentation\nValid email variants: general, intro, followup, update\n\nFor all other messages, just reply conversationally.\n\nCLIENTS (' + CL.length + '):\n' + clientData + '\n\nTEAM (' + TEAM.length + '):\n' + teamData + '\n\nNoise Media specialises in paid social, content production, and brand storytelling. Services: content strategy, creative production (video, photo, design), paid social management, UGC/influencer, community management. Offices in London, Los Angeles, New York. Contact: brands@noisemediagroup.co.uk, +44 0203 007 0500. Co-founded by Anthony and Joe.' + buildStrategyContext() + '\n\nAGENCY CASE STUDIES: Apple Gift Cards (overstocked to sold out), VOXI (UGC-style creative drove 124% higher CTR than usual ads, became the student SIM everyone switched to). Our approach: social-first mindset across Social, Influencer, Production, OOH, Paid, Activations.' + getMemoryContext();
+  return 'You are Noise Intelligence, the internal AI assistant for Noise Media, a creative agency. You are chatting with ' + (currentUser ? currentUser.name + ' (' + currentUser.role + ')' : 'a team member') + '.\n\nBe conversational, warm, and concise. Answer like a knowledgeable colleague — no bullet points or formal formatting in chat. Keep responses short (1-3 sentences) unless they ask for detail. When asked about strategy, brand positioning, audiences, paid media, partnerships, or campaign approach for a client, use the STRATEGY DEEP-DIVE DATA below to give informed, specific answers.\n\nYou can answer questions about clients, team, assets, campaigns, strategy, brand positioning, and generate documents. When asked to create a document (email, brief, social copy, proposal, cost allocation, report, meeting agenda, presentation/deck/slides), respond with ONLY a JSON object like: {"doc_type":"email","client":"BARBRI","variant":"general"}\nFor presentations, include a topic field: {"doc_type":"presentation","client":"Thortful","topic":"Campaign"}\n\nValid doc_type values: email, brief, social, proposal, cost, report, agenda, presentation\nValid email variants: general, intro, followup, update\n\nFor all other messages, just reply conversationally.\n\nCLIENTS (' + CL.length + '):\n' + clientData + '\n\nTEAM (' + TEAM.length + '):\n' + teamData + '\n\nNoise Media specialises in paid social, content production, and brand storytelling. Services: content strategy, creative production (video, photo, design), paid social management, UGC/influencer, community management. Offices in London, Los Angeles, New York. Contact: brands@noisemediagroup.co.uk, +44 0203 007 0500. Co-founded by Anthony and Joe.' + buildStrategyContext() + '\n\nAGENCY CASE STUDIES: Apple Gift Cards (overstocked to sold out), VOXI (UGC-style creative drove 124% higher CTR than usual ads, became the student SIM everyone switched to). Our approach: social-first mindset across Social, Influencer, Production, OOH, Paid, Activations.' + getMemoryContext() + getOrgMemoryContext();
 }
 
 async function aiCall(sysPrompt, msgs, maxTok) {

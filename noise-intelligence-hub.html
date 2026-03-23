@@ -495,6 +495,42 @@
     width: 24px; height: 24px; border: 1px solid var(--border); border-radius: 4px;
     cursor: pointer; padding: 0; background: none;
   }
+
+  /* ============ CO-WORK AGENT TASK CARD ============ */
+  .task-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 16px 20px; margin: 8px 0; font-size: 12px;
+    box-shadow: var(--shadow-sm);
+  }
+  .task-card-header {
+    display: flex; align-items: center; gap: 8px; margin-bottom: 12px;
+    font-family: 'Reddit Mono', monospace; font-size: 10px; text-transform: uppercase;
+    letter-spacing: 1.5px; color: var(--accent); font-weight: 700;
+  }
+  .task-card-header .pulse {
+    width: 8px; height: 8px; border-radius: 50%; background: var(--accent);
+    animation: pulse 1.5s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+  .task-card-title {
+    font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 10px; line-height: 1.4;
+  }
+  .task-step {
+    display: flex; align-items: flex-start; gap: 8px; padding: 6px 0;
+    border-bottom: 1px solid var(--border); color: var(--text-muted); font-size: 12px;
+    transition: all 0.3s;
+  }
+  .task-step:last-child { border-bottom: none; }
+  .task-step .step-icon { width: 18px; height: 18px; flex-shrink: 0; text-align: center; line-height: 18px; font-size: 11px; }
+  .task-step.done { color: var(--text); }
+  .task-step.done .step-icon { color: #27AE60; }
+  .task-step.active { color: var(--text); font-weight: 500; }
+  .task-step.active .step-icon { color: var(--accent); }
+  .task-card-done {
+    margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border);
+    font-size: 11px; color: #27AE60; font-weight: 600;
+    font-family: 'Reddit Mono', monospace; letter-spacing: 0.5px;
+  }
 </style>
 </head>
 <body>
@@ -983,7 +1019,7 @@ function renderThreadBar() {
     html += '<div class="thread-chip' + active + '" onclick="switchThread(\'' + th.id + '\')" title="' + th.label + '">'
       + th.label + clientTag + shareIcon
       + (threadViewMode === 'my' && threads.length > 1 ? '<span style="margin-left:6px;opacity:0.4;font-size:9px;" onclick="deleteThread(\'' + th.id + '\', event)">&times;</span>' : '')
-      + (threadViewMode === 'my' ? '<span style="margin-left:4px;opacity:0.5;cursor:pointer;font-size:11px;" onclick="shareThread(\'' + th.id + '\', event)" title="Share thread">🔗</span>' : '')
+      + (threadViewMode === 'my' ? '<span style="margin-left:4px;opacity:0.5;cursor:pointer;font-size:11px;" onclick="event.stopPropagation();shareThread(\'' + th.id + '\')" title="Share thread">🔗</span>' : '')
       + '</div>';
   });
   bar.innerHTML = html;
@@ -1348,7 +1384,60 @@ async function hubSend() {
     return;
   }
 
+  // Handle "share this thread" commands
+  var shareMatch = text.match(/^(share|publish)\s+(this\s+)?thread/i);
+  if (shareMatch && currentThreadId) {
+    addMsgTo(hc, text, true);
+    shareThread(currentThreadId);
+    addMsgTo(hc, 'Done — this thread is now shared with the team. It\'ll appear in Team Threads and the SHARED tab.', false);
+    saveCurrentThread();
+    return;
+  }
+
+  // Handle "assign thread to [name]" commands
+  var assignMatch = text.match(/^(?:add|assign|send|give)\s+(?:this\s+)?(?:thread\s+)?(?:to\s+)?(\w+)/i);
+  if (assignMatch && currentThreadId) {
+    var targetName = assignMatch[1];
+    var targetMember = TEAM.find(function(t) { return t.name.toLowerCase().startsWith(targetName.toLowerCase()); });
+    if (targetMember) {
+      // Share the thread and tag the contributor
+      var threads = getUserThreads(currentUser.name);
+      var th = threads.find(function(t) { return t.id === currentThreadId; });
+      if (!th) {
+        var shared = getSharedThreads();
+        th = shared.find(function(t) { return t.id === currentThreadId; });
+      }
+      if (th) {
+        if (!th.shared) shareThread(currentThreadId);
+        if (!th.contributors) th.contributors = [];
+        if (!th.contributors.includes(targetMember.name)) th.contributors.push(targetMember.name);
+        saveSharedThreads(getSharedThreads().map(function(s) { return s.id === th.id ? th : s; }));
+      }
+      addMsgTo(hc, text, true);
+      addMsgTo(hc, 'Shared this thread with <strong>' + targetMember.name + '</strong> (' + targetMember.role + '). They\'ll see it in Team Threads when they log in.', false);
+      saveCurrentThread();
+      renderThreadBar();
+      return;
+    }
+  }
+
+  // Handle "unshare" commands
+  if (text.match(/^unshare\s+(this\s+)?thread/i) && currentThreadId) {
+    addMsgTo(hc, text, true);
+    shareThread(currentThreadId);
+    addMsgTo(hc, 'Thread moved back to your personal threads.', false);
+    saveCurrentThread();
+    return;
+  }
+
   addMsgTo(hc, text, true);
+
+  // === CO-WORK AUTONOMOUS AGENT MODE ===
+  if (currentMode === 'cowork') {
+    await coworkAgent(text, hc);
+    return;
+  }
+
   addTypingTo(hc);
   var resp = await processMsg(text);
   removeTyping();
@@ -1473,7 +1562,7 @@ function buildSystemPrompt() {
 
 async function aiCall(sysPrompt, msgs, maxTok) {
   var controller = new AbortController();
-  var timeout = setTimeout(function() { controller.abort(); }, 10000);
+  var timeout = setTimeout(function() { controller.abort(); }, 30000);
   try {
     var res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -1536,6 +1625,139 @@ function docWriterPrompt(docType) {
   return base + 'Write the requested document in HTML format using <h1>, <h2>, <p>, <table> tags. Write real, complete content.';
 }
 
+/* ============ CO-WORK AUTONOMOUS AGENT ============ */
+async function coworkAgent(task, hc) {
+  var un = currentUser ? currentUser.name : 'Team Member';
+  var ur = currentUser ? currentUser.role : '';
+
+  // Step 1: Show "thinking" and get a plan from Claude
+  var planCard = document.createElement('div');
+  planCard.className = 'task-card';
+  planCard.innerHTML = '<div class="task-card-header"><div class="pulse"></div>AGENT WORKING</div>'
+    + '<div class="task-card-title">' + escHtml(task) + '</div>'
+    + '<div class="task-steps" id="agentSteps"><div class="task-step active"><span class="step-icon">⟳</span>Planning approach...</div></div>';
+  hc.appendChild(planCard);
+  hc.scrollTop = hc.scrollHeight;
+
+  var planPrompt = 'You are an autonomous AI agent for Noise Media agency. ' + un + ' (' + ur + ') gave you this task: "' + task + '"\n\n'
+    + 'Break this into 2-5 concrete steps. Return ONLY a JSON array of step descriptions, e.g.:\n'
+    + '["Research the client background", "Draft the presentation content", "Create the final deliverable"]\n'
+    + 'Keep steps short and actionable. Do NOT include any other text.';
+
+  var planReply = await aiCall(planPrompt, [{ role: 'user', content: task }], 300);
+  var steps = [];
+  try {
+    steps = JSON.parse(planReply);
+    if (!Array.isArray(steps)) steps = [planReply];
+  } catch(e) {
+    steps = ['Analyse the request', 'Research and gather information', 'Create deliverable'];
+  }
+
+  // Step 2: Render the plan
+  var stepsEl = planCard.querySelector('#agentSteps');
+  stepsEl.innerHTML = '';
+  steps.forEach(function(s, i) {
+    var div = document.createElement('div');
+    div.className = 'task-step' + (i === 0 ? ' active' : '');
+    div.id = 'agentStep_' + i;
+    div.innerHTML = '<span class="step-icon">' + (i === 0 ? '⟳' : '○') + '</span><span>' + escHtml(s) + '</span>';
+    stepsEl.appendChild(div);
+  });
+  hc.scrollTop = hc.scrollHeight;
+
+  // Step 3: Execute each step autonomously
+  var contextSoFar = '';
+  var finalDoc = null;
+
+  for (var i = 0; i < steps.length; i++) {
+    // Mark current step active
+    var stepEl = document.getElementById('agentStep_' + i);
+    if (stepEl) { stepEl.className = 'task-step active'; stepEl.querySelector('.step-icon').textContent = '⟳'; }
+
+    var isLast = (i === steps.length - 1);
+    var stepPrompt = 'You are an autonomous AI agent for Noise Media agency, working for ' + un + ' (' + ur + ').\n\n'
+      + 'ORIGINAL TASK: "' + task + '"\n\n'
+      + 'You are on step ' + (i + 1) + ' of ' + steps.length + ': "' + steps[i] + '"\n\n'
+      + (contextSoFar ? 'WORK SO FAR:\n' + contextSoFar + '\n\n' : '')
+      + (isLast ? 'This is the FINAL step. If the task requires a document (presentation, email, brief, report, social copy, proposal, etc.), return ONLY a JSON object: {"doc_type":"presentation","client":"ClientName","topic":"Topic","summary":"Brief summary of what you created"}. Otherwise, return a concise summary of completed work.' : 'Complete this step. Return a concise summary of what you did/found (2-4 sentences). This will be passed to the next step.')
+      + '\n\nClients: ' + CL.map(function(c) { return c.n + ' (' + c.cat + ')'; }).join(', ')
+      + '\nTeam: ' + TEAM.map(function(t) { return t.name + ' — ' + t.role; }).join(', ')
+      + buildStrategyContext();
+
+    var stepReply = await aiCall(stepPrompt, [{ role: 'user', content: 'Execute step ' + (i + 1) + ': ' + steps[i] }], isLast ? 600 : 400);
+
+    if (!stepReply) stepReply = 'Completed step: ' + steps[i];
+    contextSoFar += '\nStep ' + (i + 1) + ': ' + stepReply;
+
+    // Mark step done
+    if (stepEl) { stepEl.className = 'task-step done'; stepEl.querySelector('.step-icon').textContent = '✓'; }
+    hc.scrollTop = hc.scrollHeight;
+
+    // Check if last step returned a doc request
+    if (isLast) {
+      try {
+        var trimmed = stepReply.trim();
+        if (trimmed.startsWith('{') && trimmed.includes('doc_type')) {
+          var docReq = JSON.parse(trimmed);
+          var dcn = docReq.client || 'Client';
+          var fcm = CL.find(function(c) { return c.n.toLowerCase() === dcn.toLowerCase(); });
+          if (fcm) { dcn = fcm.n; }
+          var dcc = fcm ? fcm.cat : '';
+
+          var writePrompt = docWriterPrompt(docReq.doc_type);
+          var writeMsg = 'Write a ' + docReq.doc_type + ' for ' + dcn + (dcc ? ' (' + dcc + ')' : '') + '. Original task: "' + task + '". Context from research: ' + contextSoFar + '. Return ONLY the HTML content.';
+          if (docReq.topic) writeMsg += ' Topic: ' + docReq.topic + '.';
+
+          var docHtml = await aiCall(writePrompt, [{ role: 'user', content: writeMsg }], 2000);
+          if (docHtml) finalDoc = docHtml;
+
+          // Update card with completion summary
+          var doneDiv = document.createElement('div');
+          doneDiv.className = 'task-card-done';
+          doneDiv.textContent = '✓ COMPLETE — ' + (docReq.summary || docReq.doc_type + ' created for ' + dcn);
+          planCard.appendChild(doneDiv);
+        }
+      } catch(e) {}
+    }
+
+    // Small delay between steps for visual effect
+    if (i < steps.length - 1) {
+      await new Promise(function(r) { setTimeout(r, 400); });
+    }
+  }
+
+  // Stop the pulse animation
+  var pulse = planCard.querySelector('.pulse');
+  if (pulse) { pulse.style.animation = 'none'; pulse.style.background = '#27AE60'; }
+  var headerText = planCard.querySelector('.task-card-header');
+  if (headerText) headerText.childNodes[1].textContent = 'AGENT COMPLETE';
+
+  // Show final result
+  if (finalDoc) {
+    showDoc(finalDoc);
+    goPage(2);
+    addMsgTo(hc, 'Done — your deliverable is in the document panel. Review, edit, and export when ready.', false);
+  } else {
+    // No doc generated, show a summary
+    var summaryReply = contextSoFar.split('\n').filter(function(l) { return l.trim(); }).pop() || 'Task complete.';
+    if (!planCard.querySelector('.task-card-done')) {
+      var doneDiv = document.createElement('div');
+      doneDiv.className = 'task-card-done';
+      doneDiv.textContent = '✓ COMPLETE';
+      planCard.appendChild(doneDiv);
+    }
+    addMsgTo(hc, summaryReply.replace(/^Step \d+:\s*/, ''), false);
+  }
+
+  if (currentUser) saveCurrentThread();
+}
+
+function escHtml(s) {
+  var d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
 async function callClaude(userMsg) {
   conversationHistory.push({ role: 'user', content: userMsg });
   if (conversationHistory.length > 20) conversationHistory = conversationHistory.slice(-20);
@@ -1560,7 +1782,7 @@ async function callClaude(userMsg) {
         if (docReq.variant) writeMsg += ' Email type: ' + docReq.variant + '.';
         if (docReq.topic) writeMsg += ' Topic: ' + docReq.topic + '.';
 
-        var docHtml = await aiCall(writePrompt, [{ role: 'user', content: writeMsg }], 1500);
+        var docHtml = await aiCall(writePrompt, [{ role: 'user', content: writeMsg }], 2000);
 
         // Fallback to template if AI doc generation fails
         if (!docHtml) {

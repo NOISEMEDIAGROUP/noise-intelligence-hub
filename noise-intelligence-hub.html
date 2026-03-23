@@ -366,6 +366,7 @@
     padding: 0; border-radius: 10px; overflow: hidden;
     max-width: 100%; aspect-ratio: 16/9; min-height: unset;
     display: flex; flex-direction: column;
+    position: relative;
   }
   .slide-nav {
     position: absolute; top: 50%; transform: translateY(-50%);
@@ -387,16 +388,18 @@
     padding: 3px 12px; z-index: 10; box-shadow: var(--shadow-sm);
     letter-spacing: 1px;
   }
-  .doc-slide { display: none; flex: 1; }
-  .doc-slide.active { display: flex; flex-direction: column; }
+  .doc-slide { display: none; }
+  .doc-slide.active {
+    display: flex; flex-direction: column;
+    position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+  }
 
   /* Title slide — full dark background */
   .doc-slide.slide-title {
     background: #1B1B1B; justify-content: center; padding: 48px 56px;
-    position: relative;
   }
   .doc-slide.slide-title::before {
-    content: ''; position: absolute; left: 0; top: 0; width: 5px; height: 100%;
+    content: ''; position: absolute; left: 0; top: 0; width: 5px; height: 100%; z-index: 1;
     background: #C73C1E;
   }
   .doc-slide.slide-title .noise-tag {
@@ -422,10 +425,10 @@
 
   /* Content slides */
   .doc-slide.slide-content {
-    background: white; padding: 32px 40px; position: relative;
+    background: white; padding: 32px 40px;
   }
   .doc-slide.slide-content::before {
-    content: ''; position: absolute; left: 0; top: 0; width: 4px; height: 100%;
+    content: ''; position: absolute; left: 0; top: 0; width: 4px; height: 100%; z-index: 1;
     background: #C73C1E;
   }
   .doc-slide.slide-content .slide-section-title {

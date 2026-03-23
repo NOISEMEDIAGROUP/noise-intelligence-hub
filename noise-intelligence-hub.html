@@ -526,6 +526,51 @@
     font-family: 'Reddit Mono', monospace; letter-spacing: 0.5px;
   }
 
+  /* Document pages (non-presentation) */
+  .p2-dc.doc-paged .doc-paper {
+    padding: 0; border-radius: 10px; overflow: hidden;
+    width: 100%; max-width: 700px; aspect-ratio: 3/4;
+    min-height: unset; max-height: calc(100% - 32px);
+    display: flex; flex-direction: column;
+    position: relative; border: 1px solid var(--border);
+  }
+  .doc-page { display: none; }
+  .doc-page.active {
+    display: flex; flex-direction: column;
+    position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+    background: white; padding: 40px 44px;
+    overflow-y: auto;
+  }
+  .doc-page .doc-page-title {
+    font-family: 'Reddit Mono', monospace; font-size: 15px; font-weight: 700;
+    color: #1B1B1B; margin: 0 0 4px 0; line-height: 1.3;
+  }
+  .doc-page .doc-page-bar {
+    width: 36px; height: 3px; background: #C73C1E; margin-bottom: 16px; border-radius: 2px;
+  }
+  .doc-page .doc-page-body { flex: 1; font-size: 12.5px; line-height: 1.75; color: #333; }
+  .doc-page .doc-page-body h3 { font-size: 13px; font-weight: 600; margin: 14px 0 4px; color: #1B1B1B; }
+  .doc-page .doc-page-body p { margin: 0 0 10px 0; }
+  .doc-page .doc-page-body ul { margin: 4px 0 10px 18px; }
+  .doc-page .doc-page-body li { margin-bottom: 4px; }
+  .doc-page .doc-page-body table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 11.5px; }
+  .doc-page .doc-page-body th,
+  .doc-page .doc-page-body td { padding: 7px 10px; text-align: left; border: 1px solid #E4E3E0; }
+  .doc-page .doc-page-body th {
+    background: #F5F5F3; font-weight: 600; font-size: 9px;
+    text-transform: uppercase; letter-spacing: 0.5px; color: #1B1B1B;
+  }
+  .doc-page .doc-page-num {
+    position: absolute; bottom: 14px; right: 20px;
+    font-family: 'Reddit Mono', monospace; font-size: 9px; color: var(--text-muted);
+    opacity: 0.5;
+  }
+  .doc-page .doc-page-brand {
+    position: absolute; bottom: 14px; left: 20px;
+    font-family: 'Reddit Mono', monospace; font-size: 8px; color: #C73C1E;
+    font-weight: 700; letter-spacing: 1px; opacity: 0.4;
+  }
+
   ::-webkit-scrollbar { width: 5px; }
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
@@ -1988,26 +2033,122 @@ function showDoc(html) {
   var isPresentation = hasDarkBg && hasH2;
   if (isPresentation) {
     pdc.classList.add('slide-active');
+    pdc.classList.remove('doc-paged');
     showSlides(html, dc);
   } else {
-    /* Normal document — no pagination */
-    slideMode = false;
-    slidePages = [];
-    slideTypes = [];
+    /* Document pages — split by h2 for page-by-page viewing */
     pdc.classList.remove('slide-active');
-    dc.innerHTML = html;
-    prevBtn.classList.add('disabled');
-    nextBtn.classList.add('disabled');
-    ctrEl.style.display = 'none';
+    if (hasH2) {
+      pdc.classList.add('doc-paged');
+      showDocPages(html, dc);
+    } else {
+      /* Very short / no-section doc — show as single page */
+      pdc.classList.add('doc-paged');
+      slideMode = true;
+      docPageMode = true;
+      slidePages = [{ title: '', body: html }];
+      slideTypes = ['doc-page-single'];
+      slideIdx = 0;
+      renderDocPage(dc);
+    }
   }
 }
 
 function closeDocPanel() {
   document.getElementById('page1').classList.remove('has-doc');
+  var pdc = document.getElementById('p1DocContainer');
+  if (pdc) { pdc.classList.remove('slide-active'); pdc.classList.remove('doc-paged'); }
+}
+
+function showDocPages(html, dc) {
+  slideMode = true;
+  docPageMode = true;
+  slidePages = [];
+  slideTypes = [];
+  slideIdx = 0;
+
+  var tmp = document.createElement('div');
+  tmp.innerHTML = html;
+
+  /* Gather all top-level children, splitting by h2 */
+  var root = tmp.querySelector('div[style*="font-family"]') || tmp.querySelector('div[style*="max-width"]') || tmp;
+  if (!root.querySelector('h2') && tmp.querySelector('h2')) root = tmp;
+  var children = Array.from(root.children);
+  var sections = [];
+  var current = [];
+
+  children.forEach(function(el) {
+    if (el.tagName === 'H2') {
+      if (current.length > 0) sections.push(current);
+      current = [el];
+    } else {
+      current.push(el);
+    }
+  });
+  if (current.length > 0) sections.push(current);
+
+  /* First section: if it starts with h1 or non-h2 content, treat as title/intro page */
+  sections.forEach(function(els) {
+    var title = '';
+    var bodyHtml = '';
+    els.forEach(function(el) {
+      if (el.tagName === 'H2') {
+        title = el.textContent;
+      } else if (el.tagName === 'H1' && !title) {
+        title = el.textContent;
+      } else {
+        bodyHtml += el.outerHTML;
+      }
+    });
+    slidePages.push({ title: title, body: bodyHtml });
+    slideTypes.push('doc-page');
+  });
+
+  if (slidePages.length === 0) {
+    slidePages.push({ title: '', body: html });
+    slideTypes.push('doc-page');
+  }
+
+  renderDocPage(dc);
+}
+
+function renderDocPage(dc) {
+  var nav = window._activeSlideNav || {};
+  if (!dc) dc = nav.dc || document.getElementById('docC');
+  dc.innerHTML = '';
+
+  slidePages.forEach(function(page, i) {
+    var div = document.createElement('div');
+    div.className = 'doc-page' + (i === slideIdx ? ' active' : '');
+
+    var inner = '';
+    if (page.title) {
+      inner += '<div class="doc-page-title">' + page.title + '</div>';
+      inner += '<div class="doc-page-bar"></div>';
+    }
+    var body = typeof page === 'string' ? page : (page.body || '');
+    inner += '<div class="doc-page-body">' + body + '</div>';
+    inner += '<div class="doc-page-brand">NOISE.</div>';
+    inner += '<div class="doc-page-num">' + (i + 1) + ' / ' + slidePages.length + '</div>';
+    div.innerHTML = inner;
+    dc.appendChild(div);
+  });
+
+  var prev = nav.prev || document.getElementById('slidePrev');
+  var next = nav.next || document.getElementById('slideNext');
+  var ctr = nav.ctr || document.getElementById('slideCtr');
+  prev.classList.toggle('disabled', slideIdx === 0);
+  next.classList.toggle('disabled', slideIdx === slidePages.length - 1);
+  ctr.style.display = slidePages.length > 1 ? '' : 'none';
+  ctr.textContent = (slideIdx + 1) + ' / ' + slidePages.length;
+
+  var pdc = nav.pdc || document.querySelector('.p2-dc');
+  if (pdc) pdc.scrollTop = 0;
 }
 
 function showSlides(html, dc) {
   slideMode = true;
+  docPageMode = false;
   slidePages = [];
   slideTypes = [];
   slideIdx = 0;
@@ -2122,12 +2263,15 @@ function renderSlide(dc) {
   if (pdc) pdc.scrollTop = 0;
 }
 
+var docPageMode = false; /* true = doc pages, false = presentation slides */
+
 function slideGo(dir) {
   if (!slideMode || slidePages.length === 0) return;
   var newIdx = slideIdx + dir;
   if (newIdx < 0 || newIdx >= slidePages.length) return;
   slideIdx = newIdx;
-  renderSlide();
+  if (docPageMode) renderDocPage();
+  else renderSlide();
 }
 
 function togEdit() {

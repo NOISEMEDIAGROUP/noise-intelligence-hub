@@ -350,6 +350,53 @@
   .de h3 { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
   .de p { font-size: 12px; max-width: 280px; }
 
+  /* ============ SLIDE PAGINATION ============ */
+  .p2-dc { position: relative; }
+  .slide-nav {
+    position: absolute; top: 50%; transform: translateY(-50%);
+    width: 36px; height: 36px; border-radius: 50%;
+    background: var(--surface); border: 1px solid var(--border);
+    box-shadow: var(--shadow-md); cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; color: var(--text-muted); z-index: 10;
+    transition: all 0.2s;
+  }
+  .slide-nav:hover { border-color: var(--accent); color: var(--accent); box-shadow: var(--shadow-lg); }
+  .slide-nav.disabled { opacity: 0.25; pointer-events: none; }
+  .slide-prev { left: 6px; }
+  .slide-next { right: 6px; }
+  .slide-counter {
+    position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%);
+    font-family: 'Reddit Mono', monospace; font-size: 11px; color: var(--text-muted);
+    background: var(--surface); border: 1px solid var(--border); border-radius: 20px;
+    padding: 4px 14px; z-index: 10; box-shadow: var(--shadow-sm);
+    letter-spacing: 0.5px;
+  }
+  .doc-slide {
+    display: none; min-height: 480px;
+  }
+  .doc-slide.active { display: block; }
+  .doc-slide-title {
+    background: #1B1B1B; color: white; padding: 48px 42px; margin: -44px -52px 24px -52px;
+    border-radius: 4px 4px 0 0;
+  }
+  .doc-slide-title .noise-tag {
+    font-family: 'Reddit Mono', monospace; font-size: 11px; letter-spacing: 2px;
+    text-transform: uppercase; color: #C73C1E; margin-bottom: 10px;
+  }
+  .doc-slide-title h1 { font-size: 28px; font-weight: 700; margin: 0 0 6px 0; color: white; }
+  .doc-slide-title .sub { font-size: 16px; font-weight: 300; color: rgba(255,255,255,0.65); margin: 0 0 20px 0; }
+  .doc-slide-title .meta { font-size: 11px; color: rgba(255,255,255,0.35); }
+  .doc-slide-end {
+    background: #1B1B1B; color: white; padding: 60px 42px; margin: 24px -52px -44px -52px;
+    border-radius: 0 0 4px 4px; text-align: center;
+  }
+  .doc-slide-end .noise-end {
+    font-family: 'Reddit Mono', monospace; font-size: 22px; font-weight: 700; letter-spacing: 2px;
+  }
+  .doc-slide-end .noise-end span { color: #C73C1E; }
+  .doc-slide-end .url { font-size: 12px; color: rgba(255,255,255,0.35); margin-top: 8px; }
+
   ::-webkit-scrollbar { width: 5px; }
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
@@ -431,6 +478,9 @@
       </div>
     </div>
     <div class="p2-dc">
+      <button class="slide-nav slide-prev disabled" id="slidePrev" onclick="slideGo(-1)">&#8249;</button>
+      <button class="slide-nav slide-next disabled" id="slideNext" onclick="slideGo(1)">&#8250;</button>
+      <div class="slide-counter" id="slideCtr" style="display:none">1 / 1</div>
       <div class="doc-paper" id="docP">
         <div class="de" id="docE">
           <div class="de-i">&#128196;</div>
@@ -730,6 +780,10 @@ function selectUser(u) {
   document.getElementById('chat').innerHTML = '';
   document.getElementById('docC').style.display = 'none';
   document.getElementById('docE').style.display = '';
+  slideMode = false; slidePages = []; slideIdx = 0;
+  document.getElementById('slidePrev').classList.add('disabled');
+  document.getElementById('slideNext').classList.add('disabled');
+  document.getElementById('slideCtr').style.display = 'none';
   // Set up header
   document.getElementById('mainHeader').classList.remove('hidden');
   document.getElementById('hdrUser').innerHTML = '<div class="hdr-user-av" style="background:' + u.color + '">' + u.init + '</div><span class="hdr-user-name">' + u.name + '</span>';
@@ -1160,6 +1214,13 @@ async function callClaude(userMsg) {
 
 /* Workspace chat (secondary, for when you're already there) */
 document.getElementById('cI').addEventListener('keypress', function(e) { if (e.key==='Enter') wsSend(); });
+document.addEventListener('keydown', function(e) {
+  if (!slideMode || slidePages.length === 0) return;
+  var tag = (e.target.tagName||'').toLowerCase();
+  if (tag === 'input' || tag === 'textarea' || e.target.contentEditable === 'true') return;
+  if (e.key === 'ArrowLeft') { slideGo(-1); e.preventDefault(); }
+  if (e.key === 'ArrowRight') { slideGo(1); e.preventDefault(); }
+});
 async function wsSend() {
   var input = document.getElementById('cI');
   var text = input.value.trim();
@@ -1175,11 +1236,147 @@ async function wsSend() {
 }
 
 /* ============ DOCUMENT PANEL ============ */
+var slidePages = [];
+var slideIdx = 0;
+var slideMode = false;
+
 function showDoc(html) {
   document.getElementById('docE').style.display = 'none';
-  const dc = document.getElementById('docC');
+  var dc = document.getElementById('docC');
   dc.style.display = 'block';
-  dc.innerHTML = html;
+
+  /* Detect presentation — has the dark title header + h2 sections */
+  var isPresentation = html.indexOf('NOISE MEDIA') !== -1 && html.indexOf('<h2>') !== -1;
+  if (isPresentation) {
+    showSlides(html, dc);
+  } else {
+    /* Normal document — no pagination */
+    slideMode = false;
+    slidePages = [];
+    dc.innerHTML = html;
+    document.getElementById('slidePrev').classList.add('disabled');
+    document.getElementById('slideNext').classList.add('disabled');
+    document.getElementById('slideCtr').style.display = 'none';
+  }
+}
+
+function showSlides(html, dc) {
+  slideMode = true;
+  slidePages = [];
+  slideIdx = 0;
+
+  /* Parse into a temp container */
+  var tmp = document.createElement('div');
+  tmp.innerHTML = html;
+
+  /* Extract title slide (the dark header block) */
+  var titleBlock = tmp.querySelector('div[style*="background:#1B1B1B"]');
+  var endBlock = null;
+  var allDivs = tmp.querySelectorAll(':scope > div > div[style*="background:#1B1B1B"]');
+  if (!allDivs.length) allDivs = tmp.querySelectorAll('div[style*="background:#1B1B1B"]');
+
+  /* Find the title (first dark block) and end slide (last dark block with NOISE.) */
+  var darkBlocks = [];
+  var walk = tmp.querySelectorAll('div[style*="background:#1B1B1B"]');
+  walk.forEach(function(b) { darkBlocks.push(b); });
+
+  var titleHtml = '';
+  var endHtml = '';
+  if (darkBlocks.length >= 1) {
+    titleHtml = darkBlocks[0].outerHTML;
+    darkBlocks[0].setAttribute('data-remove', '1');
+  }
+  if (darkBlocks.length >= 2) {
+    endHtml = darkBlocks[darkBlocks.length - 1].outerHTML;
+    darkBlocks[darkBlocks.length - 1].setAttribute('data-remove', '1');
+  }
+
+  /* Remove extracted dark blocks from flow */
+  tmp.querySelectorAll('[data-remove]').forEach(function(el) { el.remove(); });
+
+  /* Now split remaining content by h2 */
+  var inner = tmp.querySelector('div[style*="font-family"]') || tmp;
+  var children = Array.from(inner.children);
+  var sections = [];
+  var current = [];
+
+  children.forEach(function(el) {
+    if (el.tagName === 'H2') {
+      if (current.length > 0) sections.push(current);
+      current = [el];
+    } else {
+      current.push(el);
+    }
+  });
+  if (current.length > 0) sections.push(current);
+
+  /* Page 1: Title slide */
+  slidePages.push('<div class="doc-slide-title">' +
+    '<div class="noise-tag">NOISE MEDIA</div>' +
+    (function() {
+      var t = tmp.querySelector('h1') || { textContent: 'Presentation' };
+      /* Get info from the extracted title block */
+      var tempT = document.createElement('div');
+      tempT.innerHTML = titleHtml;
+      var h1 = tempT.querySelector('h1');
+      var sub = tempT.querySelector('p[style*="font-weight:300"], p[style*="18px"]');
+      var meta = tempT.querySelector('div[style*="font-size:12px"]');
+      var out = '';
+      if (h1) out += '<h1>' + h1.textContent + '</h1>';
+      if (sub) out += '<p class="sub">' + sub.textContent + '</p>';
+      if (meta) out += '<div class="meta">' + meta.textContent + '</div>';
+      return out;
+    })() +
+  '</div>');
+
+  /* Middle pages: one per h2 section */
+  sections.forEach(function(els) {
+    var pageHtml = '';
+    els.forEach(function(el) { pageHtml += el.outerHTML; });
+    slidePages.push(pageHtml);
+  });
+
+  /* End slide */
+  if (endHtml) {
+    slidePages.push('<div class="doc-slide-end">' +
+      '<div class="noise-end">NOISE<span>.</span></div>' +
+      '<div class="url">noisemedia.co.uk</div>' +
+    '</div>');
+  }
+
+  renderSlide(dc);
+}
+
+function renderSlide(dc) {
+  if (!dc) dc = document.getElementById('docC');
+  dc.innerHTML = '';
+  slidePages.forEach(function(html, i) {
+    var div = document.createElement('div');
+    div.className = 'doc-slide' + (i === slideIdx ? ' active' : '');
+    div.innerHTML = html;
+    dc.appendChild(div);
+  });
+
+  /* Update nav buttons */
+  var prev = document.getElementById('slidePrev');
+  var next = document.getElementById('slideNext');
+  var ctr = document.getElementById('slideCtr');
+  prev.classList.toggle('disabled', slideIdx === 0);
+  next.classList.toggle('disabled', slideIdx === slidePages.length - 1);
+  ctr.style.display = slidePages.length > 1 ? '' : 'none';
+  ctr.textContent = (slideIdx + 1) + ' / ' + slidePages.length;
+
+  /* Scroll doc panel to top */
+  var pdc = document.querySelector('.p2-dc');
+  if (pdc) pdc.scrollTop = 0;
+}
+
+function slideGo(dir) {
+  if (!slideMode || slidePages.length === 0) return;
+  var newIdx = slideIdx + dir;
+  if (newIdx < 0 || newIdx >= slidePages.length) return;
+  slideIdx = newIdx;
+  renderSlide();
 }
 
 function togEdit() {

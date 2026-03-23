@@ -1599,7 +1599,7 @@ function buildSystemPrompt() {
 
 async function aiCall(sysPrompt, msgs, maxTok) {
   var controller = new AbortController();
-  var timeout = setTimeout(function() { controller.abort(); }, 30000);
+  var timeout = setTimeout(function() { controller.abort(); }, 90000);
   try {
     var res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',

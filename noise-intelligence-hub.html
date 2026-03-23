@@ -394,6 +394,7 @@
     background: var(--surface); border: 1px solid var(--border);
     border-radius: 8px; box-shadow: var(--shadow-md);
     padding: 44px 52px; font-size: 13px; line-height: 1.8; outline: none;
+    position: relative;
   }
   .doc-paper:focus { border-color: var(--accent); }
   .doc-paper h1 { font-family: 'Reddit Mono', monospace; font-size: 20px; font-weight: 700; margin-bottom: 4px; }
@@ -1981,8 +1982,10 @@ function showDoc(html) {
   /* Store active elements for slide navigation */
   window._activeSlideNav = { dc: dc, pdc: pdc, prev: prevBtn, next: nextBtn, ctr: ctrEl };
 
-  /* Detect presentation — has the dark title header + h2 sections */
-  var isPresentation = html.indexOf('NOISE MEDIA') !== -1 && html.indexOf('<h2>') !== -1;
+  /* Detect presentation — dark background div + h2 sections */
+  var hasDarkBg = /background[^"]*#(?:1[Bb]1[Bb]1[Bb]|222|111|000)|background[^"]*rgb\(27/i.test(html);
+  var hasH2 = html.indexOf('<h2') !== -1;
+  var isPresentation = hasDarkBg && hasH2;
   if (isPresentation) {
     pdc.classList.add('slide-active');
     showSlides(html, dc);
@@ -2016,7 +2019,7 @@ function showSlides(html, dc) {
   /* Find dark blocks — title (first) and end (last) */
   var darkBlocks = Array.from(tmp.querySelectorAll('div[style*="background"]')).filter(function(el) {
     var bg = (el.getAttribute('style') || '').toLowerCase();
-    return bg.includes('#1b1b1b') || bg.includes('#1B1B1B') || bg.includes('#222') || bg.includes('#111') || bg.includes('#000') || bg.includes('rgb(27');
+    return bg.includes('#1b1b1b') || bg.includes('#222') || bg.includes('#111') || bg.includes('#000') || bg.includes('rgb(27') || bg.includes('#333') || bg.includes('#2d2d');
   });
   var titleEl = darkBlocks.length >= 1 ? darkBlocks[0] : null;
   var endEl = darkBlocks.length >= 2 ? darkBlocks[darkBlocks.length - 1] : null;
@@ -2027,17 +2030,22 @@ function showSlides(html, dc) {
   var titleMeta = '';
   if (titleEl) {
     var h1 = titleEl.querySelector('h1');
-    var sub = titleEl.querySelector('p[style*="font-weight:300"], p[style*="18px"]');
+    var allP = Array.from(titleEl.querySelectorAll('p'));
+    var sub = allP.length > 0 ? allP[0] : null;
+    var metaP = allP.length > 1 ? allP.slice(1).map(function(p) { return p.textContent; }).join(' · ') : '';
     var meta = titleEl.querySelector('div[style*="font-size:12px"]');
     if (h1) titleName = h1.textContent;
     if (sub) titleSub = sub.textContent;
     if (meta) titleMeta = meta.textContent;
+    else if (metaP) titleMeta = metaP;
     titleEl.remove();
   }
   if (endEl && endEl !== titleEl) endEl.remove();
 
-  /* Split remaining content by h2 */
-  var inner = tmp.querySelector('div[style*="font-family"]') || tmp;
+  /* Split remaining content by h2 — use first wrapper div with substantial content, or just tmp */
+  var inner = tmp.querySelector('div[style*="font-family"]') || tmp.querySelector('div[style*="max-width"]') || tmp;
+  /* If inner has no h2s but tmp does, use tmp */
+  if (!inner.querySelector('h2') && tmp.querySelector('h2')) inner = tmp;
   var children = Array.from(inner.children);
   var sections = [];
   var current = [];

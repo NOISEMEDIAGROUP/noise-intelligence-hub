@@ -175,52 +175,46 @@
     border-right: 1px solid var(--border);
     display: flex; flex-direction: column; flex-shrink: 0;
   }
-  .p1-tabs { display: flex; border-bottom: 1px solid var(--border); }
-  .p1-tab {
-    flex: 1; padding: 10px 6px; text-align: center;
-    font-family: 'Reddit Mono', monospace;
-    font-size: 9px; text-transform: uppercase; letter-spacing: 1.2px;
-    color: var(--text-muted); font-weight: 600; cursor: pointer;
-    border-bottom: 2px solid transparent; transition: all 0.2s;
+  .p1-sb-header {
+    padding: 16px 16px 12px; display: flex; align-items: center; justify-content: space-between;
   }
-  .p1-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
-  .p1-tab:hover:not(.active) { color: var(--text); }
-  .p1-search { padding: 10px 12px; border-bottom: 1px solid var(--border); }
-  .p1-search input {
-    width: 100%; padding: 8px 12px;
-    background: var(--surface2); border: 1px solid var(--border);
-    border-radius: 8px; color: var(--text); font-size: 12px; outline: none;
+  .p1-sb-logo {
+    font-family: 'Reddit Mono', monospace; font-size: 14px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 1.5px; color: var(--text);
   }
-  .p1-search input:focus { border-color: var(--accent); }
-  .p1-search input::placeholder { color: var(--text-muted); }
-  .p1-list { flex: 1; overflow-y: auto; padding: 4px 0; }
+  .p1-sb-logo .sb-dot { color: var(--accent); }
+  .p1-sb-new {
+    padding: 5px 12px; border-radius: 8px; font-size: 11px; font-weight: 600;
+    font-family: 'Reddit Mono', monospace; cursor: pointer;
+    border: 1px dashed var(--accent); color: var(--accent); background: var(--accent-light);
+    transition: all 0.2s;
+  }
+  .p1-sb-new:hover { background: var(--accent); color: white; border-style: solid; }
+  .p1-sb-divider { height: 1px; background: var(--border); margin: 0 16px; }
+  .p1-list { flex: 1; overflow-y: auto; padding: 6px 8px; }
 
-  /* Sidebar items */
-  .si { padding: 9px 16px; display: flex; align-items: center; gap: 10px; cursor: pointer; transition: background 0.15s; border-left: 3px solid transparent; }
-  .si:hover { background: var(--surface2); }
-  .si-name { font-size: 12.5px; font-weight: 500; }
-  .si-cat { margin-left: auto; font-size: 10px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 140px; }
-  .si-team { padding: 8px 16px; display: flex; align-items: center; gap: 10px; }
-  .si-team-av { width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Reddit Mono', monospace; font-size: 10px; font-weight: 700; color: white; flex-shrink: 0; }
-  .si-team-n { font-size: 12px; font-weight: 500; }
-  .si-team-r { font-size: 10px; color: var(--text-muted); }
-  .si-conn { padding: 9px 16px; display: flex; align-items: center; gap: 10px; }
-  .si-conn-i { font-size: 16px; width: 26px; text-align: center; }
-  .si-conn-n { font-size: 12px; font-weight: 500; }
-  .si-conn-d { font-size: 10px; color: var(--text-muted); }
-  .si-conn-s { margin-left: auto; padding: 2px 7px; border-radius: 4px; font-size: 8px; font-weight: 600; font-family: 'Reddit Mono', monospace; text-transform: uppercase; background: var(--green-bg); color: var(--green); }
-  .mem-item { padding: 10px 12px; border-bottom: 1px solid var(--border); }
-  .mem-text { font-size: 12.5px; line-height: 1.5; color: var(--text); }
-  .mem-meta { font-size: 10px; color: var(--text-muted); margin-top: 4px; display: flex; justify-content: space-between; }
-  .mem-del { cursor: pointer; color: var(--accent); font-weight: 700; padding: 0 4px; }
-  .mem-cat { display: inline-block; padding: 2px 6px; border-radius: 3px; font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-right: 4px; }
-  .mem-cat.decision { background: rgba(199,60,30,0.1); color: #C73C1E; }
-  .mem-cat.process { background: rgba(43,108,176,0.1); color: #2B6CB0; }
-  .mem-cat.client { background: rgba(45,138,78,0.1); color: #2D8A4E; }
-  .mem-cat.general { background: var(--surface2); color: var(--text-muted); }
-  .thread-mode-btn { padding: 4px 10px; font-size: 11px; font-weight: 600; cursor: pointer; color: var(--text-muted); border-bottom: 2px solid transparent; transition: all 0.2s; }
-  .thread-mode-btn:hover { color: var(--text); }
-  .thread-mode-btn.active { color: var(--text); border-bottom-color: var(--accent); }
+  /* Sidebar thread items */
+  .sb-thread {
+    padding: 10px 12px; border-radius: 8px; cursor: pointer;
+    transition: background 0.15s; margin-bottom: 2px;
+  }
+  .sb-thread:hover { background: var(--surface2); }
+  .sb-thread.active { background: var(--accent-light); }
+  .sb-thread-client {
+    font-family: 'Reddit Mono', monospace; font-size: 11px; font-weight: 600;
+    color: var(--text); text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .sb-thread-label {
+    font-size: 12px; color: var(--text-muted); margin-top: 2px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .sb-thread.active .sb-thread-client { color: var(--accent); }
+  .sb-thread-del {
+    float: right; opacity: 0; font-size: 14px; color: var(--text-muted);
+    cursor: pointer; padding: 0 4px; transition: opacity 0.15s;
+  }
+  .sb-thread:hover .sb-thread-del { opacity: 0.5; }
+  .sb-thread-del:hover { opacity: 1 !important; color: var(--accent); }
 
   /* Inline doc panel for page 1 */
   .p1-doc {
@@ -247,20 +241,8 @@
   .hub-input-bar .wi { width: 100%; padding: 15px 56px 15px 20px; }
   .hub-input-bar .wi-btn { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); margin-top: -4px; }
 
-  /* Thread bar */
-  .thread-bar { display: flex; align-items: center; gap: 8px; padding: 12px 0 0; flex-shrink: 0; overflow-x: auto; }
-  .thread-bar::-webkit-scrollbar { height: 0; }
-  .thread-chip {
-    padding: 6px 14px; border-radius: 20px; font-size: 11px; font-weight: 600;
-    font-family: 'Reddit Mono', monospace; cursor: pointer; white-space: nowrap;
-    border: 1px solid var(--border); background: var(--surface); color: var(--text-muted);
-    transition: all 0.2s; flex-shrink: 0;
-  }
-  .thread-chip:hover { background: var(--surface2); color: var(--text); }
-  .thread-chip.active { background: var(--text); color: white; border-color: var(--text); }
-  .thread-chip.new-thread { border-style: dashed; color: var(--accent); border-color: var(--accent); background: var(--accent-light); }
-  .thread-chip.new-thread:hover { background: var(--accent); color: white; }
-  .thread-client { font-size: 9px; color: var(--accent); margin-left: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+  /* Thread bar (hidden - threads now in sidebar) */
+  .thread-bar { display: none; }
   .modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 1000; display: flex; align-items: center; justify-content: center; }
   .modal { background: var(--surface); border-radius: 16px; padding: 28px; width: 440px; max-width: 90vw; box-shadow: 0 8px 40px rgba(0,0,0,0.15); }
   .modal h3 { font-family: 'Reddit Mono', monospace; font-size: 16px; margin-bottom: 6px; }
@@ -558,9 +540,7 @@
   <div class="logo" onclick="goPage(1)">NM<span class="dot">.</span></div>
   <span class="header-title" onclick="goPage(1)">Noise Intelligence <span id="modeIndicator" style="font-size:11px;opacity:0.6;"></span></span>
   <div class="header-right">
-    <button class="header-btn" id="modeBtn1" onclick="switchMode('chat')">Noise Chat</button>
-    <button class="header-btn" id="modeBtn2" onclick="switchMode('cowork')">Noise Co-Work</button>
-    <button class="header-btn" onclick="showSettings()" title="AI Settings" style="font-size:16px;padding:6px 10px;">&#9881;</button>
+    <button class="header-btn" onclick="showSettings()" title="Settings" style="font-size:16px;padding:6px 10px;">&#9881;</button>
     <div class="hdr-user" id="hdrUser" onclick="goPage(0)"></div>
   </div>
 </div>
@@ -578,14 +558,11 @@
 <!-- PAGE 1: HUB -->
 <div class="page" id="page1">
   <div class="p1-sidebar">
-    <div class="p1-tabs">
-      <div class="p1-tab active" onclick="swTab('clients')">Clients</div>
-      <div class="p1-tab" onclick="swTab('team')">Team</div>
-      <div class="p1-tab" onclick="swTab('connectors')">Connectors</div>
-      <div class="p1-tab" onclick="swTab('shared')">Shared</div>
-      <div class="p1-tab" onclick="swTab('memory')">Memory</div>
+    <div class="p1-sb-header">
+      <span class="p1-sb-logo">NOISE<span class="sb-dot">.</span></span>
+      <button class="p1-sb-new" onclick="promptNewThread()">+ New</button>
     </div>
-    <div class="p1-search"><input type="text" id="sbS" placeholder="Search clients..." oninput="rSb(this.value)"></div>
+    <div class="p1-sb-divider"></div>
     <div class="p1-list" id="sbL"></div>
   </div>
   <div class="p1-main">
@@ -757,7 +734,7 @@ const CONN = [
 let currentUser = null;
 let sbTab = 'clients';
 var currentMode = 'chat'; // 'chat' or 'cowork'
-var threadViewMode = 'my'; // 'my' or 'team' — which threads to show in thread bar
+var threadViewMode = 'my';
 
 /* ============ PERSISTENT MEMORY ============ */
 const STORE_KEY = 'noise_intelligence';
@@ -1035,40 +1012,21 @@ function deleteThread(threadId, ev) {
 
 function renderThreadBar() {
   if (!currentUser) return;
-  var bar = document.getElementById('threadBar');
-  var html = '';
+  var el = document.getElementById('sbL');
+  var threads = getUserThreads(currentUser.name);
 
-  // Add view toggle buttons for the thread bar
-  html += '<div style="display:flex;gap:6px;padding:8px 0;border-bottom:1px solid var(--border);margin-bottom:8px;">';
-  html += '<span class="thread-mode-btn' + (threadViewMode === 'my' ? ' active' : '') + '" onclick="setThreadViewMode(\'my\')">My Threads</span>';
-  html += '<span class="thread-mode-btn' + (threadViewMode === 'team' ? ' active' : '') + '" onclick="setThreadViewMode(\'team\')">Team Threads</span>';
-  html += '</div>';
-
-  html += '<div class="thread-chip new-thread" onclick="promptNewThread()">+ New</div>';
-
-  var threads;
-  if (threadViewMode === 'team') {
-    threads = getAllTeamThreads();
-  } else {
-    threads = getUserThreads(currentUser.name);
-  }
-
+  el.innerHTML = '';
   threads.forEach(function(th) {
     var active = th.id === currentThreadId ? ' active' : '';
-    var clientTag = th.client ? '<span class="thread-client">' + th.client + '</span>' : '';
-    var shareIcon = th.shared ? '🔗' : '';
-    html += '<div class="thread-chip' + active + '" onclick="switchThread(\'' + th.id + '\')" title="' + th.label + '">'
-      + th.label + clientTag + shareIcon
-      + (threadViewMode === 'my' && threads.length > 1 ? '<span style="margin-left:6px;opacity:0.4;font-size:9px;" onclick="deleteThread(\'' + th.id + '\', event)">&times;</span>' : '')
-      + (threadViewMode === 'my' ? '<span style="margin-left:4px;opacity:0.5;cursor:pointer;font-size:11px;" onclick="event.stopPropagation();shareThread(\'' + th.id + '\')" title="Share thread">🔗</span>' : '')
-      + '</div>';
+    var clientName = th.client || 'General';
+    var d = document.createElement('div');
+    d.className = 'sb-thread' + active;
+    d.onclick = function() { switchThread(th.id); };
+    d.innerHTML = (threads.length > 1 ? '<span class="sb-thread-del" onclick="event.stopPropagation();deleteThread(\'' + th.id + '\', event)">&times;</span>' : '')
+      + '<div class="sb-thread-client">' + clientName + '</div>'
+      + '<div class="sb-thread-label">' + th.label + '</div>';
+    el.appendChild(d);
   });
-  bar.innerHTML = html;
-}
-
-function setThreadViewMode(mode) {
-  threadViewMode = mode;
-  renderThreadBar();
 }
 
 function initThreadsForUser(userName) {
@@ -1133,8 +1091,6 @@ function selectUser(u) {
     addMsgTo(hubChatEl, 'Hey ' + u.name.split(' ')[0] + '! What are you working on today?', false);
   }
   renderThreadBar();
-  // Refresh sidebar if on memory tab
-  if (sbTab === 'memory') rSb('');
 }
 
 /* ============ PAGE NAV ============ */
@@ -1150,87 +1106,20 @@ function goPage(n) {
 /* ============ MODE SWITCHING ============ */
 function switchMode(mode) {
   currentMode = mode;
-  var btn1 = document.getElementById('modeBtn1');
-  var btn2 = document.getElementById('modeBtn2');
   var indicator = document.getElementById('modeIndicator');
-
-  if (mode === 'chat') {
-    btn1.classList.add('active');
-    btn2.classList.remove('active');
-    indicator.textContent = '';
-    threadViewMode = 'my';
-    if (sbTab === 'shared') swTab('clients');
-  } else {
-    btn1.classList.remove('active');
-    btn2.classList.add('active');
-    indicator.textContent = '(TEAM)';
-    threadViewMode = 'team';
-    sbTab = 'shared';
-    var s = document.getElementById('sbS');
-    s.placeholder = 'Search shared threads...';
-    s.value = '';
-  }
+  if (indicator) indicator.textContent = mode === 'cowork' ? '(Agent)' : '';
   renderThreadBar();
-  rSb('');
 }
 
 /* ============ SIDEBAR ============ */
 function swTab(tab) {
-  sbTab = tab;
-  document.querySelectorAll('.p1-tab').forEach(function(t) { t.classList.remove('active'); });
-  document.querySelector('.p1-tab[onclick*="' + tab + '"]').classList.add('active');
-  var s = document.getElementById('sbS');
-  if (tab === 'memory') {
-    s.placeholder = 'Add a note...';
-  } else if (tab === 'shared') {
-    s.placeholder = 'Search shared threads...';
-  } else {
-    s.placeholder = tab==='clients'?'Search clients...':tab==='team'?'Search team...':'Search connectors...';
-  }
-  s.value = ''; rSb('');
+  // Simplified — sidebar only shows threads now
+  renderThreadBar();
 }
 
 function rSb(q) {
-  q = q || '';
-  var el = document.getElementById('sbL');
-  el.innerHTML = '';
-  var ql = q.toLowerCase();
-
-  if (sbTab==='clients') {
-    CL.filter(function(c) { return c.n.toLowerCase().includes(ql); }).forEach(function(c) {
-      var d = document.createElement('div');
-      d.className = 'si';
-      d.onclick = function() {
-        // Find or create a thread for this client
-        var threads = getUserThreads(currentUser.name);
-        var existing = threads.find(function(t) { return t.client === c.n; });
-        if (existing) { switchThread(existing.id); }
-        else { startNewThread(c.n, c.n); }
-        document.getElementById('wI').value = 'Tell me about ' + c.n;
-        hubSend();
-      };
-      d.innerHTML = '<span class="si-name">' + c.n + '</span><span class="si-cat">' + c.cat + '</span>';
-      el.appendChild(d);
-    });
-  } else if (sbTab==='team') {
-    TEAM.filter(function(t) { return t.name.toLowerCase().includes(ql); }).forEach(function(t) {
-      var d = document.createElement('div');
-      d.className = 'si-team';
-      d.innerHTML = '<div class="si-team-av" style="background:' + t.color + '">' + t.init + '</div><div><div class="si-team-n">' + t.name + '</div><div class="si-team-r">' + t.role + '</div></div>';
-      el.appendChild(d);
-    });
-  } else if (sbTab==='shared') {
-    renderSharedThreadsList(el, ql);
-  } else if (sbTab==='memory') {
-    renderMemoryList(el, ql);
-  } else {
-    CONN.filter(function(c) { return c.n.toLowerCase().includes(ql); }).forEach(function(c) {
-      var d = document.createElement('div');
-      d.className = 'si-conn';
-      d.innerHTML = '<span class="si-conn-i">' + c.i + '</span><div><div class="si-conn-n">' + c.n + '</div><div class="si-conn-d">' + c.d + '</div></div><span class="si-conn-s">Connected</span>';
-      el.appendChild(d);
-    });
-  }
+  // Simplified — sidebar only shows threads now
+  renderThreadBar();
 }
 
 function renderMemoryList(el, filter) {
@@ -1316,16 +1205,8 @@ function renderSharedThreadsList(el, filter) {
   });
 }
 
-// Allow adding memories from the search bar when on Memory tab
-document.getElementById('sbS').addEventListener('keypress', function(e) {
-  if (e.key === 'Enter' && sbTab === 'memory' && this.value.trim()) {
-    addMemory(currentUser ? currentUser.name : '_global', this.value.trim());
-    this.value = '';
-    rSb('');
-  }
-});
-
-rSb();
+// Init sidebar
+renderThreadBar();
 
 /* ============ CHAT SYSTEM ============ */
 function addMsgTo(container, text, isUser, senderInfo) {
@@ -1430,7 +1311,7 @@ async function hubSend() {
   if (shareMatch && currentThreadId) {
     addMsgTo(hc, text, true);
     shareThread(currentThreadId);
-    addMsgTo(hc, 'Done — this thread is now shared with the team. It\'ll appear in Team Threads and the SHARED tab.', false);
+    addMsgTo(hc, 'Done — this thread is now shared with the team.', false);
     saveCurrentThread();
     return;
   }
@@ -1455,7 +1336,7 @@ async function hubSend() {
         saveSharedThreads(getSharedThreads().map(function(s) { return s.id === th.id ? th : s; }));
       }
       addMsgTo(hc, text, true);
-      addMsgTo(hc, 'Shared this thread with <strong>' + targetMember.name + '</strong> (' + targetMember.role + '). They\'ll see it in Team Threads when they log in.', false);
+      addMsgTo(hc, 'Shared this thread with <strong>' + targetMember.name + '</strong> (' + targetMember.role + ').', false);
       saveCurrentThread();
       renderThreadBar();
       return;
@@ -1473,9 +1354,13 @@ async function hubSend() {
 
   addMsgTo(hc, text, true);
 
-  // === CO-WORK AUTONOMOUS AGENT MODE ===
-  if (currentMode === 'cowork') {
+  // === AUTO-DETECT AGENT MODE ===
+  // If the message sounds like a brief/task, use autonomous agent mode
+  var agentTriggers = /\b(create|build|make|draft|prepare|design|generate|write|produce|put together|develop)\b.*\b(deck|presentation|strategy|plan|report|brief|campaign|document|doc|proposal|audit|analysis|slides|overview)\b/i;
+  if (agentTriggers.test(text)) {
+    currentMode = 'cowork';
     await coworkAgent(text, hc);
+    currentMode = 'chat';
     return;
   }
 

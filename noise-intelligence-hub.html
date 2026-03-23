@@ -2070,31 +2070,89 @@ function showDocPages(html, dc) {
   var tmp = document.createElement('div');
   tmp.innerHTML = html;
 
-  /* Gather all top-level children, splitting by h2 */
+  /* Find the content root */
   var root = tmp.querySelector('div[style*="font-family"]') || tmp.querySelector('div[style*="max-width"]') || tmp;
   if (!root.querySelector('h2') && tmp.querySelector('h2')) root = tmp;
-  var children = Array.from(root.children);
+
+  /* Flatten all elements recursively to find headings and content at any depth */
+  function collectElements(parent) {
+    var result = [];
+    var kids = Array.from(parent.children);
+    kids.forEach(function(el) {
+      var tag = el.tagName;
+      /* If it's a heading, a table, a blockquote, or a substantial block — keep it */
+      if (tag === 'H1' || tag === 'H2' || tag === 'H3' || tag === 'TABLE' ||
+          tag === 'BLOCKQUOTE' || tag === 'P' || tag === 'UL' || tag === 'OL' ||
+          tag === 'HR' || tag === 'PRE') {
+        result.push(el);
+      } else if (tag === 'DIV' || tag === 'SECTION') {
+        /* Check if this div has dark background (presentation-style block) */
+        var style = (el.getAttribute('style') || '').toLowerCase();
+        var isDark = style.includes('#1b1b1b') || style.includes('#222') || style.includes('#111') || style.includes('#000') || style.includes('rgb(27');
+        if (isDark) {
+          result.push(el); /* Keep dark blocks whole */
+        } else if (el.querySelector('h2, h3, table')) {
+          /* Div contains sub-sections — recurse into it */
+          result = result.concat(collectElements(el));
+        } else {
+          result.push(el); /* Keep as a content block */
+        }
+      } else {
+        result.push(el);
+      }
+    });
+    return result;
+  }
+
+  var allEls = collectElements(root);
+
+  /* Split into pages at every h2, h3, and after tables */
   var sections = [];
   var current = [];
+  var currentLen = 0;
+  var MAX_CONTENT = 600; /* approximate chars before forcing a page break */
 
-  children.forEach(function(el) {
-    if (el.tagName === 'H2') {
-      if (current.length > 0) sections.push(current);
+  allEls.forEach(function(el) {
+    var tag = el.tagName;
+    var isHeading = (tag === 'H1' || tag === 'H2' || tag === 'H3');
+    var isTable = (tag === 'TABLE');
+    var elLen = (el.textContent || '').length;
+
+    /* Start new page on any heading */
+    if (isHeading && current.length > 0) {
+      sections.push(current);
       current = [el];
-    } else {
-      current.push(el);
+      currentLen = elLen;
+      return;
+    }
+
+    current.push(el);
+    currentLen += elLen;
+
+    /* Break after a table — it's a natural page boundary */
+    if (isTable) {
+      sections.push(current);
+      current = [];
+      currentLen = 0;
+      return;
+    }
+
+    /* Break if content is getting long */
+    if (currentLen > MAX_CONTENT && current.length > 1) {
+      sections.push(current);
+      current = [];
+      currentLen = 0;
     }
   });
   if (current.length > 0) sections.push(current);
 
-  /* First section: if it starts with h1 or non-h2 content, treat as title/intro page */
+  /* Build pages from sections */
   sections.forEach(function(els) {
     var title = '';
     var bodyHtml = '';
     els.forEach(function(el) {
-      if (el.tagName === 'H2') {
-        title = el.textContent;
-      } else if (el.tagName === 'H1' && !title) {
+      var tag = el.tagName;
+      if ((tag === 'H1' || tag === 'H2' || tag === 'H3') && !title) {
         title = el.textContent;
       } else {
         bodyHtml += el.outerHTML;

@@ -222,6 +222,20 @@
   .thread-mode-btn:hover { color: var(--text); }
   .thread-mode-btn.active { color: var(--text); border-bottom-color: var(--accent); }
 
+  /* Inline doc panel for page 1 */
+  .p1-doc {
+    display: none; flex-direction: column; flex: 1; min-width: 0;
+    border-left: 1px solid var(--border); background: var(--bg);
+  }
+  #page1.has-doc .p1-sidebar { display: none; }
+  #page1.has-doc .p1-doc { display: flex; }
+  #page1.has-doc .p1-main { max-width: 420px; flex-shrink: 0; }
+  .p1-doc-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 8px 12px; border-bottom: 1px solid var(--border);
+    background: var(--surface); flex-shrink: 0;
+  }
+
   /* Hub chat area */
   .p1-main { flex: 1; display: flex; flex-direction: column; padding: 0; overflow: hidden; min-height: 0; }
   .hub-chat-area { flex: 1; display: flex; flex-direction: column; max-width: 700px; width: 100%; margin: 0 auto; padding: 0 24px; min-height: 0; overflow: hidden; }
@@ -581,6 +595,29 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
         </button>
       </div>
+    </div>
+  </div>
+  <!-- INLINE DOC PANEL (shown when document is generated) -->
+  <div class="p1-doc" id="p1Doc">
+    <div class="p1-doc-header">
+      <div style="display:flex;gap:6px;align-items:center;">
+        <span class="dt-tab active" id="p1dtPrev">Preview</span>
+        <span class="dt-tab" id="p1dtEdit" onclick="togEdit()">Edit</span>
+      </div>
+      <div style="display:flex;gap:4px;align-items:center;">
+        <button class="dt-btn" onclick="copyDoc()">Copy</button>
+        <button class="dt-btn gd" onclick="exportPDF()">PDF</button>
+        <button class="dt-btn" onclick="exportDOCX()" style="background:#2B579A;color:white;border-color:#2B579A;">.docx</button>
+        <button class="dt-btn gs" onclick="exportXLSX()">.xlsx</button>
+        <button class="dt-btn gsl" onclick="exportPPTX()">.pptx</button>
+        <button class="dt-btn" onclick="closeDocPanel()" title="Close" style="font-size:16px;padding:2px 6px;">×</button>
+      </div>
+    </div>
+    <div class="p2-dc" id="p1DocContainer">
+      <div class="doc-paper" id="p1DocC" contenteditable="false"></div>
+      <div class="slide-nav slide-prev disabled" id="p1SlidePrev" onclick="slideGo(-1)">&#8249;</div>
+      <div class="slide-nav slide-next disabled" id="p1SlideNext" onclick="slideGo(1)">&#8250;</div>
+      <div class="slide-counter" id="p1SlideCtr" style="display:none;">1 / 1</div>
     </div>
   </div>
 </div>
@@ -1449,10 +1486,6 @@ async function hubSend() {
 
   if (resp.doc) {
     showDoc(resp.doc);
-    goPage(2);
-    var wc = document.getElementById('chat');
-    addMsgTo(wc, text, true);
-    addMsgTo(wc, resp.chat, false);
   }
 }
 
@@ -1736,7 +1769,6 @@ async function coworkAgent(task, hc) {
   // Show final result
   if (finalDoc) {
     showDoc(finalDoc);
-    goPage(2);
     addMsgTo(hc, 'Done — your deliverable is in the document panel. Review, edit, and export when ready.', false);
   } else {
     // No doc generated, show a summary
@@ -1841,10 +1873,30 @@ var slideIdx = 0;
 var slideMode = false;
 
 function showDoc(html) {
-  document.getElementById('docE').style.display = 'none';
-  var dc = document.getElementById('docC');
-  dc.style.display = 'block';
-  var pdc = document.querySelector('.p2-dc');
+  /* Determine which panel to use — page 1 inline or page 2 workspace */
+  var onPage1 = document.getElementById('page1').classList.contains('active');
+  var dc, pdc, prevBtn, nextBtn, ctrEl;
+
+  if (onPage1) {
+    /* Show inline doc panel in page 1 */
+    document.getElementById('page1').classList.add('has-doc');
+    dc = document.getElementById('p1DocC');
+    pdc = document.getElementById('p1DocContainer');
+    prevBtn = document.getElementById('p1SlidePrev');
+    nextBtn = document.getElementById('p1SlideNext');
+    ctrEl = document.getElementById('p1SlideCtr');
+  } else {
+    document.getElementById('docE').style.display = 'none';
+    dc = document.getElementById('docC');
+    dc.style.display = 'block';
+    pdc = document.querySelector('#page2 .p2-dc');
+    prevBtn = document.getElementById('slidePrev');
+    nextBtn = document.getElementById('slideNext');
+    ctrEl = document.getElementById('slideCtr');
+  }
+
+  /* Store active elements for slide navigation */
+  window._activeSlideNav = { dc: dc, pdc: pdc, prev: prevBtn, next: nextBtn, ctr: ctrEl };
 
   /* Detect presentation — has the dark title header + h2 sections */
   var isPresentation = html.indexOf('NOISE MEDIA') !== -1 && html.indexOf('<h2>') !== -1;
@@ -1858,10 +1910,14 @@ function showDoc(html) {
     slideTypes = [];
     pdc.classList.remove('slide-active');
     dc.innerHTML = html;
-    document.getElementById('slidePrev').classList.add('disabled');
-    document.getElementById('slideNext').classList.add('disabled');
-    document.getElementById('slideCtr').style.display = 'none';
+    prevBtn.classList.add('disabled');
+    nextBtn.classList.add('disabled');
+    ctrEl.style.display = 'none';
   }
+}
+
+function closeDocPanel() {
+  document.getElementById('page1').classList.remove('has-doc');
 }
 
 function showSlides(html, dc) {
@@ -1953,7 +2009,8 @@ function showSlides(html, dc) {
 }
 
 function renderSlide(dc) {
-  if (!dc) dc = document.getElementById('docC');
+  var nav = window._activeSlideNav || {};
+  if (!dc) dc = nav.dc || document.getElementById('docC');
   dc.innerHTML = '';
   slidePages.forEach(function(html, i) {
     var div = document.createElement('div');
@@ -1962,15 +2019,15 @@ function renderSlide(dc) {
     dc.appendChild(div);
   });
 
-  var prev = document.getElementById('slidePrev');
-  var next = document.getElementById('slideNext');
-  var ctr = document.getElementById('slideCtr');
+  var prev = nav.prev || document.getElementById('slidePrev');
+  var next = nav.next || document.getElementById('slideNext');
+  var ctr = nav.ctr || document.getElementById('slideCtr');
   prev.classList.toggle('disabled', slideIdx === 0);
   next.classList.toggle('disabled', slideIdx === slidePages.length - 1);
   ctr.style.display = slidePages.length > 1 ? '' : 'none';
   ctr.textContent = (slideIdx + 1) + ' / ' + slidePages.length;
 
-  var pdc = document.querySelector('.p2-dc');
+  var pdc = nav.pdc || document.querySelector('.p2-dc');
   if (pdc) pdc.scrollTop = 0;
 }
 

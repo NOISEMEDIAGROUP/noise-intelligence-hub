@@ -1,0 +1,1560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Noise Intelligence</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Reddit+Mono:wght@400;500;600;700&family=Montserrat:wght@300;400;500;600;700&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --bg: #F7F7F5;
+    --surface: #FFFFFF;
+    --surface2: #F0EFED;
+    --border: #E4E3E0;
+    --text: #1B1B1B;
+    --text-muted: #7A7A78;
+    --accent: #C73C1E;
+    --accent-light: rgba(199,60,30,0.08);
+    --green: #2D8A4E;
+    --green-bg: rgba(45,138,78,0.08);
+    --blue: #2B6CB0;
+    --blue-bg: rgba(43,108,176,0.06);
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-md: 0 2px 8px rgba(0,0,0,0.06);
+    --shadow-lg: 0 4px 20px rgba(0,0,0,0.08);
+  }
+  body {
+    font-family: 'Montserrat', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    height: 100vh;
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ============ PAGE 0: LOGIN / SELECT USER ============ */
+  #page0 {
+    height: 100vh; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    background: #1B1B1B;
+    position: relative; overflow: hidden;
+  }
+  #page0::before {
+    content: ''; position: absolute; top: -40%; left: -20%;
+    width: 140%; height: 140%;
+    background: radial-gradient(ellipse at 30% 20%, rgba(199,60,30,0.15) 0%, transparent 50%),
+                radial-gradient(ellipse at 70% 80%, rgba(199,60,30,0.08) 0%, transparent 50%);
+    pointer-events: none;
+  }
+  .login-container {
+    position: relative; z-index: 1;
+    text-align: center; width: 100%; max-width: 680px; padding: 0 24px;
+  }
+  .login-logo {
+    font-family: 'Reddit Mono', monospace;
+    font-size: 28px; font-weight: 700; color: #fff;
+    letter-spacing: 2px; text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .login-logo .ldot { color: var(--accent); }
+  .login-sub {
+    font-size: 13px; color: rgba(255,255,255,0.4);
+    letter-spacing: 0.5px; margin-bottom: 40px;
+  }
+  .login-prompt {
+    font-family: 'Reddit Mono', monospace;
+    font-size: 11px; color: rgba(255,255,255,0.5);
+    text-transform: uppercase; letter-spacing: 2px;
+    margin-bottom: 20px;
+  }
+  .team-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    max-height: 460px;
+    overflow-y: auto;
+    padding: 4px;
+  }
+  .team-card {
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px 18px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .team-card:hover {
+    background: rgba(255,255,255,0.1);
+    border-color: rgba(255,255,255,0.2);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+  }
+  .team-card:active { transform: translateY(0); }
+  .tc-av {
+    width: 42px; height: 42px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Reddit Mono', monospace;
+    font-size: 13px; font-weight: 700; color: white;
+    flex-shrink: 0;
+  }
+  .tc-info { text-align: left; }
+  .tc-name { font-size: 14px; font-weight: 600; color: #fff; }
+  .tc-role { font-size: 11px; color: rgba(255,255,255,0.45); margin-top: 1px; }
+
+  .team-grid::-webkit-scrollbar { width: 4px; }
+  .team-grid::-webkit-scrollbar-track { background: transparent; }
+  .team-grid::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+
+  /* ============ SHARED HEADER (pages 1 & 2) ============ */
+  .header {
+    background: var(--surface);
+    padding: 0 24px; height: 52px;
+    display: flex; align-items: center; gap: 14px;
+    border-bottom: 1px solid var(--border);
+    box-shadow: var(--shadow-sm);
+    z-index: 100;
+    position: fixed; top: 0; left: 0; right: 0;
+  }
+  .header.hidden { display: none; }
+  .logo {
+    width: 34px; height: 34px; background: #1B1B1B;
+    border-radius: 7px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Reddit Mono', monospace;
+    font-weight: 700; font-size: 13px; color: white;
+    letter-spacing: -1px; cursor: pointer;
+  }
+  .logo .dot { color: var(--accent); }
+  .header-title {
+    font-family: 'Reddit Mono', monospace;
+    font-size: 13px; font-weight: 600; color: var(--text);
+    text-transform: uppercase; letter-spacing: 1.2px; cursor: pointer;
+  }
+  .header-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+  .header-btn {
+    padding: 6px 14px; border-radius: 7px;
+    font-family: 'Reddit Mono', monospace; font-weight: 600;
+    font-size: 10px; text-transform: uppercase; letter-spacing: 0.8px;
+    cursor: pointer; transition: all 0.2s;
+    border: 1px solid var(--border); color: var(--text-muted); background: transparent;
+  }
+  .header-btn:hover { border-color: var(--accent); color: var(--text); }
+  .hdr-user {
+    display: flex; align-items: center; gap: 8px; cursor: pointer;
+    padding: 4px 10px 4px 4px; border-radius: 20px;
+    border: 1px solid var(--border); transition: all 0.2s;
+  }
+  .hdr-user:hover { border-color: var(--accent); }
+  .hdr-user-av {
+    width: 28px; height: 28px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Reddit Mono', monospace;
+    font-size: 9px; font-weight: 700; color: white;
+  }
+  .hdr-user-name {
+    font-size: 11px; font-weight: 600; color: var(--text);
+  }
+
+  /* ============ PAGE SYSTEM ============ */
+  .page { display: none; }
+  .page.active { display: flex; }
+  #page1, #page2 { height: calc(100vh - 52px); margin-top: 52px; }
+
+  /* ============ PAGE 1: HUB / WELCOME ============ */
+  #page1 { flex-direction: row; }
+
+  .p1-sidebar {
+    width: 260px; background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex; flex-direction: column; flex-shrink: 0;
+  }
+  .p1-tabs { display: flex; border-bottom: 1px solid var(--border); }
+  .p1-tab {
+    flex: 1; padding: 10px 6px; text-align: center;
+    font-family: 'Reddit Mono', monospace;
+    font-size: 9px; text-transform: uppercase; letter-spacing: 1.2px;
+    color: var(--text-muted); font-weight: 600; cursor: pointer;
+    border-bottom: 2px solid transparent; transition: all 0.2s;
+  }
+  .p1-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .p1-tab:hover:not(.active) { color: var(--text); }
+  .p1-search { padding: 10px 12px; border-bottom: 1px solid var(--border); }
+  .p1-search input {
+    width: 100%; padding: 8px 12px;
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 8px; color: var(--text); font-size: 12px; outline: none;
+  }
+  .p1-search input:focus { border-color: var(--accent); }
+  .p1-search input::placeholder { color: var(--text-muted); }
+  .p1-list { flex: 1; overflow-y: auto; padding: 4px 0; }
+
+  /* Sidebar items */
+  .si { padding: 9px 16px; display: flex; align-items: center; gap: 10px; cursor: pointer; transition: background 0.15s; border-left: 3px solid transparent; }
+  .si:hover { background: var(--surface2); }
+  .si-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--border); flex-shrink: 0; }
+  .si.rdy .si-dot { background: var(--green); }
+  .si.inv .si-dot { background: var(--blue); }
+  .si-name { font-size: 12.5px; font-weight: 500; }
+  .si-badge { margin-left: auto; padding: 2px 6px; border-radius: 4px; font-family: 'Reddit Mono', monospace; font-size: 8px; font-weight: 600; text-transform: uppercase; }
+  .b-r { background: var(--green-bg); color: var(--green); }
+  .b-i { background: var(--blue-bg); color: var(--blue); }
+  .si-team { padding: 8px 16px; display: flex; align-items: center; gap: 10px; }
+  .si-team-av { width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Reddit Mono', monospace; font-size: 10px; font-weight: 700; color: white; flex-shrink: 0; }
+  .si-team-n { font-size: 12px; font-weight: 500; }
+  .si-team-r { font-size: 10px; color: var(--text-muted); }
+  .si-conn { padding: 9px 16px; display: flex; align-items: center; gap: 10px; }
+  .si-conn-i { font-size: 16px; width: 26px; text-align: center; }
+  .si-conn-n { font-size: 12px; font-weight: 500; }
+  .si-conn-d { font-size: 10px; color: var(--text-muted); }
+  .si-conn-s { margin-left: auto; padding: 2px 7px; border-radius: 4px; font-size: 8px; font-weight: 600; font-family: 'Reddit Mono', monospace; text-transform: uppercase; background: var(--green-bg); color: var(--green); }
+  .mem-item { padding: 10px 12px; border-bottom: 1px solid var(--border); }
+  .mem-text { font-size: 12.5px; line-height: 1.5; color: var(--text); }
+  .mem-meta { font-size: 10px; color: var(--text-muted); margin-top: 4px; display: flex; justify-content: space-between; }
+  .mem-del { cursor: pointer; color: var(--accent); font-weight: 700; padding: 0 4px; }
+
+  /* Hub chat area */
+  .p1-main { flex: 1; display: flex; flex-direction: column; padding: 0; overflow: hidden; min-height: 0; }
+  .hub-chat-area { flex: 1; display: flex; flex-direction: column; max-width: 700px; width: 100%; margin: 0 auto; padding: 0 24px; min-height: 0; overflow: hidden; }
+  .hub-msgs { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; padding: 24px 0; scroll-behavior: smooth; min-height: 0; }
+  .hub-input-bar { padding: 16px 0 24px; position: relative; flex-shrink: 0; }
+  .hub-input-bar .wi { width: 100%; padding: 15px 56px 15px 20px; }
+  .hub-input-bar .wi-btn { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); margin-top: -4px; }
+
+  /* Thread bar */
+  .thread-bar { display: flex; align-items: center; gap: 8px; padding: 12px 0 0; flex-shrink: 0; overflow-x: auto; }
+  .thread-bar::-webkit-scrollbar { height: 0; }
+  .thread-chip {
+    padding: 6px 14px; border-radius: 20px; font-size: 11px; font-weight: 600;
+    font-family: 'Reddit Mono', monospace; cursor: pointer; white-space: nowrap;
+    border: 1px solid var(--border); background: var(--surface); color: var(--text-muted);
+    transition: all 0.2s; flex-shrink: 0;
+  }
+  .thread-chip:hover { background: var(--surface2); color: var(--text); }
+  .thread-chip.active { background: var(--text); color: white; border-color: var(--text); }
+  .thread-chip.new-thread { border-style: dashed; color: var(--accent); border-color: var(--accent); background: var(--accent-light); }
+  .thread-chip.new-thread:hover { background: var(--accent); color: white; }
+  .thread-client { font-size: 9px; color: var(--accent); margin-left: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 1000; display: flex; align-items: center; justify-content: center; }
+  .modal { background: var(--surface); border-radius: 16px; padding: 28px; width: 440px; max-width: 90vw; box-shadow: 0 8px 40px rgba(0,0,0,0.15); }
+  .modal h3 { font-family: 'Reddit Mono', monospace; font-size: 16px; margin-bottom: 6px; }
+  .modal p { font-size: 13px; color: var(--text-muted); margin-bottom: 16px; line-height: 1.5; }
+  .modal input { width: 100%; padding: 12px 14px; border: 1px solid var(--border); border-radius: 10px; font-size: 13px; margin-bottom: 10px; outline: none; font-family: 'Reddit Mono', monospace; }
+  .modal input:focus { border-color: var(--accent); }
+  .modal-btns { display: flex; gap: 8px; justify-content: flex-end; margin-top: 8px; }
+  .modal-btns button { padding: 10px 20px; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; }
+  .modal-btns .btn-cancel { background: var(--surface2); color: var(--text); }
+  .modal-btns .btn-save { background: var(--accent); color: white; }
+  .ai-badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 700; font-family: 'Reddit Mono', monospace; margin-left: 6px; }
+  .ai-on { background: rgba(45,138,78,0.1); color: #2D8A4E; }
+  .ai-off { background: var(--surface2); color: var(--text-muted); }
+  .wi {
+    width: 100%; padding: 15px 56px 15px 20px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 14px; font-size: 14px; color: var(--text); outline: none;
+    box-shadow: var(--shadow-md); transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .wi:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(199,60,30,0.08), var(--shadow-md); }
+  .wi::placeholder { color: var(--text-muted); }
+  .wi-btn {
+    position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+    width: 38px; height: 38px; border-radius: 10px;
+    background: var(--accent); border: none; color: white;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+  .wi-btn:hover { background: #a82e15; }
+  .wi-btn svg { width: 16px; height: 16px; }
+
+  /* ============ PAGE 2: WORKSPACE ============ */
+  #page2 { flex-direction: row; }
+
+  /* Chat panel */
+  .p2-chat {
+    width: 400px; display: flex; flex-direction: column;
+    border-right: 1px solid var(--border); background: var(--surface); flex-shrink: 0;
+  }
+  .p2-ch { padding: 10px 16px; border-bottom: 1px solid var(--border); font-family: 'Reddit Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-muted); font-weight: 600; }
+  .p2-msgs { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 16px; scroll-behavior: smooth; }
+
+  .msg { display: flex; gap: 10px; max-width: 88%; animation: fu 0.25s ease; }
+  @keyframes fu { from { opacity:0; transform:translateY(5px); } to { opacity:1; transform:translateY(0); } }
+  .msg-u { align-self: flex-end; flex-direction: row-reverse; }
+  .m-av { width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 800; margin-top: 2px; }
+  .m-av-b { background: #1B1B1B; color: white; font-family: 'Reddit Mono', monospace; }
+  .m-av-u { color: white; font-family: 'Reddit Mono', monospace; }
+  .m-body { padding: 12px 16px; border-radius: 16px; font-size: 14px; line-height: 1.65; }
+  .msg-u .m-body { background: var(--accent); color: white; border-bottom-right-radius: 4px; }
+  .msg-b .m-body { background: var(--surface); color: var(--text); border: 1px solid var(--border); border-bottom-left-radius: 4px; }
+  .msg-b .m-body strong { color: #1B1B1B; }
+  .m-body p { margin: 6px 0; }
+  .m-body ul, .m-body ol { margin: 6px 0 6px 18px; }
+  .m-body li { margin: 3px 0; }
+
+  .typing { display: flex; gap: 5px; padding: 5px 0; }
+  .typing span { width: 7px; height: 7px; background: var(--text-muted); border-radius: 50%; animation: bn 1.4s infinite; }
+  .typing span:nth-child(2) { animation-delay: 0.2s; }
+  .typing span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes bn { 0%,60%,100% { transform:translateY(0); } 30% { transform:translateY(-4px); } }
+
+  .p2-in { padding: 12px 16px; border-top: 1px solid var(--border); }
+  .p2-ir { display: flex; gap: 8px; }
+  .p2-ir input { flex: 1; padding: 12px 16px; background: var(--surface2); border: 1px solid var(--border); border-radius: 12px; color: var(--text); font-size: 14px; outline: none; }
+  .p2-ir input:focus { border-color: var(--accent); }
+  .p2-ir input::placeholder { color: var(--text-muted); }
+  .p2-ir button { padding: 10px 16px; background: var(--accent); color: white; border: none; border-radius: 10px; font-weight: 600; font-size: 12px; cursor: pointer; }
+  .p2-ir button:hover { background: #a82e15; }
+
+  /* Document panel */
+  .p2-doc { flex: 1; display: flex; flex-direction: column; background: var(--bg); overflow: hidden; }
+  .p2-dt {
+    padding: 8px 16px; background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .dt-tab { padding: 5px 12px; border-radius: 6px; font-size: 11px; font-weight: 500; cursor: pointer; transition: all 0.2s; border: 1px solid transparent; color: var(--text-muted); background: transparent; }
+  .dt-tab.active { background: var(--surface2); color: var(--text); border-color: var(--border); }
+  .dt-tab:hover:not(.active) { color: var(--text); }
+  .dt-right { margin-left: auto; display: flex; align-items: center; gap: 6px; }
+  .dt-btn {
+    padding: 5px 10px; border-radius: 6px; font-size: 10px; font-weight: 600;
+    font-family: 'Reddit Mono', monospace; text-transform: uppercase; letter-spacing: 0.5px;
+    cursor: pointer; border: 1px solid var(--border); color: var(--text-muted);
+    background: transparent; transition: all 0.2s; display: flex; align-items: center; gap: 4px;
+  }
+  .dt-btn:hover { border-color: var(--accent); color: var(--text); }
+  .dt-btn.gd { background: #4285F4; color: white; border-color: #4285F4; }
+  .dt-btn.gd:hover { background: #3367D6; }
+  .dt-btn.gs { background: #0F9D58; color: white; border-color: #0F9D58; }
+  .dt-btn.gs:hover { background: #0B8043; }
+  .dt-btn.gsl { background: #F4B400; color: #1B1B1B; border-color: #F4B400; }
+
+  .p2-dc { flex: 1; overflow-y: auto; padding: 28px 40px; display: flex; justify-content: center; }
+  .doc-paper {
+    width: 100%; max-width: 700px; min-height: 500px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; box-shadow: var(--shadow-md);
+    padding: 44px 52px; font-size: 13px; line-height: 1.8; outline: none;
+  }
+  .doc-paper:focus { border-color: var(--accent); }
+  .doc-paper h1 { font-family: 'Reddit Mono', monospace; font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+  .doc-paper h2 { font-family: 'Reddit Mono', monospace; font-size: 15px; font-weight: 600; margin: 18px 0 6px; border-bottom: 1px solid var(--border); padding-bottom: 3px; }
+  .doc-paper h3 { font-size: 13px; font-weight: 600; margin: 12px 0 4px; }
+  .doc-paper .dm { font-size: 11px; color: var(--text-muted); margin-bottom: 18px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+  .doc-paper ul { margin: 6px 0 6px 20px; }
+  .doc-paper li { margin-bottom: 3px; }
+  .doc-paper table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 12px; }
+  .doc-paper th, .doc-paper td { padding: 7px 10px; text-align: left; border: 1px solid var(--border); }
+  .doc-paper th { background: var(--surface2); font-weight: 600; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .de { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 350px; color: var(--text-muted); text-align: center; }
+  .de-i { font-size: 44px; margin-bottom: 14px; opacity: 0.3; }
+  .de h3 { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+  .de p { font-size: 12px; max-width: 280px; }
+
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+</style>
+</head>
+<body>
+
+<!-- HEADER (hidden on login page) -->
+<div class="header hidden" id="mainHeader">
+  <div class="logo" onclick="goPage(1)">NM<span class="dot">.</span></div>
+  <span class="header-title" onclick="goPage(1)">Noise Intelligence</span>
+  <div class="header-right">
+    <button class="header-btn" onclick="goPage(1)">Hub</button>
+    <button class="header-btn" onclick="goPage(2)">Workspace</button>
+    <button class="header-btn" onclick="showSettings()" title="AI Settings" style="font-size:16px;padding:6px 10px;">&#9881;</button>
+    <div class="hdr-user" id="hdrUser" onclick="goPage(0)"></div>
+  </div>
+</div>
+
+<!-- PAGE 0: SELECT USER -->
+<div class="page active" id="page0">
+  <div class="login-container">
+    <div class="login-logo">NOISE INTELLIGENCE<span class="ldot">.</span></div>
+    <div class="login-sub">Agency Knowledge Hub</div>
+    <div class="login-prompt">Select your profile to continue</div>
+    <div class="team-grid" id="teamGrid"></div>
+  </div>
+</div>
+
+<!-- PAGE 1: HUB -->
+<div class="page" id="page1">
+  <div class="p1-sidebar">
+    <div class="p1-tabs">
+      <div class="p1-tab active" onclick="swTab('clients')">Clients</div>
+      <div class="p1-tab" onclick="swTab('team')">Team</div>
+      <div class="p1-tab" onclick="swTab('connectors')">Connectors</div>
+      <div class="p1-tab" onclick="swTab('memory')">Memory</div>
+    </div>
+    <div class="p1-search"><input type="text" id="sbS" placeholder="Search clients..." oninput="rSb(this.value)"></div>
+    <div class="p1-list" id="sbL"></div>
+  </div>
+  <div class="p1-main">
+    <div class="hub-chat-area">
+      <div class="thread-bar" id="threadBar"></div>
+      <div class="hub-msgs" id="hubChat"></div>
+      <div class="hub-input-bar">
+        <input class="wi" id="wI" type="text" placeholder="What can I help you with today?">
+        <button class="wi-btn" onclick="hubSend()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE 2: WORKSPACE -->
+<div class="page" id="page2">
+  <div class="p2-chat">
+    <div class="p2-ch">Chat</div>
+    <div class="p2-msgs" id="chat"></div>
+    <div class="p2-in">
+      <div class="p2-ir">
+        <input type="text" id="cI" placeholder="What can I help you with today?">
+        <button onclick="wsSend()">Send</button>
+      </div>
+    </div>
+  </div>
+  <div class="p2-doc">
+    <div class="p2-dt">
+      <span class="dt-tab active" id="dtPrev">Preview</span>
+      <span class="dt-tab" id="dtEdit" onclick="togEdit()">Edit</span>
+      <div class="dt-right">
+        <button class="dt-btn" onclick="copyDoc()">Copy</button>
+        <button class="dt-btn gd" onclick="exportPDF()">PDF</button>
+        <button class="dt-btn" onclick="exportDOCX()" style="background:#2B579A;color:white;border-color:#2B579A;">.docx</button>
+        <button class="dt-btn gs" onclick="exportXLSX()">.xlsx</button>
+        <button class="dt-btn gsl" onclick="exportPPTX()">.pptx</button>
+      </div>
+    </div>
+    <div class="p2-dc">
+      <div class="doc-paper" id="docP">
+        <div class="de" id="docE">
+          <div class="de-i">&#128196;</div>
+          <h3>Document Preview</h3>
+          <p>Ask me to generate a brief, cost allocation, report, or any document — it'll appear here for you to edit and export.</p>
+        </div>
+        <div id="docC" style="display:none"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============ TEAM DATA (matching your screenshot exactly) ============ */
+const TEAM = [
+  { name:"Anthony", init:"AN", role:"Co-Founder", color:"#E74C3C" },
+  { name:"Joe", init:"JO", role:"Co-Founder", color:"#2C3E50" },
+  { name:"Beau", init:"BE", role:"Creative Director", color:"#9B59B6" },
+  { name:"Sam", init:"SM", role:"Head of Operations", color:"#8E44AD" },
+  { name:"Louise", init:"LO", role:"Head of Accounts", color:"#D4AC0D" },
+  { name:"Leah", init:"LH", role:"Motion Graphic Designer", color:"#27AE60" },
+  { name:"Steph", init:"ST", role:"Senior Designer", color:"#E74C3C" },
+  { name:"Georgie", init:"GE", role:"Junior Creative", color:"#E91E8F" },
+  { name:"Adam", init:"AD", role:"Head of Motion", color:"#7F8C8D" },
+  { name:"Mike", init:"MK", role:"Head of Production", color:"#E67E22" },
+  { name:"Luke", init:"LK", role:"Motion Designer", color:"#1ABC9C" },
+  { name:"Dan", init:"DN", role:"Paid Media", color:"#85929E" },
+  { name:"Obenewa Adu", init:"OA", role:"Social Media Intern", color:"#C0897B" }
+];
+
+/* ============ CLIENT DATA ============ */
+const CL = [
+  { id:"barbri", n:"BARBRI", s:"r", cat:"Legal Education / SQE Prep", sum:"SQE1 & SQE2 prep courses. 4 products, 15+ campaigns, 200+ assets, 2 promo codes, BARBRI Barometer report.", a:200, c:15 },
+  { id:"boodle", n:"Boodle", s:"r", cat:"FinTech / Group Payments", sum:"Group payment app. 25 video ads across 7 campaigns, Nando's partnership.", a:46, c:7 },
+  { id:"altra", n:"Altra Skin", s:"r", cat:"Luxury Fragrance", sum:"Sculpted perfume bottles. 6 scents, product stills, 3D/STL files.", a:20, c:0 },
+  { id:"culture-club", n:"Culture Club", s:"r", cat:"Music / Entertainment", sum:"9 video assets: Palladium live (ProRes), Karma Chameleon, Frantic 08.", a:9, c:0 },
+  { id:"brothers-cider", n:"Brothers Cider", s:"r", cat:"Drinks / FMCG", sum:"196 assets across 15 campaigns — interactive games, recipes, lockdown content.", a:196, c:15 },
+  { id:"thortful", n:"Thortful", s:"r", cat:"E-commerce / Greeting Cards", sum:"Mrs Thortful (Lou). 95 files — Valentine's, Mother's Day, reaction clips, photography.", a:95, c:6 },
+  { id:"davines", n:"Davines", s:"r", cat:"Beauty / Haircare", sum:"Italian haircare, 4 markets. 78 files — festive, TikTok, UGC, media plans.", a:78, c:9 },
+  { id:"access-storage", n:"Access Storage", s:"r", cat:"Storage / Self-Storage", sum:"UK self-storage. 7 campaigns (summer storage, box storage, brand awareness). Monthly Noise content batches (Jan-Apr 2025), UGC video, Trustpilot social proof ads. Brand guidelines + logos. Content types: static 1x1, carousel, UGC.", a:30, c:7 },
+  { id:"amano-hotels", n:"Amano Hotels", s:"r", cat:"Hospitality / Hotels", sum:"Berlin lifestyle hotel group. 4 objectives: grow corporate event revenue, rebuild brand perception in Germany, raise room revenue (+€5 ADR), increase direct bookings (25% to 35%). Strategy: brand & positioning, organic, paid media, influencers, CRM, website. Covent Garden shoot active. IG audit, CI guide, brand strategy notes.", a:18, c:4 },
+  { id:"apricot", n:"Apricot", s:"r", cat:"Beauty / Skincare", sum:"Beauty/skincare brand. Paid media (PPC PMax), organic content, influencer/creator strategy, UGC. Black Friday paid content plan, UGC content plan. Brand assets: customer personas, Tenerife shoot selects, fonts, logos. Brand brainstorm deck. Paid media strategy.", a:17, c:3 },
+  { id:"aspora", n:"Aspora", s:"r", cat:"Food & Drink / FMCG", sum:"FMCG brand. Heavy OOH (Out of Home) focus with B2B content and social amplification. Activations, Diwali campaign, paid social UGC, always-on content, social shoots B2B. Event RAMs for live activations.", a:14, c:4 },
+  { id:"audio-technica", n:"Audio-Technica", s:"r", cat:"Audio / Electronics", sum:"Professional audio equipment. Commercial retainer: organic assets, paid media, reporting. Live events collaboration. Brand assets, signed contract, kick off agendas.", a:10, c:3 },
+  { id:"biovelvet", n:"Biovelvet", s:"r", cat:"Beauty / Skincare", sum:"Beauty/skincare brand. Strategy, content creation, imagery. Brand guidelines, imagery library, sales pitch, scope docs, kick off materials, helpful reference docs.", a:8, c:2 },
+  { id:"brand-your", n:"Brand Your", s:"r", cat:"Branding", sum:"Branding client. Brand assets, Noise-produced assets, reporting. 2025 master doc.", a:4, c:1 },
+  { id:"butterfly-effect", n:"Butterfly Effect", s:"r", cat:"Entertainment", sum:"Entertainment/events. Ad formats doc, creative ideas, contracts.", a:3, c:1 },
+  { id:"everythinghealthy-ig", n:"EverythingHealthy IG", s:"r", cat:"Health / Social", sum:"Instagram health food account. Creator management.", a:1, c:1 },
+  { id:"fable-and-mane", n:"Fable & Mane", s:"r", cat:"Beauty / Haircare", sum:"Haircare brand. Full-service: audience research, content strategy (SSG), production, strategy. Shared collaboration folder.", a:7, c:3 },
+  { id:"funding-loop", n:"Funding Loop", s:"r", cat:"Finance / Fintech", sum:"Fintech. Paid social strategy (2025-2026), audio content, website work, email lookalike targeting. Qualified lead list.", a:8, c:3 },
+  { id:"fundonion", n:"FundOnion", s:"r", cat:"Finance / Fintech", sum:"Fintech. Shared assets folder.", a:1, c:1 },
+  { id:"ge-vernova-data-centres", n:"GE Vernova Data Centres", s:"r", cat:"Energy / Industrial", sum:"GE Vernova data centres division. Multi-year engagement (2025-2026). Admin docs.", a:3, c:1 },
+  { id:"ge-vernova-nuclear", n:"GE Vernova Nuclear", s:"r", cat:"Energy / Industrial", sum:"GE Vernova nuclear division. Brief and helpful reference docs.", a:2, c:1 },
+  { id:"indian-motorcycles", n:"Indian Motorcycles", s:"r", cat:"Automotive / Motorcycles", sum:"New 2026 engagement. Single folder.", a:1, c:1 },
+  { id:"intro-travel", n:"Intro Travel", s:"r", cat:"Travel / Tourism", sum:"Travel company. Summer sale 2025 campaign, brand assets, reporting. Multi-year partnership (2025/2026). Assets zip file.", a:6, c:2 },
+  { id:"jiffy", n:"Jiffy", s:"r", cat:"Tech / On-demand Services", sum:"On-demand services. Internal docs and shared collaboration folder.", a:2, c:1 },
+  { id:"lighting-sharks", n:"Lighting Sharks", s:"r", cat:"Technology / Lighting", sum:"Lighting tech. Internal docs and shared collaboration folder.", a:2, c:1 },
+  { id:"metier", n:"Metier", s:"r", cat:"Fashion / Luxury", sum:"Luxury fashion brand. Internal docs and shared collaboration folder.", a:2, c:1 },
+  { id:"otto", n:"Otto", s:"r", cat:"E-commerce / Retail", sum:"Major retail/e-commerce. Full-service: PPC, content, brand guidelines, key messaging, pitch deck, strategy. Discovery call notes. Very well-organized.", a:11, c:4 },
+  { id:"paradisus-melia", n:"Paradisus / Melia", s:"r", cat:"Hospitality / Luxury Resorts", sum:"Paradisus by Melia luxury resorts. Largest client. Full-service: brand, campaign, influencer, organic & paid social, creative production. Canary Islands shoot (May 2025). Multiple SOWs, weekly status updates, video content. 17 folders + 12 files.", a:29, c:8 },
+  { id:"parkbee", n:"ParkBee", s:"r", cat:"Parking / PropTech", sum:"PropTech parking. Creative scope document only.", a:1, c:1 },
+  { id:"peta", n:"PETA", s:"r", cat:"Non-profit / Animal Rights", sum:"Animal rights non-profit. Meetings, Noise assets, pitch docs, PR.", a:4, c:2 },
+  { id:"qustodio", n:"Qustodio", s:"r", cat:"Tech / Parental Controls", sum:"Parental control software. Video content with adult and child actors, creative pitches, client docs, contracts.", a:7, c:3 },
+  { id:"the-butterfly-effect", n:"The Butterfly Effect", s:"r", cat:"Entertainment", sum:"Entertainment/events. UGC agency work for 2026, account management, Noise assets.", a:3, c:1 },
+  { id:"trudis", n:"Trudi's", s:"r", cat:"Food & Drink", sum:"Food/drink brand. Brand assets, kick off materials, strategy, Noise assets.", a:4, c:1 },
+  { id:"winter-wonderland", n:"Winter Wonderland", s:"r", cat:"Events / Entertainment", sum:"Hyde Park Winter Wonderland. Assets, docs, Noise assets, shared collaboration folder.", a:4, c:2 },
+  { id:"xigxag", n:"XigXag", s:"r", cat:"Tech / Footwear", sum:"Footwear tech. New 2026 engagement.", a:1, c:1 },
+  { id:"zapp", n:"Zapp", s:"r", cat:"Tech / Delivery", sum:"Delivery service. Brief and pitch materials.", a:2, c:1 },
+  { id:"zeigo", n:"Zeigo", s:"r", cat:"Energy / Sustainability", sum:"Sustainability platform. Internal docs and shared collaboration folder.", a:2, c:1 }
+];
+
+const CONN = [
+  { n:"Google Docs", d:"Briefs, scripts, strategy", i:"📄" },
+  { n:"Google Sheets", d:"Media plans, trackers, budgets", i:"📊" },
+  { n:"Google Slides", d:"Decks, presentations, pitches", i:"📑" },
+  { n:"Google Drive", d:"Asset storage, file management", i:"💾" },
+  { n:"Google Chrome", d:"Web research, competitor audits", i:"🌐" }
+];
+
+/* ============ STATE ============ */
+let currentUser = null;
+let sbTab = 'clients';
+
+/* ============ PERSISTENT MEMORY ============ */
+const STORE_KEY = 'noise_intelligence';
+function loadStore() {
+  try { return JSON.parse(localStorage.getItem(STORE_KEY)) || {}; } catch(e) { return {}; }
+}
+function saveStore(data) {
+  try { localStorage.setItem(STORE_KEY, JSON.stringify(data)); } catch(e) {}
+}
+
+// Chat history per user
+function saveChatHistory(userName, html) {
+  var store = loadStore();
+  if (!store.chats) store.chats = {};
+  store.chats[userName] = html;
+  saveStore(store);
+}
+function loadChatHistory(userName) {
+  var store = loadStore();
+  return (store.chats && store.chats[userName]) || '';
+}
+
+// Memory notes per user
+function getMemories(userName) {
+  var store = loadStore();
+  if (!store.memories) store.memories = {};
+  return store.memories[userName] || [];
+}
+function addMemory(userName, note) {
+  var store = loadStore();
+  if (!store.memories) store.memories = {};
+  if (!store.memories[userName]) store.memories[userName] = [];
+  store.memories[userName].push({ text: note, time: new Date().toISOString() });
+  saveStore(store);
+}
+function deleteMemory(userName, index) {
+  var store = loadStore();
+  if (store.memories && store.memories[userName]) {
+    store.memories[userName].splice(index, 1);
+    saveStore(store);
+  }
+}
+function getAllMemories() {
+  var store = loadStore();
+  return store.memories || {};
+}
+
+// Get memory context string for AI system prompt
+function getMemoryContext() {
+  if (!currentUser) return '';
+  var mems = getMemories(currentUser.name);
+  var globalMems = getMemories('_global');
+  var all = globalMems.concat(mems);
+  if (all.length === 0) return '';
+  return '\n\nSAVED MEMORIES:\n' + all.map(function(m) { return '- ' + m.text; }).join('\n');
+}
+
+/* ============ THREAD SYSTEM ============ */
+var currentThreadId = null;
+
+function getUserThreads(userName) {
+  var store = loadStore();
+  if (!store.threads) store.threads = {};
+  if (!store.threads[userName]) store.threads[userName] = [];
+  return store.threads[userName];
+}
+
+function saveUserThreads(userName, threads) {
+  var store = loadStore();
+  if (!store.threads) store.threads = {};
+  store.threads[userName] = threads;
+  saveStore(store);
+}
+
+function createThread(userName, label, client) {
+  var threads = getUserThreads(userName);
+  var thread = {
+    id: 'th_' + Date.now(),
+    label: label || 'New chat',
+    client: client || null,
+    html: '',
+    created: new Date().toISOString()
+  };
+  threads.unshift(thread);
+  saveUserThreads(userName, threads);
+  return thread;
+}
+
+function saveCurrentThread() {
+  if (!currentUser || !currentThreadId) return;
+  var threads = getUserThreads(currentUser.name);
+  var th = threads.find(function(t) { return t.id === currentThreadId; });
+  if (th) {
+    th.html = document.getElementById('hubChat').innerHTML;
+    saveUserThreads(currentUser.name, threads);
+  }
+}
+
+function switchThread(threadId) {
+  // Save current thread first
+  saveCurrentThread();
+  conversationHistory = [];
+
+  var threads = getUserThreads(currentUser.name);
+  var th = threads.find(function(t) { return t.id === threadId; });
+  if (!th) return;
+
+  currentThreadId = th.id;
+  var hc = document.getElementById('hubChat');
+  hc.innerHTML = th.html || '';
+  hc.scrollTop = hc.scrollHeight;
+  renderThreadBar();
+}
+
+function startNewThread(label, client) {
+  if (!currentUser) return;
+  saveCurrentThread();
+  conversationHistory = [];
+  var th = createThread(currentUser.name, label, client);
+  currentThreadId = th.id;
+  var hc = document.getElementById('hubChat');
+  hc.innerHTML = '';
+  var greeting = client
+    ? 'Starting a new thread for <strong>' + client + '</strong>. What do you need?'
+    : 'New thread started. What are you working on?';
+  addMsgTo(hc, greeting, false);
+  renderThreadBar();
+}
+
+function promptNewThread() {
+  var label = prompt('Thread name (e.g. "Thortful Q2 Campaign", "Team 1-1s"):');
+  if (!label) return;
+  // Try to match a client name
+  var client = null;
+  var ll = label.toLowerCase();
+  var cm = CL.find(function(c) { return ll.includes(c.n.toLowerCase()); });
+  if (cm) client = cm.n;
+  startNewThread(label, client);
+}
+
+function deleteThread(threadId, ev) {
+  ev.stopPropagation();
+  if (!currentUser) return;
+  var threads = getUserThreads(currentUser.name);
+  if (threads.length <= 1) return; // Keep at least one
+  threads = threads.filter(function(t) { return t.id !== threadId; });
+  saveUserThreads(currentUser.name, threads);
+  if (currentThreadId === threadId) {
+    currentThreadId = threads[0].id;
+    var hc = document.getElementById('hubChat');
+    hc.innerHTML = threads[0].html || '';
+    hc.scrollTop = hc.scrollHeight;
+  }
+  renderThreadBar();
+}
+
+function renderThreadBar() {
+  if (!currentUser) return;
+  var threads = getUserThreads(currentUser.name);
+  var bar = document.getElementById('threadBar');
+  var html = '<div class="thread-chip new-thread" onclick="promptNewThread()">+ New</div>';
+  threads.forEach(function(th) {
+    var active = th.id === currentThreadId ? ' active' : '';
+    var clientTag = th.client ? '<span class="thread-client">' + th.client + '</span>' : '';
+    html += '<div class="thread-chip' + active + '" onclick="switchThread(\'' + th.id + '\')" title="' + th.label + '">'
+      + th.label + clientTag
+      + (threads.length > 1 ? '<span style="margin-left:6px;opacity:0.4;font-size:9px;" onclick="deleteThread(\'' + th.id + '\', event)">&times;</span>' : '')
+      + '</div>';
+  });
+  bar.innerHTML = html;
+}
+
+function initThreadsForUser(userName) {
+  var threads = getUserThreads(userName);
+  if (threads.length === 0) {
+    // Migrate existing chat history into a "General" thread
+    var saved = loadChatHistory(userName);
+    var th = {
+      id: 'th_' + Date.now(),
+      label: 'General',
+      client: null,
+      html: saved || '',
+      created: new Date().toISOString()
+    };
+    threads.push(th);
+    saveUserThreads(userName, threads);
+  }
+  currentThreadId = threads[0].id;
+  return threads[0];
+}
+
+/* ============ PAGE 0: LOGIN ============ */
+function renderLogin() {
+  const g = document.getElementById('teamGrid');
+  g.innerHTML = '';
+  TEAM.forEach(t => {
+    const d = document.createElement('div');
+    d.className = 'team-card';
+    d.onclick = () => selectUser(t);
+    d.innerHTML = `<div class="tc-av" style="background:${t.color}">${t.init}</div><div class="tc-info"><div class="tc-name">${t.name}</div><div class="tc-role">${t.role}</div></div>`;
+    g.appendChild(d);
+  });
+}
+renderLogin();
+
+function selectUser(u) {
+  // Save outgoing user's thread
+  if (currentUser) saveCurrentThread();
+  currentUser = u;
+  conversationHistory = [];
+  var hubChatEl = document.getElementById('hubChat');
+  hubChatEl.innerHTML = '';
+  document.getElementById('chat').innerHTML = '';
+  document.getElementById('docC').style.display = 'none';
+  document.getElementById('docE').style.display = '';
+  // Set up header
+  document.getElementById('mainHeader').classList.remove('hidden');
+  document.getElementById('hdrUser').innerHTML = '<div class="hdr-user-av" style="background:' + u.color + '">' + u.init + '</div><span class="hdr-user-name">' + u.name + '</span>';
+  goPage(1);
+  // Init threads and load the first one
+  var firstThread = initThreadsForUser(u.name);
+  if (firstThread.html) {
+    hubChatEl.innerHTML = firstThread.html;
+    hubChatEl.scrollTop = hubChatEl.scrollHeight;
+    addMsgTo(hubChatEl, 'Welcome back, ' + u.name.split(' ')[0] + '!', false);
+  } else {
+    addMsgTo(hubChatEl, 'Hey ' + u.name.split(' ')[0] + '! What are you working on today?', false);
+  }
+  renderThreadBar();
+  // Refresh sidebar if on memory tab
+  if (sbTab === 'memory') rSb('');
+}
+
+/* ============ PAGE NAV ============ */
+function goPage(n) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page'+n).classList.add('active');
+  if (n===0) { document.getElementById('mainHeader').classList.add('hidden'); return; }
+  document.getElementById('mainHeader').classList.remove('hidden');
+  if (n===1) document.getElementById('wI').focus();
+  if (n===2) document.getElementById('cI').focus();
+}
+
+/* ============ SIDEBAR ============ */
+function swTab(tab) {
+  sbTab = tab;
+  document.querySelectorAll('.p1-tab').forEach(function(t) { t.classList.remove('active'); });
+  document.querySelector('.p1-tab[onclick*="' + tab + '"]').classList.add('active');
+  var s = document.getElementById('sbS');
+  if (tab === 'memory') {
+    s.placeholder = 'Add a note...';
+  } else {
+    s.placeholder = tab==='clients'?'Search clients...':tab==='team'?'Search team...':'Search connectors...';
+  }
+  s.value = ''; rSb('');
+}
+
+function rSb(q) {
+  q = q || '';
+  var el = document.getElementById('sbL');
+  el.innerHTML = '';
+  var ql = q.toLowerCase();
+
+  if (sbTab==='clients') {
+    CL.filter(function(c) { return c.n.toLowerCase().includes(ql); }).forEach(function(c) {
+      var d = document.createElement('div');
+      d.className = 'si ' + (c.s==='r'?'rdy':'inv');
+      d.onclick = function() {
+        // Find or create a thread for this client
+        var threads = getUserThreads(currentUser.name);
+        var existing = threads.find(function(t) { return t.client === c.n; });
+        if (existing) { switchThread(existing.id); }
+        else { startNewThread(c.n, c.n); }
+        document.getElementById('wI').value = 'Tell me about ' + c.n;
+        hubSend();
+      };
+      d.innerHTML = '<span class="si-dot"></span><span class="si-name">' + c.n + '</span><span class="si-badge ' + (c.s==='r'?'b-r':'b-i') + '">' + (c.s==='r'?'Ready':'Inventoried') + '</span>';
+      el.appendChild(d);
+    });
+  } else if (sbTab==='team') {
+    TEAM.filter(function(t) { return t.name.toLowerCase().includes(ql); }).forEach(function(t) {
+      var d = document.createElement('div');
+      d.className = 'si-team';
+      d.innerHTML = '<div class="si-team-av" style="background:' + t.color + '">' + t.init + '</div><div><div class="si-team-n">' + t.name + '</div><div class="si-team-r">' + t.role + '</div></div>';
+      el.appendChild(d);
+    });
+  } else if (sbTab==='memory') {
+    renderMemoryList(el, ql);
+  } else {
+    CONN.filter(function(c) { return c.n.toLowerCase().includes(ql); }).forEach(function(c) {
+      var d = document.createElement('div');
+      d.className = 'si-conn';
+      d.innerHTML = '<span class="si-conn-i">' + c.i + '</span><div><div class="si-conn-n">' + c.n + '</div><div class="si-conn-d">' + c.d + '</div></div><span class="si-conn-s">Connected</span>';
+      el.appendChild(d);
+    });
+  }
+}
+
+function renderMemoryList(el, filter) {
+  if (!currentUser) return;
+  var mems = getMemories(currentUser.name);
+  var globalMems = getMemories('_global');
+
+  if (mems.length === 0 && globalMems.length === 0) {
+    el.innerHTML = '<div style="padding:16px;color:var(--text-muted);font-size:12px;line-height:1.6;">No memories saved yet.<br><br>Tell the bot to <strong>"remember that..."</strong> or type a note in the search bar above and press Enter to save it.</div>';
+    return;
+  }
+
+  if (globalMems.length > 0) {
+    var gh = document.createElement('div');
+    gh.style.cssText = 'padding:8px 12px;font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;';
+    gh.textContent = 'Shared';
+    el.appendChild(gh);
+    globalMems.forEach(function(m, i) {
+      if (filter && !m.text.toLowerCase().includes(filter)) return;
+      var d = document.createElement('div');
+      d.className = 'mem-item';
+      d.innerHTML = '<div class="mem-text">' + m.text + '</div><div class="mem-meta">' + new Date(m.time).toLocaleDateString('en-GB',{day:'numeric',month:'short'}) + ' <span class="mem-del" onclick="deleteMemory(\'_global\',' + i + ');rSb();">x</span></div>';
+      el.appendChild(d);
+    });
+  }
+
+  if (mems.length > 0) {
+    var ph = document.createElement('div');
+    ph.style.cssText = 'padding:8px 12px;font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;';
+    ph.textContent = currentUser.name.split(' ')[0] + '\'s Notes';
+    el.appendChild(ph);
+    mems.forEach(function(m, i) {
+      if (filter && !m.text.toLowerCase().includes(filter)) return;
+      var d = document.createElement('div');
+      d.className = 'mem-item';
+      d.innerHTML = '<div class="mem-text">' + m.text + '</div><div class="mem-meta">' + new Date(m.time).toLocaleDateString('en-GB',{day:'numeric',month:'short'}) + ' <span class="mem-del" onclick="deleteMemory(\'' + currentUser.name + '\',' + i + ');rSb();">x</span></div>';
+      el.appendChild(d);
+    });
+  }
+}
+
+// Allow adding memories from the search bar when on Memory tab
+document.getElementById('sbS').addEventListener('keypress', function(e) {
+  if (e.key === 'Enter' && sbTab === 'memory' && this.value.trim()) {
+    addMemory(currentUser ? currentUser.name : '_global', this.value.trim());
+    this.value = '';
+    rSb('');
+  }
+});
+
+rSb();
+
+/* ============ CHAT SYSTEM ============ */
+function addMsgTo(container, text, isUser) {
+  var el = document.createElement('div');
+  el.className = 'msg ' + (isUser ? 'msg-u' : 'msg-b');
+  var avCol = isUser && currentUser ? currentUser.color : '#1B1B1B';
+  var avInit = isUser && currentUser ? currentUser.init : 'NI';
+  var avCls = isUser ? 'm-av-u' : 'm-av-b';
+  el.innerHTML = '<div class="m-av ' + avCls + '" style="background:' + avCol + '">' + avInit + '</div><div class="m-body">' + text + '</div>';
+  container.appendChild(el);
+  container.scrollTop = container.scrollHeight;
+}
+
+function addTypingTo(container) {
+  var el = document.createElement('div');
+  el.className = 'msg msg-b'; el.id = 'typ';
+  el.innerHTML = '<div class="m-av m-av-b">NI</div><div class="m-body"><div class="typing"><span></span><span></span><span></span></div></div>';
+  container.appendChild(el);
+  container.scrollTop = container.scrollHeight;
+}
+
+function removeTyping() { var el = document.getElementById('typ'); if (el) el.remove(); }
+
+/* Helper: process a response for any chat surface */
+async function processMsg(text) {
+  if (AI_KEY) {
+    var aiResp = await callClaude(text);
+    return aiResp || getResponse(text);
+  } else {
+    await new Promise(function(r) { setTimeout(r, 400); });
+    return getResponse(text);
+  }
+}
+
+/* Hub chat (primary surface) */
+document.getElementById('wI').addEventListener('keypress', function(e) { if (e.key==='Enter') hubSend(); });
+async function hubSend() {
+  var input = document.getElementById('wI');
+  var text = input.value.trim();
+  if (!text) return;
+  input.value = '';
+  var hc = document.getElementById('hubChat');
+
+  // Handle "remember" commands locally
+  var remMatch = text.match(/^remember\s+(that\s+)?(.+)/i);
+  if (remMatch) {
+    var note = remMatch[2];
+    addMemory(currentUser ? currentUser.name : '_global', note);
+    addMsgTo(hc, text, true);
+    addMsgTo(hc, 'Got it — I\'ll remember that. You can see all saved memories in the Memory tab on the left.', false);
+    saveCurrentThread();
+    if (sbTab === 'memory') rSb('');
+    return;
+  }
+
+  // Handle "forget" / clear memory
+  if (text.match(/^(forget|clear memory|clear all|delete memory)/i)) {
+    var store = loadStore();
+    if (store.memories && currentUser) { store.memories[currentUser.name] = []; saveStore(store); }
+    addMsgTo(hc, text, true);
+    addMsgTo(hc, 'Done — your memories have been cleared.', false);
+    saveCurrentThread();
+    if (sbTab === 'memory') rSb('');
+    return;
+  }
+
+  addMsgTo(hc, text, true);
+  addTypingTo(hc);
+  var resp = await processMsg(text);
+  removeTyping();
+  addMsgTo(hc, resp.chat, false);
+
+  // Save chat to localStorage after every message
+  if (currentUser) saveCurrentThread();
+
+  if (resp.doc) {
+    showDoc(resp.doc);
+    goPage(2);
+    var wc = document.getElementById('chat');
+    addMsgTo(wc, text, true);
+    addMsgTo(wc, resp.chat, false);
+  }
+}
+
+/* ============ AI CONFIG ============ */
+let AI_KEY = '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';
+let conversationHistory = []; // for Claude API context
+
+function buildSystemPrompt() {
+  var clientData = CL.map(function(c) {
+    var info = c.n + ' (' + c.cat + ') — ' + (c.s==='r' ? 'Fully ingested. ' + c.a + ' assets, ' + c.c + ' campaigns. ' + c.sum : 'Drive inventory: ' + (c.fd||0) + ' folders' + (c.ff ? ', ' + c.ff + ' root files' : '') + '.' + (c.f && c.f.length ? ' Folders: ' + c.f.join(', ') + '.' : '') + (c.rf && c.rf.length ? ' Files: ' + c.rf.join(', ') + '.' : '') + ' Needs deep-scan for full asset cataloguing.');
+    return info;
+  }).join('\n');
+  var teamData = TEAM.map(function(t) { return t.name + ' — ' + t.role; }).join('\n');
+  return 'You are Noise Intelligence, the internal AI assistant for Noise Media, a creative agency. You are chatting with ' + (currentUser ? currentUser.name + ' (' + currentUser.role + ')' : 'a team member') + '.\n\nBe conversational, warm, and concise. Answer like a knowledgeable colleague — no bullet points or formal formatting in chat. Keep responses short (1-3 sentences) unless they ask for detail.\n\nYou can answer questions about clients, team, assets, campaigns, and generate documents. When asked to create a document (email, brief, social copy, proposal, cost allocation, report, meeting agenda, presentation/deck/slides), respond with ONLY a JSON object like: {"doc_type":"email","client":"BARBRI","variant":"general"}\nFor presentations, include a topic field: {"doc_type":"presentation","client":"Thortful","topic":"Campaign"}\n\nValid doc_type values: email, brief, social, proposal, cost, report, agenda, presentation\nValid email variants: general, intro, followup, update\n\nFor all other messages, just reply conversationally.\n\nCLIENTS (' + CL.length + '):\n' + clientData + '\n\nTEAM (' + TEAM.length + '):\n' + teamData + '\n\nNoise Media specialises in paid social, content production, and brand storytelling. Services: content strategy, creative production (video, photo, design), paid social management, UGC/influencer, community management.' + getMemoryContext();
+}
+
+async function aiCall(sysPrompt, msgs, maxTok) {
+  var res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': AI_KEY,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true'
+    },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: maxTok || 400,
+      system: sysPrompt,
+      messages: msgs
+    })
+  });
+  var data = await res.json();
+  if (data.content && data.content[0]) return data.content[0].text;
+  return null;
+}
+
+function docWriterPrompt(docType) {
+  var un = currentUser ? currentUser.name : 'Team Member';
+  var ur = currentUser ? currentUser.role : '';
+  var se = currentUser ? currentUser.name.toLowerCase().replace(/\s/g,'.') + '@noisemedia.co.uk' : 'hello@noisemedia.co.uk';
+  var teamInfo = TEAM.map(function(t) { return t.name + ' — ' + t.role; }).join(', ');
+  var base = 'You are a document writer for Noise Media, a creative agency specialising in paid social, content production, and brand storytelling. Write on behalf of ' + un + ' (' + ur + ', email: ' + se + '). Write complete, professional, ready-to-send content — NOT templates with placeholders. Use real names, real details from context. Be warm, professional, and concise.\n\nTeam: ' + teamInfo + '\n\n';
+
+  if (docType === 'email') {
+    return base + 'Write a complete professional email in HTML format. Structure:\n<div style="max-width:640px;margin:0 auto;">\n<div style="background:#F0EFED;padding:16px 20px;border-radius:8px;margin-bottom:20px;font-size:13px;">From/To/Subject/Date header</div>\n<p>Email body paragraphs</p>\n<p>Sign-off with sender name, role, Noise Media</p>\n</div>\n\nFill in ALL fields with real content based on context. If names are mentioned, use them. If a topic is given, write about it. Today is ' + fmtDate() + '. The sender is ' + un + ' (' + ur + ').';
+  }
+  if (docType === 'brief') {
+    return base + 'Write a complete content/creative brief in HTML. Use <h1> for title, <h2> for sections, <table> for structured data. Include: client overview, objectives, target audience, key messages, deliverables, timeline. Fill in real content based on what the user described.';
+  }
+  if (docType === 'social') {
+    return base + 'Write 3 complete, ready-to-post social media captions in HTML. Each post should have: platform, caption text (actual copy, not placeholders), hashtags, and posting time. Use <h2> for each post. Write real engaging copy.';
+  }
+  if (docType === 'proposal') {
+    return base + 'Write a complete agency proposal in HTML. Include: about Noise Media, client needs, proposed services, investment/pricing, timeline, next steps. Use <h1>, <h2>, <table> tags. Write real content.';
+  }
+  if (docType === 'cost') {
+    return base + 'Write a cost allocation/budget breakdown in HTML. Include line items, team hours, rates. Use <h1>, <h2>, <table>. Fill in realistic agency costs.';
+  }
+  if (docType === 'report') {
+    return base + 'Write a campaign performance report in HTML. Include key metrics table, top creative, analysis, recommendations. Use <h1>, <h2>, <table>.';
+  }
+  if (docType === 'agenda') {
+    return base + 'Write a meeting agenda in HTML. Include attendees, timed topics, action items. Use <h1>, <h2>, <table>. Fill in realistic content based on context.';
+  }
+  if (docType === 'presentation') {
+    return base + 'Write presentation content in HTML with branded slides. Start with a dark title slide (background:#1B1B1B, white text, NOISE MEDIA header in red #C73C1E), then content sections with <h2> headers, tables, and a dark closing slide. Write real content — not placeholders.';
+  }
+  return base + 'Write the requested document in HTML format using <h1>, <h2>, <p>, <table> tags. Write real, complete content.';
+}
+
+async function callClaude(userMsg) {
+  conversationHistory.push({ role: 'user', content: userMsg });
+  if (conversationHistory.length > 20) conversationHistory = conversationHistory.slice(-20);
+  try {
+    var reply = await aiCall(buildSystemPrompt(), conversationHistory, 400);
+    if (!reply) return null;
+    conversationHistory.push({ role: 'assistant', content: reply });
+
+    // Check if Claude returned a doc request (JSON)
+    try {
+      var trimmed = reply.trim();
+      if (trimmed.startsWith('{') && trimmed.includes('doc_type')) {
+        var docReq = JSON.parse(trimmed);
+        var dcn = docReq.client || 'Client';
+        var dcc = '';
+        var fcm = CL.find(function(c) { return c.n.toLowerCase() === dcn.toLowerCase(); });
+        if (fcm) { dcn = fcm.n; dcc = fcm.cat || ''; }
+
+        // SECOND CALL: Claude writes the actual document content
+        var writePrompt = docWriterPrompt(docReq.doc_type);
+        var writeMsg = 'Write a ' + docReq.doc_type + ' for ' + dcn + (dcc ? ' (' + dcc + ')' : '') + '. Original request from user: "' + userMsg + '". Return ONLY the HTML content, nothing else.';
+        if (docReq.variant) writeMsg += ' Email type: ' + docReq.variant + '.';
+        if (docReq.topic) writeMsg += ' Topic: ' + docReq.topic + '.';
+
+        var docHtml = await aiCall(writePrompt, [{ role: 'user', content: writeMsg }], 1500);
+
+        // Fallback to template if AI doc generation fails
+        if (!docHtml) {
+          if (docReq.doc_type === 'email') docHtml = buildEmail(dcn, dcc, docReq.variant || 'general');
+          else if (docReq.doc_type === 'brief') docHtml = buildBrief(dcn, dcc || 'TBC');
+          else if (docReq.doc_type === 'social') docHtml = buildSocial(dcn, dcc);
+          else if (docReq.doc_type === 'proposal') docHtml = buildProposal(dcn);
+          else if (docReq.doc_type === 'cost') docHtml = buildCost(dcn);
+          else if (docReq.doc_type === 'report') docHtml = buildReport(dcn);
+          else if (docReq.doc_type === 'agenda') docHtml = buildAgenda(dcn);
+          else if (docReq.doc_type === 'presentation') docHtml = buildPresentation(dcn, dcc, docReq.topic || '');
+        }
+
+        if (docHtml) {
+          var chatMsg = 'Done! I\'ve written a ' + docReq.doc_type + ' for ' + dcn + ' — it\'s in the document panel. Edit and export when ready.';
+          conversationHistory[conversationHistory.length - 1].content = chatMsg;
+          return { chat: chatMsg, doc: docHtml };
+        }
+      }
+    } catch(e) {}
+    return { chat: reply, doc: null };
+  } catch(e) {
+    console.error('Claude API error:', e);
+    return null;
+  }
+}
+
+/* Workspace chat (secondary, for when you're already there) */
+document.getElementById('cI').addEventListener('keypress', function(e) { if (e.key==='Enter') wsSend(); });
+async function wsSend() {
+  var input = document.getElementById('cI');
+  var text = input.value.trim();
+  if (!text) return;
+  input.value = '';
+  var wc = document.getElementById('chat');
+  addMsgTo(wc, text, true);
+  addTypingTo(wc);
+  var resp = await processMsg(text);
+  removeTyping();
+  addMsgTo(wc, resp.chat, false);
+  if (resp.doc) showDoc(resp.doc);
+}
+
+/* ============ DOCUMENT PANEL ============ */
+function showDoc(html) {
+  document.getElementById('docE').style.display = 'none';
+  const dc = document.getElementById('docC');
+  dc.style.display = 'block';
+  dc.innerHTML = html;
+}
+
+function togEdit() {
+  const p = document.getElementById('docP');
+  const on = p.contentEditable === 'true';
+  p.contentEditable = on ? 'false' : 'true';
+  document.getElementById('dtEdit').classList.toggle('active');
+  document.getElementById('dtPrev').classList.toggle('active');
+  if (!on) p.focus();
+}
+
+function copyDoc() {
+  var dc = document.getElementById('docC');
+  if (dc.style.display==='none') return;
+  var r = document.createRange(); r.selectNodeContents(dc);
+  var s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+  document.execCommand('copy'); s.removeAllRanges();
+  alert('Copied to clipboard');
+}
+
+function getDocTitle() {
+  var h1 = document.querySelector('#docC h1');
+  return h1 ? h1.textContent.trim().replace(/[^a-zA-Z0-9\s-]/g,'').substring(0,60) : 'Noise-Intelligence-Doc';
+}
+
+function triggerDownload(blob, filename) {
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+/* PDF Export */
+function exportPDF() {
+  var dc = document.getElementById('docC');
+  if (dc.style.display==='none') { alert('Generate a document first.'); return; }
+  var title = getDocTitle();
+  // Create a clean printable container
+  var wrap = document.createElement('div');
+  wrap.style.cssText = 'position:fixed;top:0;left:0;width:800px;padding:40px;background:white;z-index:9999;font-family:Montserrat,sans-serif;font-size:13px;line-height:1.7;color:#1B1B1B;';
+  wrap.innerHTML = dc.innerHTML;
+  document.body.appendChild(wrap);
+  html2canvas(wrap, { scale: 2, useCORS: true }).then(function(canvas) {
+    document.body.removeChild(wrap);
+    var pdf = new jspdf.jsPDF('p', 'mm', 'a4');
+    var imgW = 210; // A4 width in mm
+    var imgH = canvas.height * imgW / canvas.width;
+    var pageH = 297;
+    var y = 0;
+    while (y < imgH) {
+      if (y > 0) pdf.addPage();
+      pdf.addImage(canvas.toDataURL('image/jpeg', 0.95), 'JPEG', 0, -y, imgW, imgH);
+      y += pageH;
+    }
+    pdf.save(title + '.pdf');
+  });
+}
+
+/* DOCX Export (HTML blob method — opens in Word) */
+function exportDOCX() {
+  var dc = document.getElementById('docC');
+  if (dc.style.display==='none') { alert('Generate a document first.'); return; }
+  var title = getDocTitle();
+  var html = '<!DOCTYPE html><html><head><meta charset="utf-8"><style>body{font-family:Calibri,sans-serif;font-size:11pt;line-height:1.6;color:#1B1B1B;max-width:700px;margin:0 auto;padding:20px;}h1{font-size:18pt;margin-bottom:4px;}h2{font-size:14pt;margin-top:16px;border-bottom:1px solid #ddd;padding-bottom:4px;}h3{font-size:12pt;}table{width:100%;border-collapse:collapse;margin:10px 0;}th,td{border:1px solid #ccc;padding:6px 10px;text-align:left;font-size:10pt;}th{background:#f5f5f5;font-weight:bold;}.dm{color:#888;font-size:9pt;margin-bottom:12px;}</style></head><body>' + dc.innerHTML + '</body></html>';
+  var blob = new Blob([html], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+  triggerDownload(blob, title + '.docx');
+}
+
+/* XLSX Export (extracts tables from document) */
+function exportXLSX() {
+  var dc = document.getElementById('docC');
+  if (dc.style.display==='none') { alert('Generate a document first.'); return; }
+  var title = getDocTitle();
+  var tables = dc.querySelectorAll('table');
+  if (tables.length === 0) { alert('No tables found in this document to export to spreadsheet.'); return; }
+  var wb = XLSX.utils.book_new();
+  tables.forEach(function(table, i) {
+    var ws = XLSX.utils.table_to_sheet(table);
+    XLSX.utils.book_append_sheet(wb, ws, 'Sheet' + (i + 1));
+  });
+  XLSX.writeFile(wb, title + '.xlsx');
+}
+
+/* PPTX Export */
+function exportPPTX() {
+  var dc = document.getElementById('docC');
+  if (dc.style.display==='none') { alert('Generate a document first.'); return; }
+  var title = getDocTitle();
+  var pptx = new PptxGenJS();
+  pptx.author = currentUser ? currentUser.name : 'Noise Intelligence';
+  pptx.company = 'Noise Media';
+  pptx.title = title;
+
+  // Title slide
+  var slide1 = pptx.addSlide();
+  slide1.background = { color: '1B1B1B' };
+  var h1 = dc.querySelector('h1');
+  slide1.addText(h1 ? h1.textContent : title, { x: 0.8, y: 1.5, w: 8.4, h: 1.5, fontSize: 28, color: 'FFFFFF', fontFace: 'Calibri', bold: true });
+  var dm = dc.querySelector('.dm');
+  if (dm) slide1.addText(dm.textContent, { x: 0.8, y: 3.0, w: 8.4, h: 0.6, fontSize: 12, color: '999999', fontFace: 'Calibri' });
+  slide1.addText('NOISE MEDIA', { x: 0.8, y: 4.5, w: 3, h: 0.4, fontSize: 10, color: 'C73C1E', fontFace: 'Calibri', bold: true });
+
+  // Content slides — one per h2 section
+  var sections = dc.querySelectorAll('h2');
+  sections.forEach(function(h2) {
+    var slide = pptx.addSlide();
+    slide.addText(h2.textContent, { x: 0.5, y: 0.3, w: 9, h: 0.7, fontSize: 22, color: '1B1B1B', fontFace: 'Calibri', bold: true });
+    // Gather content until next h2
+    var content = [];
+    var el = h2.nextElementSibling;
+    while (el && el.tagName !== 'H2') {
+      if (el.tagName === 'TABLE') {
+        var rows = [];
+        el.querySelectorAll('tr').forEach(function(tr) {
+          var cells = [];
+          tr.querySelectorAll('th,td').forEach(function(td) { cells.push({ text: td.textContent, options: { fontSize: 9, color: '333333', fontFace: 'Calibri', bold: td.tagName === 'TH', fill: td.tagName === 'TH' ? { color: 'F0F0F0' } : undefined } }); });
+          rows.push(cells);
+        });
+        if (rows.length > 0) {
+          slide.addTable(rows, { x: 0.5, y: 1.2, w: 9, colW: Array(rows[0].length).fill(9/rows[0].length), border: { pt: 0.5, color: 'CCCCCC' }, autoPage: true });
+        }
+      } else {
+        content.push(el.textContent);
+      }
+      el = el.nextElementSibling;
+    }
+    if (content.length > 0) {
+      slide.addText(content.join('\n'), { x: 0.5, y: 1.2, w: 9, h: 4, fontSize: 11, color: '444444', fontFace: 'Calibri', valign: 'top', wrap: true });
+    }
+  });
+
+  pptx.writeFile({ fileName: title + '.pptx' });
+}
+
+/* ============ RESPONSE ENGINE ============ */
+function uName() { return currentUser ? currentUser.name.split(' ')[0] : 'there'; }
+function fmtDate() { return new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'}); }
+function findClient(ql) { return CL.find(c => ql.includes(c.n.toLowerCase())); }
+function sn() { return currentUser ? currentUser.name : '[Your Name]'; }
+function sr() { return currentUser ? currentUser.role : ''; }
+
+/* --- Document builders (keep these separate so chat responses stay clean) --- */
+function buildBrief(cn, cc) {
+  const d = fmtDate();
+  return `<h1>${cn} — Content Brief</h1>
+<div class="dm">Prepared by ${sn()} &middot; ${d} &middot; Noise Media</div>
+<h2>1. Overview</h2>
+<p><strong>Client:</strong> ${cn}<br><strong>Category:</strong> ${cc}<br><strong>Brief Type:</strong> Content Brief<br><strong>Prepared by:</strong> ${sn()} (${sr()})</p>
+<h2>2. Objectives</h2>
+<ul><li>Drive awareness and consideration through targeted paid social content</li><li>Increase engagement rate by 15% vs. previous campaign period</li><li>Generate high-quality UGC-style assets for organic and paid distribution</li></ul>
+<h2>3. Target Audience</h2>
+<table><tr><th>Segment</th><th>Demographics</th><th>Interests</th><th>Platform</th></tr>
+<tr><td>Primary</td><td>25-40, M/F</td><td>Category enthusiasts</td><td>Instagram, TikTok</td></tr>
+<tr><td>Secondary</td><td>18-24, M/F</td><td>Discovery-driven</td><td>TikTok, YouTube</td></tr></table>
+<h2>4. Key Messages</h2>
+<ul><li>Hero message: [To be defined with client]</li><li>Supporting proof points from existing asset library</li><li>CTA: Drive to product page / signup</li></ul>
+<h2>5. Deliverables</h2>
+<table><tr><th>Asset</th><th>Format</th><th>Qty</th><th>Owner</th></tr>
+<tr><td>Video ads</td><td>9:16 + 1:1</td><td>6</td><td>Luke / Adam</td></tr>
+<tr><td>Static carousels</td><td>1080x1080</td><td>4</td><td>Steph / Georgie</td></tr>
+<tr><td>UGC clips</td><td>9:16</td><td>3</td><td>Leah</td></tr></table>
+<h2>6. Timeline</h2>
+<table><tr><th>Phase</th><th>Dates</th><th>Notes</th></tr>
+<tr><td>Brief sign-off</td><td>Week 1</td><td>Client approval</td></tr>
+<tr><td>Production</td><td>Weeks 2-3</td><td>Shoot + post</td></tr>
+<tr><td>Review</td><td>Week 4</td><td>Max 2 rounds</td></tr>
+<tr><td>Go live</td><td>Week 5</td><td>Paid + organic</td></tr></table>
+<h2>7. Budget</h2><p>To be confirmed with ${cn} based on campaign scope.</p>
+<h2>8. Approvals</h2>
+<table><tr><th>Role</th><th>Name</th><th>Status</th></tr>
+<tr><td>Account Lead</td><td>Beau / Louise</td><td>Pending</td></tr>
+<tr><td>Creative Director</td><td>Beau</td><td>Pending</td></tr>
+<tr><td>Client</td><td>${cn}</td><td>Pending</td></tr></table>`;
+}
+
+function buildEmail(cn, cc, type) {
+  const d = fmtDate();
+  let subj, body;
+  if (type==='intro') {
+    subj = 'Introduction — Noise Media × ' + cn;
+    body = '<p>Hi [Contact Name],</p><p>My name is ' + sn() + ' and I\'m the ' + sr() + ' at Noise Media. I\'m thrilled to be working with ' + cn + ' and wanted to introduce myself as your point of contact.</p><p>We\'ve been doing some initial research into your brand and we\'re excited about the creative possibilities. I\'d love to schedule a quick call to discuss your key priorities, any upcoming campaigns, brand guidelines, and preferred ways of working.</p><p>Please feel free to share any materials you\'d like us to review ahead of our call.</p><p>Looking forward to getting started!</p>';
+  } else if (type==='followup') {
+    subj = 'Following Up — ' + cn + ' Campaign Progress';
+    body = '<p>Hi [Contact Name],</p><p>Hope you\'re well! Just wanted to touch base regarding our current workstream for ' + cn + '.</p><p>Here\'s where things stand:</p><table><tr><th>Item</th><th>Status</th><th>Next Step</th></tr><tr><td>Creative assets</td><td>In progress</td><td>First drafts ready for review by [date]</td></tr><tr><td>Campaign strategy</td><td>Approved</td><td>Build out in Ads Manager</td></tr><tr><td>Content calendar</td><td>Draft</td><td>Awaiting client sign-off</td></tr></table><p>Happy to jump on a quick call if easier — just let me know what works.</p>';
+  } else if (type==='update') {
+    subj = cn + ' — Campaign Status Update';
+    body = '<p>Hi [Contact Name],</p><p>Please find below your latest campaign status update for ' + cn + '.</p><table><tr><th>Campaign</th><th>Platform</th><th>Status</th></tr><tr><td>Awareness — Spring</td><td>Meta / TikTok</td><td>Live</td></tr><tr><td>Retargeting</td><td>Meta</td><td>In review</td></tr><tr><td>UGC Push</td><td>TikTok / IG Reels</td><td>Production</td></tr></table><p>Let me know if you have any questions.</p>';
+  } else {
+    subj = cn + (cc ? ' — ' + cc + ' | ' : ' — ') + 'Noise Media';
+    body = '<p>Hi [Contact Name],</p><p>I hope you\'re having a great week. I\'m reaching out regarding ' + cn + '.</p><p>[Your message here]</p><p>Could we schedule a quick call to discuss next steps? Happy to work around your availability.</p><p>Looking forward to hearing from you.</p>';
+  }
+  var se = currentUser ? currentUser.name.toLowerCase().replace(/\s/g,'.') + '@noisemedia.co.uk' : '[you]@noisemedia.co.uk';
+  return '<div style="max-width:640px;margin:0 auto;"><div style="background:var(--surface2);padding:16px 20px;border-radius:8px;margin-bottom:20px;font-size:13px;"><div><strong>From:</strong> ' + sn() + ' &lt;' + se + '&gt;</div><div><strong>To:</strong> [Contact Name] &lt;[email]&gt;</div><div><strong>Subject:</strong> ' + subj + '</div><div><strong>Date:</strong> ' + d + '</div></div>' + body + '<p>Best regards,<br><strong>' + sn() + '</strong><br>' + sr() + '<br>Noise Media</p></div>';
+}
+
+function buildSocial(cn, cc) {
+  const d = fmtDate();
+  return '<h1>' + cn + ' — Social Media Copy</h1><div class="dm">Prepared by ' + sn() + ' &middot; ' + d + ' &middot; Noise Media</div><h2>Post 1 — Hero / Awareness</h2><p><strong>Platform:</strong> Instagram Feed + Stories</p><p><strong>Caption:</strong> [Hero message about ' + cn + '. Lead with value, not sell. 1-2 sentences max.]</p><p>[Supporting line + CTA]</p><p><em>#' + cn.replace(/\s/g,'') + ' #NoiseMade</em></p><h2>Post 2 — Educational</h2><p><strong>Platform:</strong> TikTok / Reels</p><p><strong>Hook:</strong> "Did you know [surprising fact about ' + (cc||'the brand') + ']?"</p><p>[Teach something, tie back to product, CTA: Save this]</p><h2>Post 3 — UGC / Social Proof</h2><p><strong>Platform:</strong> IG / TikTok</p><p>[Real customer words. Brand response. Soft CTA.]</p><h2>Scheduling</h2><table><tr><th>Post</th><th>Day</th><th>Time</th></tr><tr><td>1</td><td>Tue/Thu</td><td>11-13:00</td></tr><tr><td>2</td><td>Wed/Fri</td><td>18-20:00</td></tr><tr><td>3</td><td>Sat</td><td>10-12:00</td></tr></table>';
+}
+
+function buildProposal(cn) {
+  const d = fmtDate();
+  return '<h1>Proposal — Noise Media × ' + cn + '</h1><div class="dm">Prepared by ' + sn() + ' &middot; ' + d + '</div><h2>1. About Noise Media</h2><p>Creative agency specialising in paid social, content production, and brand storytelling.</p><h2>2. Your Needs</h2><p>[To be completed after discovery call]</p><h2>3. Services</h2><table><tr><th>Service</th><th>Description</th></tr><tr><td>Content Strategy</td><td>Audience research, platform strategy, content pillars</td></tr><tr><td>Creative Production</td><td>Video, photography, design</td></tr><tr><td>Paid Social</td><td>Campaign setup, optimisation, reporting</td></tr><tr><td>UGC / Influencer</td><td>Creator sourcing, briefing, content rights</td></tr></table><h2>4. Investment</h2><table><tr><th>Package</th><th>Scope</th><th>Monthly</th></tr><tr><td>Starter</td><td>Strategy + 8 posts + reporting</td><td>£2,500</td></tr><tr><td>Growth</td><td>+ paid media mgmt + 16 posts</td><td>£5,000</td></tr><tr><td>Full Service</td><td>All services + video + UGC</td><td>£8,500+</td></tr></table><p><em>Media spend additional. Prices ex. VAT.</em></p><h2>5. Next Steps</h2><ol><li>Discovery call</li><li>Tailored scope & timeline</li><li>Contract & onboarding</li><li>Kick-off</li></ol>';
+}
+
+function buildCost(cn) {
+  const d = fmtDate();
+  return '<h1>' + cn + ' — Cost Allocation</h1><div class="dm">Prepared by ' + sn() + ' &middot; ' + d + '</div><h2>Cost Breakdown</h2><table><tr><th>Line Item</th><th>Cost</th></tr><tr><td>Strategy & Planning</td><td>£1,200</td></tr><tr><td>Creative Production</td><td>£2,500</td></tr><tr><td>UGC Management</td><td>£800</td></tr><tr><td>Paid Media Mgmt</td><td>£1,500</td></tr><tr><td>Media Spend</td><td>TBC</td></tr></table><h3>Total Agency Fee: £6,000 + media</h3><h2>Team Hours</h2><table><tr><th>Person</th><th>Role</th><th>Hours</th><th>Rate</th></tr><tr><td>Sam</td><td>Operations</td><td>4</td><td>£150/hr</td></tr><tr><td>Mike</td><td>Production</td><td>8</td><td>£125/hr</td></tr><tr><td>Adam/Luke</td><td>Motion</td><td>16</td><td>£100/hr</td></tr><tr><td>Dan</td><td>Paid Media</td><td>12</td><td>£100/hr</td></tr><tr><td>Louise</td><td>Account</td><td>6</td><td>£100/hr</td></tr></table>';
+}
+
+function buildReport(cn) {
+  const d = fmtDate();
+  return '<h1>' + cn + ' — Performance Report</h1><div class="dm">Prepared by ' + sn() + ' &middot; ' + d + '</div><h2>Key Metrics</h2><table><tr><th>Metric</th><th>This Period</th><th>Previous</th><th>Change</th></tr><tr><td>Impressions</td><td>—</td><td>—</td><td>—</td></tr><tr><td>Reach</td><td>—</td><td>—</td><td>—</td></tr><tr><td>Engagement Rate</td><td>—</td><td>—</td><td>—</td></tr><tr><td>Link Clicks</td><td>—</td><td>—</td><td>—</td></tr><tr><td>CPC</td><td>—</td><td>—</td><td>—</td></tr></table><h2>Top Creative</h2><p>[Insert top 3 creatives with performance data]</p><h2>Recommendations</h2><ul><li>Scale top-performing ad sets</li><li>Test new creative formats</li><li>Review audience targeting</li></ul>';
+}
+
+function buildAgenda(cn) {
+  const d = fmtDate();
+  return '<h1>' + cn + ' — Meeting Agenda</h1><div class="dm">' + sn() + ' &middot; ' + d + '</div><table><tr><th>Detail</th><th></th></tr><tr><td>Date</td><td>[Date & Time]</td></tr><tr><td>Attendees</td><td>' + sn() + ' (Noise), [Client]</td></tr><tr><td>Duration</td><td>30 min</td></tr></table><h2>Agenda</h2><table><tr><th>#</th><th>Topic</th><th>Owner</th><th>Time</th></tr><tr><td>1</td><td>Welcome</td><td>' + sn() + '</td><td>2 min</td></tr><tr><td>2</td><td>Campaign performance</td><td>Dan</td><td>5 min</td></tr><tr><td>3</td><td>Creative update</td><td>Beau</td><td>5 min</td></tr><tr><td>4</td><td>Content calendar</td><td>' + sn() + '</td><td>8 min</td></tr><tr><td>5</td><td>Client feedback</td><td>[Client]</td><td>5 min</td></tr><tr><td>6</td><td>Actions & next steps</td><td>All</td><td>5 min</td></tr></table><h2>Action Items</h2><table><tr><th>Action</th><th>Owner</th><th>Due</th></tr><tr><td>[To be completed]</td><td></td><td></td></tr></table>';
+}
+
+function buildPresentation(cn, cc, topic) {
+  const d = fmtDate();
+  const t = topic || 'Campaign';
+  return '<div style="font-family:Montserrat,sans-serif;">' +
+    '<div style="background:#1B1B1B;color:white;padding:60px 48px;margin:-20px -20px 24px -20px;border-radius:4px;">' +
+      '<div style="font-family:Reddit Mono,monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#C73C1E;margin-bottom:12px;">NOISE MEDIA</div>' +
+      '<h1 style="font-size:32px;font-weight:700;margin:0 0 8px 0;color:white;">' + cn + '</h1>' +
+      '<p style="font-size:18px;font-weight:300;margin:0 0 24px 0;color:rgba(255,255,255,0.7);">' + t + ' Presentation</p>' +
+      '<div style="font-size:12px;color:rgba(255,255,255,0.4);">Prepared by ' + sn() + ' &middot; ' + d + '</div>' +
+    '</div>' +
+    '<h2>Agenda</h2>' +
+    '<table><tr><th>#</th><th>Section</th></tr>' +
+    '<tr><td>1</td><td>Overview & Objectives</td></tr>' +
+    '<tr><td>2</td><td>Strategy & Approach</td></tr>' +
+    '<tr><td>3</td><td>Creative Direction</td></tr>' +
+    '<tr><td>4</td><td>Channel Plan</td></tr>' +
+    '<tr><td>5</td><td>Timeline & Budget</td></tr>' +
+    '<tr><td>6</td><td>Next Steps</td></tr></table>' +
+    '<h2>1. Overview & Objectives</h2>' +
+    '<p><strong>Client:</strong> ' + cn + (cc ? ' (' + cc + ')' : '') + '</p>' +
+    '<p><strong>Objective:</strong> [Define the primary campaign/project objective]</p>' +
+    '<p><strong>KPIs:</strong> [Reach, Engagement Rate, Conversions, ROAS — set targets]</p>' +
+    '<h2>2. Strategy & Approach</h2>' +
+    '<p><strong>Target Audience:</strong> [Demographics, interests, behaviours]</p>' +
+    '<p><strong>Key Insight:</strong> [The consumer truth driving this campaign]</p>' +
+    '<p><strong>Strategic Approach:</strong> [How we plan to achieve the objectives]</p>' +
+    '<h2>3. Creative Direction</h2>' +
+    '<p><strong>Concept:</strong> [Campaign concept / big idea]</p>' +
+    '<p><strong>Tone of Voice:</strong> [Brand voice direction]</p>' +
+    '<p><strong>Content Formats:</strong></p>' +
+    '<table><tr><th>Format</th><th>Platform</th><th>Quantity</th></tr>' +
+    '<tr><td>Short-form Video (Reels/TikTok)</td><td>Instagram, TikTok</td><td>—</td></tr>' +
+    '<tr><td>Static Posts</td><td>Instagram, Facebook</td><td>—</td></tr>' +
+    '<tr><td>Stories</td><td>Instagram</td><td>—</td></tr>' +
+    '<tr><td>UGC Content</td><td>All platforms</td><td>—</td></tr></table>' +
+    '<h2>4. Channel Plan</h2>' +
+    '<table><tr><th>Channel</th><th>Role</th><th>Budget Split</th></tr>' +
+    '<tr><td>Instagram (Organic)</td><td>Brand awareness & community</td><td>—</td></tr>' +
+    '<tr><td>Instagram (Paid)</td><td>Reach & conversions</td><td>—</td></tr>' +
+    '<tr><td>TikTok</td><td>Discovery & engagement</td><td>—</td></tr>' +
+    '<tr><td>Facebook</td><td>Retargeting & conversions</td><td>—</td></tr></table>' +
+    '<h2>5. Timeline & Budget</h2>' +
+    '<table><tr><th>Phase</th><th>Dates</th><th>Activity</th></tr>' +
+    '<tr><td>Phase 1: Pre-launch</td><td>[Dates]</td><td>Strategy, creative production, asset prep</td></tr>' +
+    '<tr><td>Phase 2: Launch</td><td>[Dates]</td><td>Content rollout, paid activation</td></tr>' +
+    '<tr><td>Phase 3: Optimise</td><td>[Dates]</td><td>Performance review, creative refresh</td></tr>' +
+    '<tr><td>Phase 4: Report</td><td>[Dates]</td><td>Wrap-up report, learnings</td></tr></table>' +
+    '<p><strong>Total Budget:</strong> £[TBC] (Agency fee + Media spend)</p>' +
+    '<h2>6. Next Steps</h2>' +
+    '<table><tr><th>Action</th><th>Owner</th><th>Due</th></tr>' +
+    '<tr><td>Client approval on strategy</td><td>[Client]</td><td>[Date]</td></tr>' +
+    '<tr><td>Creative production begins</td><td>Noise</td><td>[Date]</td></tr>' +
+    '<tr><td>Content review & sign-off</td><td>[Client]</td><td>[Date]</td></tr>' +
+    '<tr><td>Campaign go-live</td><td>Noise</td><td>[Date]</td></tr></table>' +
+    '<div style="background:#1B1B1B;color:white;padding:40px 48px;margin:32px -20px -20px -20px;border-radius:4px;text-align:center;">' +
+      '<div style="font-family:Reddit Mono,monospace;font-size:18px;font-weight:700;letter-spacing:2px;">NOISE<span style="color:#C73C1E;">.</span></div>' +
+      '<div style="font-size:12px;color:rgba(255,255,255,0.4);margin-top:8px;">noisemedia.co.uk</div>' +
+    '</div>' +
+  '</div>';
+}
+
+/* --- Main response function --- */
+function getResponse(q) {
+  const ql = q.toLowerCase();
+  const un = uName();
+  const cm = findClient(ql);
+  const cn = cm ? cm.n : 'Client';
+  const cc = cm ? cm.cat : '';
+
+  // ===== DOCUMENT GENERATORS =====
+  if (ql.match(/generate.*brief|create.*brief|write.*brief|content brief|creative brief/))
+    return { chat: 'I\'ve put together a content brief for <strong>' + cn + '</strong> in the document panel. You can edit it directly and export when ready.', doc: buildBrief(cn, cc||'TBC') };
+
+  if (ql.match(/email|write.*to\s|send.*to\s|draft.*to\s|message.*to/)) {
+    const type = ql.match(/intro|onboard|welcome/) ? 'intro' : ql.match(/follow.?up|check.?in/) ? 'followup' : ql.match(/update|status|progress/) ? 'update' : 'general';
+    return { chat: 'I\'ve drafted an email for <strong>' + cn + '</strong> in the document panel. Edit the bits in brackets and you\'re good to go.', doc: buildEmail(cn, cc, type) };
+  }
+
+  if (ql.match(/social|caption|post.*for|instagram|tiktok|reel|content.*cal|copy.*for/))
+    return { chat: 'Social copy for <strong>' + cn + '</strong> is in the doc panel — 3 posts covering awareness, education, and UGC with scheduling suggestions.', doc: buildSocial(cn, cc) };
+
+  if (ql.match(/presentation|ppt|pptx|slide|deck|pitch.*deck/))
+    return { chat: 'Presentation for <strong>' + cn + '</strong> is ready in the document panel — full Noise-branded deck with strategy, creative, channel plan, and timeline. Edit the content, then hit .pptx to export.', doc: buildPresentation(cn, cc) };
+
+  if (ql.match(/proposal|pitch|scope.*work|sow/))
+    return { chat: 'Proposal for <strong>' + cn + '</strong> is ready — includes services, pricing tiers, and next steps. Edit and export to share.', doc: buildProposal(cn) };
+
+  if (ql.match(/agenda|meeting.*note|call.*prep|kick.?off/))
+    return { chat: 'Meeting agenda for <strong>' + cn + '</strong> is in the document panel. Add the date and any specific talking points.', doc: buildAgenda(cn) };
+
+  if (ql.match(/cost.*alloc|budget.*estimate|cost.*estimate|budget.*break|pricing|quote/))
+    return { chat: 'Cost allocation for <strong>' + cn + '</strong> is in the doc panel with team rates and a full breakdown.', doc: buildCost(cn) };
+
+  if (ql.match(/report|quarterly|monthly report|performance/))
+    return { chat: 'Report template for <strong>' + cn + '</strong> is ready. Fill in the metrics from your campaign data and export.', doc: buildReport(cn) };
+
+  // ===== CONVERSATIONAL Q&A =====
+  const rdy = CL.filter(c=>c.s==='r'), inv = CL.filter(c=>c.s==='i');
+  const totalAssets = rdy.reduce((a,c)=>a+(c.a||0),0);
+
+  // --- Greetings & small talk (check FIRST before anything else) ---
+  if (ql.match(/^(hi|hello|hey|hiya|morning|afternoon|evening|yo|sup|what'?s up|howdy|how are you|how's it going|i want to talk|talk to you|chat|just checking)/))
+    return { chat: 'Hey ' + un + '! What are you working on today?', doc: null };
+
+  if (ql.match(/^(thanks|thank you|cheers|ta|nice one|perfect|great|awesome|brilliant|cool|lovely|sorted)/))
+    return { chat: 'Anytime! What else can I help with?', doc: null };
+
+  if (ql.match(/^(bye|see you|later|gotta go|logging off)/))
+    return { chat: 'See you later, ' + un + '!', doc: null };
+
+  if (ql.match(/good morning|good afternoon|good evening/))
+    return { chat: 'Good ' + (new Date().getHours() < 12 ? 'morning' : new Date().getHours() < 17 ? 'afternoon' : 'evening') + ', ' + un + '! What do you need?', doc: null };
+
+  if (ql.match(/how are you|you alright|you good|you ok/))
+    return { chat: 'All good here! Ready to help — what do you need?', doc: null };
+
+  if (ql.match(/what.*your name|who are you|what are you/))
+    return { chat: 'I\'m Noise Intelligence — the agency knowledge hub. I know all ' + CL.length + ' clients, every asset we\'ve catalogued, and the full team. Ask me anything or tell me to create a document.', doc: null };
+
+  // --- Help ---
+  if (ql.match(/help|what can you|what do you do|capabilities|what.*you.*know/))
+    return { chat: 'I know all ' + CL.length + ' of our clients, their ' + totalAssets + '+ catalogued assets, campaign history, and Drive folders. I also know the full team. You can ask me things like "what do we have for Davines?" or "who handles motion?" — or tell me to write an email, brief, social copy, presentation, report, proposal, cost allocation, or meeting agenda for any client.', doc: null };
+
+  // --- Client count ---
+  if (ql.match(/how many.*client|total.*client|client.*count/))
+    return { chat: 'We\'ve got <strong>' + CL.length + ' active clients</strong>. ' + rdy.length + ' are fully ingested with ' + totalAssets + ' assets catalogued, and ' + inv.length + ' have been inventoried from Google Drive but not deep-scanned yet.', doc: null };
+
+  // --- List clients ---
+  if (ql.match(/all client|show.*client|list.*client|portfolio|our client|which client/)) {
+    return { chat: '<strong>Fully ingested (' + rdy.length + '):</strong> ' + rdy.map(c=>c.n).join(', ') + '.<br><br><strong>Inventoried (' + inv.length + '):</strong> ' + inv.map(c=>c.n).join(', ') + '.', doc: null };
+  }
+
+  // --- Asset questions ---
+  if (ql.match(/how many.*asset|total.*asset|asset.*count|what assets|what.*do we have/)) {
+    if (cm && cm.s==='r') return { chat: cm.n + ' has <strong>' + cm.a + ' assets</strong> across ' + cm.c + ' campaigns. ' + cm.sum, doc: null };
+    if (cm && cm.s==='i') return { chat: cm.n + ' has been inventoried from Drive but not deep-scanned yet, so I don\'t have individual file counts. I can see ' + (cm.f?cm.f.length:0) + ' folders though.', doc: null };
+    return { chat: 'Across all ingested clients we have <strong>' + totalAssets + ' assets</strong>. The biggest are BARBRI (200+), Brothers Cider (196), Thortful (95), Davines (78), and Boodle (46).', doc: null };
+  }
+
+  // --- Campaign questions ---
+  if (ql.match(/campaign/)) {
+    if (cm && cm.s==='r') return { chat: cm.n + ' has ' + cm.c + ' campaigns with ' + cm.a + ' assets total. ' + cm.sum, doc: null };
+    return { chat: 'Campaign breakdown: ' + rdy.filter(c=>c.c>0).map(c => c.n + ' (' + c.c + ')').join(', ') + '. That\'s ' + rdy.reduce((a,c)=>a+(c.c||0),0) + ' campaigns total across ingested clients.', doc: null };
+  }
+
+  // --- Team questions ---
+  if (ql.match(/team|who.*work|staff|employee|who is|who'?s|who handles|who does/)) {
+    const tm = TEAM.find(t => ql.includes(t.name.toLowerCase()));
+    if (tm) return { chat: tm.name + ' is our ' + tm.role + '.', doc: null };
+    if (ql.match(/motion|video|animation/)) return { chat: 'Motion is handled by Adam (Head of Motion), Luke (Motion Designer), and Leah (Motion Graphic Designer).', doc: null };
+    if (ql.match(/design|creative/)) return { chat: 'Creative team: Beau (Creative Director), Steph (Senior Designer), Georgie (Junior Creative), and Leah (Motion Graphic Designer).', doc: null };
+    if (ql.match(/account|client.*manage/)) return { chat: 'Louise is Head of Accounts, and Beau handles creative direction across accounts.', doc: null };
+    if (ql.match(/paid|media|ads/)) return { chat: 'Dan handles Paid Media.', doc: null };
+    if (ql.match(/production|produce/)) return { chat: 'Mike is Head of Production.', doc: null };
+    if (ql.match(/operations|ops/)) return { chat: 'Sam is Head of Operations.', doc: null };
+    if (ql.match(/social/)) return { chat: 'Obenewa Adu is our Social Media Intern.', doc: null };
+    if (ql.match(/founder|boss|owner|ceo|lead/)) return { chat: 'Anthony and Joe are the Co-Founders of Noise Media.', doc: null };
+    return { chat: 'The team (' + TEAM.length + '): ' + TEAM.map(t => t.name + ' (' + t.role + ')').join(', ') + '.', doc: null };
+  }
+
+  // --- About Noise ---
+  if (ql.match(/what do we do|about noise|what.*noise.*do|our services|what services|what.*we.*offer/))
+    return { chat: 'Noise Media is a creative agency specialising in paid social, content production, and brand storytelling. We do content strategy, creative production, paid social management, UGC/influencer campaigns, and community management — currently working with ' + CL.length + ' clients across beauty, drinks, fintech, hospitality, and more.', doc: null };
+
+  // --- Category / sector ---
+  if (ql.match(/beauty|drinks|fintech|hospitality|food|fashion|tech|energy|entertainment|luxury|automotive|travel|storage|skincare|haircare/)) {
+    var catMatch = ql.match(/beauty|drinks|fintech|hospitality|food|fashion|tech|energy|entertainment|luxury|automotive|travel|storage|skincare|haircare/);
+    if (catMatch) {
+      var cats = CL.filter(c => c.cat && c.cat.toLowerCase().includes(catMatch[0]));
+      if (cats.length) return { chat: cats.length + ' client' + (cats.length>1?'s':'') + ' in that space: ' + cats.map(c=>c.n + ' (' + c.cat + ')').join(', ') + '.', doc: null };
+    }
+  }
+
+  // --- Specific client (ready) ---
+  if (cm && cm.s==='r')
+    return { chat: '<strong>' + cm.n + '</strong> — ' + cm.cat + '. ' + cm.sum + '<br><br>' + cm.a + ' assets, ' + cm.c + ' campaigns. Want me to create something for them?', doc: null };
+
+  // --- Specific client (inventoried) ---
+  if (cm && cm.s==='i') {
+    var r = '<strong>' + cm.n + '</strong> — ' + cm.cat + '. Inventoried from Drive';
+    if (cm.f && cm.f.length) r += ' (' + cm.f.length + ' folders: ' + cm.f.join(', ') + ')';
+    r += '. Not fully ingested yet — I have the folder structure but not individual files.';
+    return { chat: r, doc: null };
+  }
+
+  // --- Vague / conversational fallbacks ---
+  if (ql.match(/i need|can you|could you|i want|please|would you/))
+    return { chat: 'Of course — what do you need? If it\'s about a specific client, just mention their name and I\'ll pull up everything I know.', doc: null };
+
+  if (ql.match(/idea|suggest|recommend|what should/))
+    return { chat: 'What client or project are you thinking about? I can pull up their assets and campaigns, or help you draft something.', doc: null };
+
+  if (ql.match(/busy|deadline|stressed|rush|urgent/))
+    return { chat: 'Let\'s get it done — which client and what do you need? I can generate docs fast.', doc: null };
+
+  // --- True fallback ---
+  return { chat: 'Not sure I caught that, ' + un + '. Try mentioning a client name, or ask me something like "what assets do we have for Davines?" or "write an email to BARBRI."', doc: null };
+}
+
+/* ============ SETTINGS MODAL ============ */
+function showSettings() {
+  var existing = document.querySelector('.modal-bg');
+  if (existing) existing.remove();
+  var bg = document.createElement('div');
+  bg.className = 'modal-bg';
+  bg.onclick = function(e) { if (e.target === bg) bg.remove(); };
+  bg.innerHTML = '<div class="modal"><h3>AI Settings</h3>' +
+    '<p>Connect a Claude API key to enable fully conversational AI. Without it, the bot uses a built-in keyword engine (limited).</p>' +
+    '<input type="password" id="apiKeyInput" placeholder="sk-ant-api03-..." value="' + (AI_KEY || '') + '">' +
+    '<p style="font-size:11px;color:var(--text-muted)">Your key stays in this browser session only — it\'s never stored or sent anywhere except Anthropic\'s API.</p>' +
+    '<div class="modal-btns">' +
+    '<button class="btn-cancel" onclick="this.closest(\'.modal-bg\').remove()">Cancel</button>' +
+    '<button class="btn-save" onclick="saveApiKey()">Save</button>' +
+    '</div></div>';
+  document.body.appendChild(bg);
+}
+
+function saveApiKey() {
+  var key = document.getElementById('apiKeyInput').value.trim();
+  AI_KEY = key;
+  conversationHistory = [];
+  document.querySelector('.modal-bg').remove();
+  // Update status indicator
+  updateAiBadge();
+}
+
+function updateAiBadge() {
+  var el = document.getElementById('aiBadge');
+  if (!el) {
+    el = document.createElement('span');
+    el.id = 'aiBadge';
+    document.querySelector('.header-title').appendChild(el);
+  }
+  if (AI_KEY) {
+    el.className = 'ai-badge ai-on';
+    el.textContent = 'AI';
+  } else {
+    el.className = 'ai-badge ai-off';
+    el.textContent = 'OFFLINE';
+  }
+}
+updateAiBadge();
+</script>
+</body>
+</html>

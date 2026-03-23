@@ -948,13 +948,72 @@ async function hubSend() {
 let AI_KEY = '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';
 let conversationHistory = []; // for Claude API context
 
+/* ============ STRATEGY KNOWLEDGE BASE ============ */
+var STRATEGY_KB = {
+  'amano hotels': {
+    strategy_2026: true,
+    brand_proposition: '"Where the City Meets" — Amano drops you into the energy of the city. A place for staying, gathering, meeting and being part of what\'s happening now.',
+    original_proposition: '"Less, and then some." — brand confidence and restraint, but now evolved because it was philosophical rather than directional.',
+    brand_pillars: 'Community (social gathering), Sense of Place (rooted in city), The Stay (dependable hotel experience), Culture (plugged into what\'s current).',
+    audiences: 'Locals (rebuild cultural relevance via pop-ups/collabs/creators), Tourists (experience-led destination, not just Booking.com price play), Corporate (visible B2B events offering).',
+    current_reality: 'Brand experienced differently by each audience; demand exists but value leaks at every stage. Locals dropped out of cultural conversation, tourists see it as functional, corporate awareness is low.',
+    competitive_landscape: 'Soho House (membership-walled), The Hoxton (neighbourhood energy), The Standard (cultural heat/nightlife), 25hours (creative chaos). Amano\'s edge: curate the city around it, not build a world inside walls.',
+    partnerships: 'Strategic lever to reclaim cultural relevance. Selection framework: audience fit, brand alignment, brand pillar activation, cultural/commercial impact. Partners must feel natural inside Amano.',
+    influencer_strategy: 'Micro-creators 5k-100k, min 3% engagement. Primary use: event/pop-up attendance and buzz. Not staged promotion. Creator content should make people want to show up.',
+    paid_media: '5 pillars: brand awareness (future guests via IG/YT/TikTok), local cultural relevance (Berlin 21-40 via IG/TikTok), direct booking intent (Google Search/Hotel Ads/Meta retargeting), repeat bookings (Meta/Display retargeting), B2B lead gen (LinkedIn/Meta/Google for event planners).',
+    key_insight: 'One system, not separate campaigns. Cultural activity builds content, content fuels awareness, corporate visibility unlocks high-margin revenue, experiences drive return, CRM converts to direct bookings.'
+  },
+  'ge vernova': {
+    strategy_2026: true,
+    focus: 'Data Centre Campaign Strategy',
+    platform_idea: '"Knowledge is Power. We Sell Both." — In a world of vendors selling parts, GEV sells end-to-end solutions.',
+    objective: 'Develop social approach showing Data Centre solutions are world-leading. Replace complexity with simplicity.',
+    challenge: 'Competitors (Schneider, ADD, Siemens) are more active and impactful on social despite GEV being dominant in market.',
+    comms_narrative: 'Full-service provision connecting Consulting, Site Selection, Equipment Procurement, Operational Guidance, Optimisation. Thinking long-term, building reference architecture for the future.',
+    content_types: 'Case studies (real hyperscale projects), social-first whitepaper series, thought leadership, blog posts, podcasts.',
+    audiences: 'Hyperscale operators, colocation providers, utilities, data centre developers — decision-makers seeking clarity and knowledge.',
+    key_differentiator: 'End-to-end knowledge vs competitors selling parts.'
+  },
+  'davines': {
+    strategy_2026: true,
+    sub_brand: 'Essential Hair Care (EHC)',
+    campaign_name: '"Elevate Essentials"',
+    objectives: 'Strengthen Essential Brand Equity (increase market share) and Drive Essentials Sales Growth (30% of Davines sales in 2026).',
+    challenges: 'Trusted by salons but consumer recognition is low. Consumers don\'t know where to find or buy Essentials.',
+    core_pillars: 'Transparency (sourcing-to-formulation journey), Expertise (salon heritage, professional-level results), Purpose (planet and people, sustainable practices).',
+    funnel: 'Awareness (position as trusted transparent choice), Consideration (show salon heritage/results), Conversion (clear path to purchase).'
+  },
+  'trudis': {
+    strategy_2025: true,
+    social_objectives: '1) Make Trudi\'s Known and Loved, 2) Champion Purpose Beyond the Fruit (banana-growing communities), 3) Bring Good to the Feed (joyful content).',
+    content_pillars: 'Mission storytelling, Banana Facts (myth-busting), Banana Versus (comparative nutrition), Feel-Good Content.',
+    brand_inspiration: 'Tony\'s Chocolonely approach — purpose-driven storytelling with clarity and engagement.',
+    formats: 'Static posts, carousels, video/reels on Instagram.'
+  }
+};
+
+function getStrategyInfo(clientName) {
+  var key = clientName.toLowerCase();
+  for (var k in STRATEGY_KB) { if (key.includes(k) || k.includes(key)) return STRATEGY_KB[k]; }
+  return null;
+}
+
+function buildStrategyContext() {
+  var ctx = '\n\nSTRATEGY DEEP-DIVE DATA:\n';
+  for (var k in STRATEGY_KB) {
+    var s = STRATEGY_KB[k]; ctx += '\n' + k.toUpperCase() + ':\n';
+    for (var prop in s) { if (typeof s[prop] === 'string') ctx += '- ' + prop.replace(/_/g,' ') + ': ' + s[prop] + '\n'; }
+  }
+  return ctx;
+}
+
 function buildSystemPrompt() {
   var clientData = CL.map(function(c) {
     var info = c.n + ' (' + c.cat + ')  —  ' + (c.s==='r' ? 'Fully ingested. ' + c.a + ' assets, ' + c.c + ' campaigns. ' + c.sum : 'Drive inventory: ' + (c.fd||0) + ' folders' + (c.ff ? ', ' + c.ff + ' root files' : '') + '.' + (c.f && c.f.length ? ' Folders: ' + c.f.join(', ') + '.' : '') + (c.rf && c.rf.length ? ' Files: ' + c.rf.join(', ') + '.' : '') + ' Needs deep-scan for full asset cataloguing.');
     return info;
   }).join('\n');
   var teamData = TEAM.map(function(t) { return t.name + '  —  ' + t.role; }).join('\n');
-  return 'You are Noise Intelligence, the internal AI assistant for Noise Media, a creative agency. You are chatting with ' + (currentUser ? currentUser.name + ' (' + currentUser.role + ')' : 'a team member') + '.\n\nBe conversational, warm, and concise. Answer like a knowledgeable colleague  —  no bullet points or formal formatting in chat. Keep responses short (1-3 sentences) unless they ask for detail.\n\nYou can answer questions about clients, team, assets, campaigns, and generate documents. When asked to create a document (email, brief, social copy, proposal, cost allocation, report, meeting agenda, presentation/deck/slides), respond with ONLY a JSON object like: {"doc_type":"email","client":"BARBRI","variant":"general"}\nFor presentations, include a topic field: {"doc_type":"presentation","client":"Thortful","topic":"Campaign"}\n\nValid doc_type values: email, brief, social, proposal, cost, report, agenda, presentation\nValid email variants: general, intro, followup, update\n\nFor all other messages, just reply conversationally.\n\nCLIENTS (' + CL.length + '):\n' + clientData + '\n\nTEAM (' + TEAM.length + '):\n' + teamData + '\n\nNoise Media specialises in paid social, content production, and brand storytelling. Services: content strategy, creative production (video, photo, design), paid social management, UGC/influencer, community management.' + getMemoryContext();
+  return 'You are Noise Intelligence, the internal AI assistant for Noise Media, a creative agency. You are chatting with ' + (currentUser ? currentUser.name + ' (' + currentUser.role + ')' : 'a team member') + '.\n\nBe conversational, warm, and concise. Answer like a knowledgeable colleague. When asked about strategy, brand positioning, audiences, paid media, partnerships, or campaign approach for a client, use the STRATEGY DEEP-DIVE DATA below to give informed, specific answers  —  no bullet points or formal formatting in chat. Keep responses short (1-3 sentences) unless they ask for detail.\n\nYou can answer questions about clients, team, assets, campaigns, and generate documents. When asked to create a document (email, brief, social copy, proposal, cost allocation, report, meeting agenda, presentation/deck/slides), respond with ONLY a JSON object like: {"doc_type":"email","client":"BARBRI","variant":"general"}\nFor presentations, include a topic field: {"doc_type":"presentation","client":"Thortful","topic":"Campaign"}\n\nValid doc_type values: email, brief, social, proposal, cost, report, agenda, presentation\nValid email variants: general, intro, followup, update\n\nFor all other messages, just reply conversationally.\n\nCLIENTS (' + CL.length + '):\n' + clientData + '\n\nTEAM (' + TEAM.length + '):\n' + teamData + '\n\nNoise Media specialises in paid social, content production, and brand storytelling. Services: content strategy, creative production (video, photo, design), paid social management, UGC/influencer, community management. Offices in London, Los Angeles, New York. Co-founded by Anthony and Joe.' + buildStrategyContext() + '\n\nAGENCY CASE STUDIES: Apple Gift Cards (overstocked to sold out), VOXI (UGC-style creative drove 124% higher CTR, became the student SIM everyone switched to). Social-first mindset across Social, Influencer, Production, OOH, Paid, Activations.' + getMemoryContext();
 }
 
 async function aiCall(sysPrompt, msgs, maxTok) {
@@ -1449,6 +1508,66 @@ function getResponse(q) {
   if (ql.match(/report|quarterly|monthly report|performance/))
     return { chat: 'Report template for <strong>' + cn + '</strong> is ready. Fill in the metrics from your campaign data and export.', doc: buildReport(cn) };
 
+  // ===== STRATEGY Q&A =====
+  var strat = cm ? getStrategyInfo(cm.n) : null;
+
+  if (strat && ql.match(/strateg|positioning|brand position|proposition|tagline|brand pill/)) {
+    var r = '<strong>' + cn + ' Strategy</strong>: ';
+    if (strat.brand_proposition) r += strat.brand_proposition + ' ';
+    if (strat.platform_idea) r += strat.platform_idea + ' ';
+    if (strat.campaign_name) r += 'Campaign: ' + strat.campaign_name + '. ';
+    if (strat.brand_pillars) r += '<br><br><strong>Brand Pillars:</strong> ' + strat.brand_pillars;
+    if (strat.core_pillars) r += '<br><br><strong>Core Pillars:</strong> ' + strat.core_pillars;
+    if (strat.objectives) r += '<br><br><strong>Objectives:</strong> ' + strat.objectives;
+    return { chat: r, doc: null };
+  }
+
+  if (strat && ql.match(/audience|target|who.*targeting|demographic|segment/)) {
+    var r = '<strong>' + cn + ' Audiences</strong>: ';
+    if (strat.audiences) r += strat.audiences;
+    if (strat.challenges) r += '<br><br><strong>Challenges:</strong> ' + strat.challenges;
+    if (strat.funnel) r += '<br><br><strong>Funnel:</strong> ' + strat.funnel;
+    return { chat: r, doc: null };
+  }
+
+  if (strat && ql.match(/paid|media.*plan|ad.*strategy|channel|spend/)) {
+    var r = '<strong>' + cn + ' Paid/Channel Strategy</strong>: ';
+    if (strat.paid_media) r += strat.paid_media;
+    if (strat.content_types) r += '<br><br><strong>Content:</strong> ' + strat.content_types;
+    return { chat: r, doc: null };
+  }
+
+  if (strat && ql.match(/partner|collab|influenc|creator|ugc/)) {
+    var r = '<strong>' + cn + '</strong>: ';
+    if (strat.partnerships) r += strat.partnerships;
+    if (strat.influencer_strategy) r += '<br><br><strong>Influencers:</strong> ' + strat.influencer_strategy;
+    return { chat: r, doc: null };
+  }
+
+  if (strat && ql.match(/compet|rival|vs|versus|benchmark|landscape/)) {
+    var r = '<strong>' + cn + ' Competitive Landscape</strong>: ';
+    if (strat.competitive_landscape) r += strat.competitive_landscape;
+    if (strat.challenge) r += strat.challenge;
+    return { chat: r, doc: null };
+  }
+
+  if (strat && ql.match(/content.*pill|content.*strateg|what.*post|what.*content/)) {
+    var r = '<strong>' + cn + ' Content Strategy</strong>: ';
+    if (strat.content_pillars) r += strat.content_pillars;
+    if (strat.content_types) r += strat.content_types;
+    if (strat.social_objectives) r += strat.social_objectives;
+    return { chat: r, doc: null };
+  }
+
+  if (strat && ql.match(/insight|key.*learn|takeaway|deep.*dive|overview|summary/)) {
+    var r = '<strong>' + cn + ' Key Insights</strong>: ';
+    if (strat.key_insight) r += strat.key_insight + ' ';
+    if (strat.key_differentiator) r += strat.key_differentiator + ' ';
+    if (strat.current_reality) r += '<br><br><strong>Current Reality:</strong> ' + strat.current_reality;
+    if (strat.objective) r += '<br><br><strong>Objective:</strong> ' + strat.objective;
+    return { chat: r, doc: null };
+  }
+
   // ===== CONVERSATIONAL Q&A =====
   const rdy = CL.filter(c=>c.s==='r'), inv = CL.filter(c=>c.s==='i');
   const totalAssets = rdy.reduce((a,c)=>a+(c.a||0),0);
@@ -1474,7 +1593,7 @@ function getResponse(q) {
 
   // --- Help ---
   if (ql.match(/help|what can you|what do you do|capabilities|what.*you.*know/))
-    return { chat: 'I know all ' + CL.length + ' of our clients, their ' + totalAssets + '+ catalogued assets, campaign history, and Drive folders. I also know the full team. You can ask me things like "what do we have for Davines?" or "who handles motion?"  —  or tell me to write an email, brief, social copy, presentation, report, proposal, cost allocation, or meeting agenda for any client.', doc: null };
+    return { chat: 'I know all ' + CL.length + ' of our clients, their ' + totalAssets + '+ catalogued assets, campaign history, and Drive folders. I also know the full team.<br><br>I\'ve got deep strategy intel for <strong>Amano Hotels, GE Vernova, Davines (EHC), and Trudi\'s</strong> \u2014 ask me about their brand positioning, audiences, paid media plans, content pillars, partnerships, or competitive landscape.<br><br>You can ask me things like "what do we have for Davines?" or "who handles motion?"  —  or tell me to write an email, brief, social copy, presentation, report, proposal, cost allocation, or meeting agenda for any client.', doc: null };
 
   // --- Client count ---
   if (ql.match(/how many.*client|total.*client|client.*count/))
@@ -1515,7 +1634,7 @@ function getResponse(q) {
 
   // --- About Noise ---
   if (ql.match(/what do we do|about noise|what.*noise.*do|our services|what services|what.*we.*offer/))
-    return { chat: 'Noise Media is a creative agency specialising in paid social, content production, and brand storytelling. We do content strategy, creative production, paid social management, UGC/influencer campaigns, and community management  —  currently working with ' + CL.length + ' clients across beauty, drinks, fintech, hospitality, and more.', doc: null };
+    return { chat: 'Noise Media is a creative agency with a social-first mindset. We combine creativity and performance to connect with today\'s customer and drive real business growth.<br><br><strong>Services:</strong> Content strategy, creative production (video, photo, design), paid social management, UGC/influencer campaigns, OOH, activations, and community management.<br><br><strong>Offices:</strong> London, Los Angeles, New York. Co-founded by Anthony and Joe  —  currently working with ' + CL.length + ' clients across beauty, drinks, fintech, hospitality, and more.', doc: null };
 
   // --- Category / sector ---
   if (ql.match(/beauty|drinks|fintech|hospitality|food|fashion|tech|energy|entertainment|luxury|automotive|travel|storage|skincare|haircare/)) {
@@ -1527,8 +1646,13 @@ function getResponse(q) {
   }
 
   // --- Specific client (ready) ---
-  if (cm && cm.s==='r')
-    return { chat: '<strong>' + cm.n + '</strong>  —  ' + cm.cat + '. ' + cm.sum + '<br><br>' + cm.a + ' assets, ' + cm.c + ' campaigns. Want me to create something for them?', doc: null };
+  if (cm && cm.s==='r') {
+    var r = '<strong>' + cm.n + '</strong> \u2014 ' + cm.cat + '. ' + cm.sum + '<br><br>' + cm.a + ' assets, ' + cm.c + ' campaigns.';
+    var cs = getStrategyInfo(cm.n);
+    if (cs) r += '<br><br>I also have their full strategy deck loaded \u2014 ask me about their brand positioning, audiences, paid media plan, partnerships, or competitive landscape.';
+    r += ' Want me to create something for them?';
+    return { chat: r, doc: null };
+  }
 
   // --- Specific client (inventoried) ---
   if (cm && cm.s==='i') {
@@ -1536,6 +1660,12 @@ function getResponse(q) {
     if (cm.f && cm.f.length) r += ' (' + cm.f.length + ' folders: ' + cm.f.join(', ') + ')';
     r += '. Not fully ingested yet  —  I have the folder structure but not individual files.';
     return { chat: r, doc: null };
+  }
+
+  // --- Generic strategy questions ---
+  if (!cm && ql.match(/strateg|positioning|brand.*pill|proposition/)) {
+    var stratClients = Object.keys(STRATEGY_KB).map(function(k) { return k.charAt(0).toUpperCase() + k.slice(1); });
+    return { chat: 'I\'ve got full strategy decks loaded for <strong>' + stratClients.join(', ') + '</strong>. Which client do you want strategy intel on? I can tell you about their brand positioning, audiences, paid media plans, content pillars, partnerships, and competitive landscape.', doc: null };
   }
 
   // --- Vague / conversational fallbacks ---

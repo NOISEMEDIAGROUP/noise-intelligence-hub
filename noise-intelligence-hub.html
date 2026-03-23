@@ -1789,7 +1789,7 @@ async function coworkAgent(task, hc) {
           if (docReq.topic) writeMsg += ' Topic: ' + docReq.topic + '.';
 
           var docHtml = await aiCall(writePrompt, [{ role: 'user', content: writeMsg }], 2000);
-          if (docHtml) finalDoc = docHtml;
+          if (docHtml) finalDoc = stripCodeFences(docHtml);
 
           // Update card with completion summary
           var doneDiv = document.createElement('div');
@@ -1862,6 +1862,7 @@ async function callClaude(userMsg) {
         if (docReq.topic) writeMsg += ' Topic: ' + docReq.topic + '.';
 
         var docHtml = await aiCall(writePrompt, [{ role: 'user', content: writeMsg }], 2000);
+        if (docHtml) docHtml = stripCodeFences(docHtml);
 
         // Fallback to template if AI doc generation fails
         if (!docHtml) {
@@ -1918,7 +1919,17 @@ var slideTypes = [];
 var slideIdx = 0;
 var slideMode = false;
 
+function stripCodeFences(html) {
+  if (!html) return html;
+  // Remove opening ```html or ``` and closing ```
+  var s = html.trim();
+  s = s.replace(/^```(?:html|HTML)?\s*\n?/, '');
+  s = s.replace(/\n?```\s*$/, '');
+  return s.trim();
+}
+
 function showDoc(html) {
+  html = stripCodeFences(html);
   /* Determine which panel to use — page 1 inline or page 2 workspace */
   var onPage1 = document.getElementById('page1').classList.contains('active');
   var dc, pdc, prevBtn, nextBtn, ctrEl;

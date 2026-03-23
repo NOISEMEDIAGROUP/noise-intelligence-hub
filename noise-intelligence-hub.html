@@ -447,82 +447,99 @@
     position: absolute; top: 0; left: 0; right: 0; bottom: 0;
   }
 
-  /* Title slide — full dark background */
-  .doc-slide.slide-title {
-    background: #1B1B1B; justify-content: center; padding: 6% 8%;
+  /* Shared slide footer bar */
+  .slide-footer-bar {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 10px 6%; font-family: 'Reddit Mono', monospace;
+    font-size: clamp(7px, 0.8vw, 9px); font-weight: 600;
+    text-transform: uppercase; letter-spacing: 1.5px;
   }
-  .doc-slide.slide-title::before {
-    content: ''; position: absolute; left: 0; top: 0; width: 5px; height: 100%; z-index: 1;
-    background: #C73C1E;
+
+  /* COVER — Noise red background */
+  .doc-slide.slide-title {
+    background: #C73C1E; justify-content: flex-start; padding: 8% 8% 0;
   }
   .doc-slide.slide-title .noise-tag {
-    font-family: 'Reddit Mono', monospace; font-size: clamp(8px, 1.2vw, 10px); letter-spacing: 3px;
-    text-transform: uppercase; color: #C73C1E; margin-bottom: 12px;
+    font-family: 'Reddit Mono', monospace; font-size: clamp(12px, 1.6vw, 16px);
+    font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
+    color: #1B1B1B; margin-bottom: 4px;
   }
   .doc-slide.slide-title h1 {
-    font-family: 'Reddit Mono', monospace; font-size: clamp(16px, 2.5vw, 28px); font-weight: 700;
-    color: white; margin: 0 0 6px 0; line-height: 1.2;
+    font-family: 'Reddit Mono', monospace; font-size: clamp(14px, 2vw, 20px); font-weight: 400;
+    color: #1B1B1B; margin: 0; line-height: 1.3; text-transform: uppercase; letter-spacing: 1px;
   }
-  .doc-slide.slide-title .sub {
-    font-size: clamp(11px, 1.5vw, 15px); font-weight: 300; color: rgba(255,255,255,0.55);
-    margin: 0 0 16px 0;
-  }
-  .doc-slide.slide-title .meta {
-    font-size: clamp(9px, 1vw, 11px); color: rgba(255,255,255,0.3);
-  }
-  .doc-slide.slide-title .slide-footer {
-    position: absolute; bottom: 5%; left: 8%;
-    font-size: clamp(7px, 0.9vw, 9px); color: rgba(255,255,255,0.2);
-    font-family: 'Reddit Mono', monospace; letter-spacing: 1px;
+  .doc-slide.slide-title .slide-contact {
+    position: absolute; bottom: 12%; right: 8%;
+    font-family: 'Reddit Mono', monospace; font-size: clamp(7px, 0.85vw, 9px);
+    color: #1B1B1B; text-transform: uppercase; letter-spacing: 1.5px;
+    line-height: 1.8; text-align: right;
   }
 
-  /* Content slides */
-  .doc-slide.slide-content {
-    background: white; padding: 5% 6%;
+  /* SECTION DIVIDER — Noise red, bold title */
+  .doc-slide.slide-divider {
+    background: #C73C1E; justify-content: center; padding: 0 8%;
   }
-  .doc-slide.slide-content::before {
-    content: ''; position: absolute; left: 0; top: 0; width: 4px; height: 100%; z-index: 1;
-    background: #C73C1E;
+  .doc-slide.slide-divider h2 {
+    font-family: 'Reddit Mono', monospace; font-size: clamp(14px, 2.2vw, 22px); font-weight: 700;
+    color: #1B1B1B; text-transform: uppercase; letter-spacing: 1px; line-height: 1.2;
+    margin: 0;
+  }
+  .doc-slide.slide-divider .slide-footer-bar { color: rgba(27,27,27,0.5); }
+
+  /* CONTENT — cream/off-white background */
+  .doc-slide.slide-content {
+    background: #F5F3EE; padding: 5% 6% 40px;
   }
   .doc-slide.slide-content .slide-section-title {
-    font-family: 'Reddit Mono', monospace; font-size: clamp(12px, 1.8vw, 16px); font-weight: 700;
-    color: #1B1B1B; margin: 0 0 4px 0; line-height: 1.3;
-  }
-  .doc-slide.slide-content .slide-accent-bar {
-    width: 40px; height: 3px; background: #C73C1E; margin-bottom: 20px; border-radius: 2px;
+    font-family: 'Reddit Mono', monospace; font-size: clamp(13px, 1.8vw, 18px); font-weight: 700;
+    color: #1B1B1B; margin: 0 0 16px 0; line-height: 1.3; text-transform: uppercase;
   }
   .doc-slide.slide-content .slide-body {
-    flex: 1; font-size: clamp(10px, 1.2vw, 12px); line-height: 1.6; color: #444;
+    flex: 1; font-size: clamp(10px, 1.2vw, 13px); line-height: 1.7; color: #333;
     overflow-y: auto;
   }
-  .doc-slide.slide-content .slide-body h3 { font-size: 12px; font-weight: 600; margin: 10px 0 4px; color: #1B1B1B; }
-  .doc-slide.slide-content .slide-body p { margin: 0 0 8px 0; }
-  .doc-slide.slide-content .slide-body ul { margin: 4px 0 8px 18px; }
-  .doc-slide.slide-content .slide-body li { margin-bottom: 3px; }
-  .doc-slide.slide-content .slide-body table { width: 100%; border-collapse: collapse; margin: 8px 0; font-size: 11px; }
+  .doc-slide.slide-content .slide-body h3 {
+    font-family: 'Reddit Mono', monospace; font-size: clamp(11px, 1.3vw, 14px); font-weight: 700;
+    margin: 16px 0 6px; color: #1B1B1B; text-transform: uppercase;
+  }
+  .doc-slide.slide-content .slide-body p { margin: 0 0 10px 0; }
+  .doc-slide.slide-content .slide-body ul { margin: 6px 0 10px 20px; }
+  .doc-slide.slide-content .slide-body li { margin-bottom: 4px; }
+  .doc-slide.slide-content .slide-body table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 11px; }
   .doc-slide.slide-content .slide-body th,
-  .doc-slide.slide-content .slide-body td { padding: 6px 10px; text-align: left; border: 1px solid #E4E3E0; }
+  .doc-slide.slide-content .slide-body td { padding: 8px 10px; text-align: left; border: 1px solid #E0DDD8; }
   .doc-slide.slide-content .slide-body th {
-    background: #F5F5F3; font-weight: 600; font-size: 9px;
+    background: #EAE7E2; font-weight: 600; font-size: 9px;
     text-transform: uppercase; letter-spacing: 0.5px; color: #1B1B1B;
   }
-  .doc-slide.slide-content .slide-brand {
-    position: absolute; bottom: 12px; right: 20px;
-    font-family: 'Reddit Mono', monospace; font-size: 8px; color: #C73C1E;
-    font-weight: 700; letter-spacing: 1px; opacity: 0.5;
-  }
+  .doc-slide.slide-content .slide-footer-bar { color: rgba(27,27,27,0.35); }
 
-  /* End slide — full dark background */
+  /* INSIGHT — dark background, white mono text */
+  .doc-slide.slide-insight {
+    background: #1B1B1B; justify-content: center; padding: 0 8%;
+  }
+  .doc-slide.slide-insight .insight-label {
+    font-family: 'Reddit Mono', monospace; font-size: clamp(10px, 1.3vw, 13px); font-weight: 700;
+    color: #fff; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;
+  }
+  .doc-slide.slide-insight .insight-text {
+    font-family: 'Reddit Mono', monospace; font-size: clamp(13px, 2vw, 20px); font-weight: 400;
+    color: #fff; line-height: 1.5; max-width: 70%;
+  }
+  .doc-slide.slide-insight .slide-footer-bar { color: rgba(255,255,255,0.25); }
+
+  /* END — Noise red */
   .doc-slide.slide-end {
-    background: #1B1B1B; justify-content: center; align-items: center;
+    background: #C73C1E; justify-content: center; align-items: center;
   }
   .doc-slide.slide-end .noise-end {
     font-family: 'Reddit Mono', monospace; font-size: clamp(18px, 3vw, 28px); font-weight: 700;
-    color: white; letter-spacing: 3px;
+    color: #1B1B1B; letter-spacing: 3px; text-transform: uppercase;
   }
-  .doc-slide.slide-end .noise-end span { color: #C73C1E; }
+  .doc-slide.slide-end .noise-end span { color: white; }
   .doc-slide.slide-end .url {
-    font-size: 11px; color: rgba(255,255,255,0.3); margin-top: 10px;
+    font-size: 11px; color: rgba(27,27,27,0.4); margin-top: 10px;
     font-family: 'Reddit Mono', monospace; letter-spacing: 0.5px;
   }
 
@@ -532,44 +549,54 @@
     width: 100%; max-width: 700px; aspect-ratio: 3/4;
     min-height: unset; max-height: calc(100% - 32px);
     display: flex; flex-direction: column;
-    position: relative; border: 1px solid var(--border);
+    position: relative; border: none; box-shadow: var(--shadow-lg);
   }
   .doc-page { display: none; }
   .doc-page.active {
     display: flex; flex-direction: column;
     position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-    background: white; padding: 40px 44px;
+    background: #F5F3EE; padding: 36px 40px 44px;
     overflow-y: auto;
   }
-  .doc-page .doc-page-title {
-    font-family: 'Reddit Mono', monospace; font-size: 15px; font-weight: 700;
-    color: #1B1B1B; margin: 0 0 4px 0; line-height: 1.3;
+  /* Doc page cover */
+  .doc-page.doc-page-cover {
+    background: #C73C1E; padding: 8% 8% 0; justify-content: flex-start;
   }
-  .doc-page .doc-page-bar {
-    width: 36px; height: 3px; background: #C73C1E; margin-bottom: 16px; border-radius: 2px;
+  .doc-page.doc-page-cover .doc-page-title {
+    font-family: 'Reddit Mono', monospace; font-size: 18px; font-weight: 700;
+    color: #1B1B1B; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 4px;
+  }
+  .doc-page.doc-page-cover .doc-page-subtitle {
+    font-family: 'Reddit Mono', monospace; font-size: 13px; font-weight: 400;
+    color: #1B1B1B; text-transform: uppercase; letter-spacing: 1px;
+  }
+  .doc-page .doc-page-title {
+    font-family: 'Reddit Mono', monospace; font-size: 16px; font-weight: 700;
+    color: #1B1B1B; margin: 0 0 14px 0; line-height: 1.3; text-transform: uppercase;
   }
   .doc-page .doc-page-body { flex: 1; font-size: 12.5px; line-height: 1.75; color: #333; }
-  .doc-page .doc-page-body h3 { font-size: 13px; font-weight: 600; margin: 14px 0 4px; color: #1B1B1B; }
+  .doc-page .doc-page-body h3 {
+    font-family: 'Reddit Mono', monospace; font-size: 13px; font-weight: 700;
+    margin: 16px 0 6px; color: #1B1B1B; text-transform: uppercase;
+  }
   .doc-page .doc-page-body p { margin: 0 0 10px 0; }
-  .doc-page .doc-page-body ul { margin: 4px 0 10px 18px; }
+  .doc-page .doc-page-body ul { margin: 6px 0 10px 20px; }
   .doc-page .doc-page-body li { margin-bottom: 4px; }
   .doc-page .doc-page-body table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 11.5px; }
   .doc-page .doc-page-body th,
-  .doc-page .doc-page-body td { padding: 7px 10px; text-align: left; border: 1px solid #E4E3E0; }
+  .doc-page .doc-page-body td { padding: 8px 10px; text-align: left; border: 1px solid #E0DDD8; }
   .doc-page .doc-page-body th {
-    background: #F5F5F3; font-weight: 600; font-size: 9px;
+    background: #EAE7E2; font-weight: 600; font-size: 9px;
     text-transform: uppercase; letter-spacing: 0.5px; color: #1B1B1B;
   }
-  .doc-page .doc-page-num {
-    position: absolute; bottom: 14px; right: 20px;
-    font-family: 'Reddit Mono', monospace; font-size: 9px; color: var(--text-muted);
-    opacity: 0.5;
+  .doc-page .doc-page-footer {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 10px 40px; font-family: 'Reddit Mono', monospace;
+    font-size: 8px; font-weight: 600; color: rgba(27,27,27,0.3);
+    text-transform: uppercase; letter-spacing: 1.5px;
   }
-  .doc-page .doc-page-brand {
-    position: absolute; bottom: 14px; left: 20px;
-    font-family: 'Reddit Mono', monospace; font-size: 8px; color: #C73C1E;
-    font-weight: 700; letter-spacing: 1px; opacity: 0.4;
-  }
+  .doc-page.doc-page-cover .doc-page-footer { color: rgba(27,27,27,0.5); }
 
   ::-webkit-scrollbar { width: 5px; }
   ::-webkit-scrollbar-track { background: transparent; }
@@ -1729,27 +1756,33 @@ function docWriterPrompt(docType) {
     return base + 'Write a complete professional email in HTML format. Structure:\n<div style="max-width:640px;margin:0 auto;">\n<div style="background:#F0EFED;padding:16px 20px;border-radius:8px;margin-bottom:20px;font-size:13px;">From/To/Subject/Date header</div>\n<p>Email body paragraphs</p>\n<p>Sign-off with sender name, role, Noise Media</p>\n</div>\n\nFill in ALL fields with real content based on context. If names are mentioned, use them. If a topic is given, write about it. Today is ' + fmtDate() + '. The sender is ' + un + ' (' + ur + ').';
   }
   if (docType === 'brief') {
-    return base + 'Write a complete content/creative brief in HTML. Use <h1> for title, <h2> for sections, <table> for structured data. Include: client overview, objectives, target audience, key messages, deliverables, timeline. Fill in real content based on what the user described.';
+    return base + 'Write a Noise Media brief in HTML. Use <h2> for each section (UPPERCASE). Sections: THE BRIEF, THE AUDIENCE, THE OBJECTIVE, KEY MESSAGES, DELIVERABLES, TIMELINE. Keep each section short and punchy (2-4 paragraphs max). Use tables for structured data. Write in direct agency voice — no fluff.';
   }
   if (docType === 'social') {
-    return base + 'Write 3 complete, ready-to-post social media captions in HTML. Each post should have: platform, caption text (actual copy, not placeholders), hashtags, and posting time. Use <h2> for each post. Write real engaging copy.';
+    return base + 'Write social media copy in HTML. Use <h2> for each post/platform. Write actual engaging copy — punchy, conversational, scroll-stopping. Include hashtags and posting times. Write like a social-first creative agency.';
   }
   if (docType === 'proposal') {
-    return base + 'Write a complete agency proposal in HTML. Include: about Noise Media, client needs, proposed services, investment/pricing, timeline, next steps. Use <h1>, <h2>, <table> tags. Write real content.';
+    return base + 'Write a Noise Media proposal in HTML. Use <h2> for sections (UPPERCASE): ABOUT NOISE, THE OPPORTUNITY, PROPOSED APPROACH, SERVICES, INVESTMENT, TIMELINE, NEXT STEPS. Use tables for pricing. Be direct and confident, not salesy.';
   }
   if (docType === 'cost') {
-    return base + 'Write a cost allocation/budget breakdown in HTML. Include line items, team hours, rates. Use <h1>, <h2>, <table>. Fill in realistic agency costs.';
+    return base + 'Write a cost breakdown in HTML. Use <h2> for sections. Use tables for line items with columns: ITEM, DESCRIPTION, COST. Include team hours where relevant. Be clear and transparent.';
   }
   if (docType === 'report') {
-    return base + 'Write a campaign performance report in HTML. Include key metrics table, top creative, analysis, recommendations. Use <h1>, <h2>, <table>.';
+    return base + 'Write a Noise Media performance report in HTML. Use <h2> for sections (UPPERCASE): OVERVIEW, KEY METRICS, TOP PERFORMING CONTENT, ANALYSIS, RECOMMENDATIONS. Use tables for metrics. Be data-led and actionable.';
   }
   if (docType === 'agenda') {
-    return base + 'Write a meeting agenda in HTML. Include attendees, timed topics, action items. Use <h1>, <h2>, <table>. Fill in realistic content based on context.';
+    return base + 'Write a meeting agenda in HTML. Use <h2> for sections. Include a table with columns: TIME, TOPIC, LEAD, DURATION. Add <h2>KEY ACTION ITEMS</h2> section at the end. Use real team names from context.';
   }
   if (docType === 'presentation') {
-    return base + 'Write presentation content in HTML with branded slides. Start with a dark title slide (background:#1B1B1B, white text, NOISE MEDIA header in red #C73C1E), then content sections with <h2> headers, tables, and a dark closing slide. Write real content — not placeholders.';
+    return base + 'Write a Noise Media presentation in HTML. Structure:\n'
+      + '1. Start with <div style="background:#1B1B1B;padding:60px;color:white;"><h1 style="color:#C73C1E;">TITLE</h1><p>Subtitle</p></div>\n'
+      + '2. Use <h2> for each major section — these become separate slides. Use UPPERCASE, bold, punchy section titles (e.g., THE NEED, THE PROBLEM, THE AUDIENCE, THE STRATEGY, KEY METRICS).\n'
+      + '3. Keep each section SHORT and punchy — 2-4 sentences max per section. Write like a creative agency: direct, opinionated, no corporate fluff.\n'
+      + '4. Use tables for data, comparisons, timelines.\n'
+      + '5. End with <div style="background:#1B1B1B;padding:60px;text-align:center;color:white;"><h2>NOISE MEDIA</h2></div>\n'
+      + 'STYLE: Write like the Noise Media Zapp OOH pitch — short punchy sentences, provocative, opinion-led. "It\'s not wholesome. It\'s not relaxing. It\'s admin." NOT corporate marketing speak.';
   }
-  return base + 'Write the requested document in HTML format using <h1>, <h2>, <p>, <table> tags. Write real, complete content.';
+  return base + 'Write a Noise Media branded document in HTML. Use <h2> for each major section (UPPERCASE titles). Keep sections focused — one topic per section. Write in a direct, punchy agency voice. Use tables for data. Each <h2> section becomes a separate page, so keep them concise (150-300 words each). Structure with clear sections: BRIEF, AUDIENCE, STRATEGY, APPROACH, DELIVERABLES, TIMELINE, BUDGET, NEXT STEPS as relevant.';
 }
 
 /* ============ CO-WORK AUTONOMOUS AGENT ============ */
@@ -2175,19 +2208,32 @@ function renderDocPage(dc) {
   if (!dc) dc = nav.dc || document.getElementById('docC');
   dc.innerHTML = '';
 
+  /* Get client name from current thread */
+  var clientName = '';
+  if (currentUser) {
+    var threads = getUserThreads(currentUser.name);
+    var th = threads.find(function(t) { return t.id === currentThreadId; });
+    if (th && th.client) clientName = th.client;
+  }
+  var year = new Date().getFullYear();
+
   slidePages.forEach(function(page, i) {
     var div = document.createElement('div');
-    div.className = 'doc-page' + (i === slideIdx ? ' active' : '');
+    var isCover = (i === 0);
+    div.className = 'doc-page' + (isCover ? ' doc-page-cover' : '') + (i === slideIdx ? ' active' : '');
 
     var inner = '';
-    if (page.title) {
+    if (isCover) {
+      inner += '<div class="doc-page-title">NOISE MEDIA</div>';
+      inner += '<div class="doc-page-subtitle">' + (clientName || page.title || '') + '</div>';
+    } else if (page.title) {
       inner += '<div class="doc-page-title">' + page.title + '</div>';
-      inner += '<div class="doc-page-bar"></div>';
     }
     var body = typeof page === 'string' ? page : (page.body || '');
-    inner += '<div class="doc-page-body">' + body + '</div>';
-    inner += '<div class="doc-page-brand">NOISE.</div>';
-    inner += '<div class="doc-page-num">' + (i + 1) + ' / ' + slidePages.length + '</div>';
+    if (!isCover) {
+      inner += '<div class="doc-page-body">' + body + '</div>';
+    }
+    inner += '<div class="doc-page-footer"><span>' + String(i + 1).padStart(2, '0') + '</span><span>' + year + '</span><span>NOISE MEDIA</span><span>' + (clientName || '').toUpperCase() + '</span></div>';
     div.innerHTML = inner;
     dc.appendChild(div);
   });
@@ -2258,18 +2304,26 @@ function showSlides(html, dc) {
   });
   if (current.length > 0) sections.push(current);
 
-  /* Build slide 1: Title */
+  /* Get client name for footer */
+  var clientName = '';
+  if (currentUser) {
+    var threads = getUserThreads(currentUser.name);
+    var th = threads.find(function(t) { return t.id === currentThreadId; });
+    if (th && th.client) clientName = th.client;
+  }
+  var year = new Date().getFullYear();
+  var footer = '<div class="slide-footer-bar"><span>01</span><span>' + year + '</span><span>NOISE MEDIA</span><span>' + (clientName || '').toUpperCase() + '</span></div>';
+
+  /* Build slide 1: Cover — Noise red */
   slidePages.push(
     '<div class="noise-tag">NOISE MEDIA</div>' +
-    '<h1>' + titleName + '</h1>' +
-    '<p class="sub">' + titleSub + '</p>' +
-    '<div class="meta">' + titleMeta + '</div>' +
-    '<div class="slide-footer">noisemediagroup.co.uk</div>'
+    '<h1>' + (clientName || titleName) + '</h1>' +
+    '<div class="slide-contact">BRANDS@NOISEMEDIAGROUP.CO.UK<br>+44 0203 007 0500<br>LONDON, LOS ANGELES, NEW YORK<br><br>@NOISEMEDIAGROUP<br>WWW.NOISEMEDIAGROUP.CO.UK</div>'
   );
   slideTypes.push('slide-title');
 
-  /* Content slides — one per h2 section */
-  sections.forEach(function(els) {
+  /* Content slides — section divider + content for each h2 */
+  sections.forEach(function(els, idx) {
     var sectionTitle = '';
     var bodyHtml = '';
     els.forEach(function(el) {
@@ -2279,16 +2333,26 @@ function showSlides(html, dc) {
         bodyHtml += el.outerHTML;
       }
     });
-    slidePages.push(
-      '<div class="slide-section-title">' + sectionTitle + '</div>' +
-      '<div class="slide-accent-bar"></div>' +
-      '<div class="slide-body">' + bodyHtml + '</div>' +
-      '<div class="slide-brand">NOISE.</div>'
-    );
-    slideTypes.push('slide-content');
+
+    /* Add a red section divider slide first */
+    if (sectionTitle) {
+      slidePages.push(
+        '<h2>' + sectionTitle + '</h2>' + footer
+      );
+      slideTypes.push('slide-divider');
+    }
+
+    /* Then the content slide */
+    if (bodyHtml.trim()) {
+      slidePages.push(
+        '<div class="slide-section-title">' + sectionTitle + '</div>' +
+        '<div class="slide-body">' + bodyHtml + '</div>' + footer
+      );
+      slideTypes.push('slide-content');
+    }
   });
 
-  /* End slide */
+  /* End slide — Noise red */
   slidePages.push(
     '<div class="noise-end">NOISE<span>.</span></div>' +
     '<div class="url">noisemediagroup.co.uk</div>'

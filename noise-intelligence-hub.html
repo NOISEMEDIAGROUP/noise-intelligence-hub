@@ -435,7 +435,7 @@
         <div class="de" id="docE">
           <div class="de-i">&#128196;</div>
           <h3>Document Preview</h3>
-          <p>Ask me to generate a brief, cost allocation, report, or any document â it'll appear here for you to edit and export.</p>
+          <p>Ask me to generate a brief, cost allocation, report, or any document  —  it'll appear here for you to edit and export.</p>
         </div>
         <div id="docC" style="display:none"></div>
       </div>
@@ -467,11 +467,11 @@ const CL = [
   { id:"boodle", n:"Boodle", s:"r", cat:"FinTech / Group Payments", sum:"Group payment app. 25 video ads across 7 campaigns, Nando's partnership.", a:46, c:7 },
   { id:"altra", n:"Altra Skin", s:"r", cat:"Luxury Fragrance", sum:"Sculpted perfume bottles. 6 scents, product stills, 3D/STL files.", a:20, c:0 },
   { id:"culture-club", n:"Culture Club", s:"r", cat:"Music / Entertainment", sum:"9 video assets: Palladium live (ProRes), Karma Chameleon, Frantic 08.", a:9, c:0 },
-  { id:"brothers-cider", n:"Brothers Cider", s:"r", cat:"Drinks / FMCG", sum:"196 assets across 15 campaigns â interactive games, recipes, lockdown content.", a:196, c:15 },
-  { id:"thortful", n:"Thortful", s:"r", cat:"E-commerce / Greeting Cards", sum:"Mrs Thortful (Lou). 95 files â Valentine's, Mother's Day, reaction clips, photography.", a:95, c:6 },
-  { id:"davines", n:"Davines", s:"r", cat:"Beauty / Haircare", sum:"Italian haircare, 4 markets. 78 files â festive, TikTok, UGC, media plans.", a:78, c:9 },
+  { id:"brothers-cider", n:"Brothers Cider", s:"r", cat:"Drinks / FMCG", sum:"196 assets across 15 campaigns  —  interactive games, recipes, lockdown content.", a:196, c:15 },
+  { id:"thortful", n:"Thortful", s:"r", cat:"E-commerce / Greeting Cards", sum:"Mrs Thortful (Lou). 95 files  —  Valentine's, Mother's Day, reaction clips, photography.", a:95, c:6 },
+  { id:"davines", n:"Davines", s:"r", cat:"Beauty / Haircare", sum:"Italian haircare, 4 markets. 78 files  —  festive, TikTok, UGC, media plans.", a:78, c:9 },
   { id:"access-storage", n:"Access Storage", s:"r", cat:"Storage / Self-Storage", sum:"UK self-storage. 7 campaigns (summer storage, box storage, brand awareness). Monthly Noise content batches (Jan-Apr 2025), UGC video, Trustpilot social proof ads. Brand guidelines + logos. Content types: static 1x1, carousel, UGC.", a:30, c:7 },
-  { id:"amano-hotels", n:"Amano Hotels", s:"r", cat:"Hospitality / Hotels", sum:"Berlin lifestyle hotel group. 4 objectives: grow corporate event revenue, rebuild brand perception in Germany, raise room revenue (+â¬5 ADR), increase direct bookings (25% to 35%). Strategy: brand & positioning, organic, paid media, influencers, CRM, website. Covent Garden shoot active. IG audit, CI guide, brand strategy notes.", a:18, c:4 },
+  { id:"amano-hotels", n:"Amano Hotels", s:"r", cat:"Hospitality / Hotels", sum:"Berlin lifestyle hotel group. 4 objectives: grow corporate event revenue, rebuild brand perception in Germany, raise room revenue (+€5 ADR), increase direct bookings (25% to 35%). Strategy: brand & positioning, organic, paid media, influencers, CRM, website. Covent Garden shoot active. IG audit, CI guide, brand strategy notes.", a:18, c:4 },
   { id:"apricot", n:"Apricot", s:"r", cat:"Beauty / Skincare", sum:"Beauty/skincare brand. Paid media (PPC PMax), organic content, influencer/creator strategy, UGC. Black Friday paid content plan, UGC content plan. Brand assets: customer personas, Tenerife shoot selects, fonts, logos. Brand brainstorm deck. Paid media strategy.", a:17, c:3 },
   { id:"aspora", n:"Aspora", s:"r", cat:"Food & Drink / FMCG", sum:"FMCG brand. Heavy OOH (Out of Home) focus with B2B content and social amplification. Activations, Diwali campaign, paid social UGC, always-on content, social shoots B2B. Event RAMs for live activations.", a:14, c:4 },
   { id:"audio-technica", n:"Audio-Technica", s:"r", cat:"Audio / Electronics", sum:"Professional audio equipment. Commercial retainer: organic assets, paid media, reporting. Live events collaboration. Brand assets, signed contract, kick off agendas.", a:10, c:3 },
@@ -503,11 +503,11 @@ const CL = [
 ];
 
 const CONN = [
-  { n:"Google Docs", d:"Briefs, scripts, strategy", i:"ð" },
-  { n:"Google Sheets", d:"Media plans, trackers, budgets", i:"ð" },
-  { n:"Google Slides", d:"Decks, presentations, pitches", i:"ð" },
-  { n:"Google Drive", d:"Asset storage, file management", i:"ð¾" },
-  { n:"Google Chrome", d:"Web research, competitor audits", i:"ð" }
+  { n:"Google Docs", d:"Briefs, scripts, strategy", i:"📄" },
+  { n:"Google Sheets", d:"Media plans, trackers, budgets", i:"📊" },
+  { n:"Google Slides", d:"Decks, presentations, pitches", i:"📑" },
+  { n:"Google Drive", d:"Asset storage, file management", i:"💾" },
+  { n:"Google Chrome", d:"Web research, competitor audits", i:"🌐" }
 ];
 
 /* ============ STATE ============ */
@@ -909,7 +909,7 @@ async function hubSend() {
     var note = remMatch[2];
     addMemory(currentUser ? currentUser.name : '_global', note);
     addMsgTo(hc, text, true);
-    addMsgTo(hc, 'Got it â I\'ll remember that. You can see all saved memories in the Memory tab on the left.', false);
+    addMsgTo(hc, 'Got it  —  I\'ll remember that. You can see all saved memories in the Memory tab on the left.', false);
     saveCurrentThread();
     if (sbTab === 'memory') rSb('');
     return;
@@ -920,7 +920,7 @@ async function hubSend() {
     var store = loadStore();
     if (store.memories && currentUser) { store.memories[currentUser.name] = []; saveStore(store); }
     addMsgTo(hc, text, true);
-    addMsgTo(hc, 'Done â your memories have been cleared.', false);
+    addMsgTo(hc, 'Done  —  your memories have been cleared.', false);
     saveCurrentThread();
     if (sbTab === 'memory') rSb('');
     return;
@@ -950,11 +950,11 @@ let conversationHistory = []; // for Claude API context
 
 function buildSystemPrompt() {
   var clientData = CL.map(function(c) {
-    var info = c.n + ' (' + c.cat + ') â ' + (c.s==='r' ? 'Fully ingested. ' + c.a + ' assets, ' + c.c + ' campaigns. ' + c.sum : 'Drive inventory: ' + (c.fd||0) + ' folders' + (c.ff ? ', ' + c.ff + ' root files' : '') + '.' + (c.f && c.f.length ? ' Folders: ' + c.f.join(', ') + '.' : '') + (c.rf && c.rf.length ? ' Files: ' + c.rf.join(', ') + '.' : '') + ' Needs deep-scan for full asset cataloguing.');
+    var info = c.n + ' (' + c.cat + ')  —  ' + (c.s==='r' ? 'Fully ingested. ' + c.a + ' assets, ' + c.c + ' campaigns. ' + c.sum : 'Drive inventory: ' + (c.fd||0) + ' folders' + (c.ff ? ', ' + c.ff + ' root files' : '') + '.' + (c.f && c.f.length ? ' Folders: ' + c.f.join(', ') + '.' : '') + (c.rf && c.rf.length ? ' Files: ' + c.rf.join(', ') + '.' : '') + ' Needs deep-scan for full asset cataloguing.');
     return info;
   }).join('\n');
-  var teamData = TEAM.map(function(t) { return t.name + ' â ' + t.role; }).join('\n');
-  return 'You are Noise Intelligence, the internal AI assistant for Noise Media, a creative agency. You are chatting with ' + (currentUser ? currentUser.name + ' (' + currentUser.role + ')' : 'a team member') + '.\n\nBe conversational, warm, and concise. Answer like a knowledgeable colleague â no bullet points or formal formatting in chat. Keep responses short (1-3 sentences) unless they ask for detail.\n\nYou can answer questions about clients, team, assets, campaigns, and generate documents. When asked to create a document (email, brief, social copy, proposal, cost allocation, report, meeting agenda, presentation/deck/slides), respond with ONLY a JSON object like: {"doc_type":"email","client":"BARBRI","variant":"general"}\nFor presentations, include a topic field: {"doc_type":"presentation","client":"Thortful","topic":"Campaign"}\n\nValid doc_type values: email, brief, social, proposal, cost, report, agenda, presentation\nValid email variants: general, intro, followup, update\n\nFor all other messages, just reply conversationally.\n\nCLIENTS (' + CL.length + '):\n' + clientData + '\n\nTEAM (' + TEAM.length + '):\n' + teamData + '\n\nNoise Media specialises in paid social, content production, and brand storytelling. Services: content strategy, creative production (video, photo, design), paid social management, UGC/influencer, community management.' + getMemoryContext();
+  var teamData = TEAM.map(function(t) { return t.name + '  —  ' + t.role; }).join('\n');
+  return 'You are Noise Intelligence, the internal AI assistant for Noise Media, a creative agency. You are chatting with ' + (currentUser ? currentUser.name + ' (' + currentUser.role + ')' : 'a team member') + '.\n\nBe conversational, warm, and concise. Answer like a knowledgeable colleague  —  no bullet points or formal formatting in chat. Keep responses short (1-3 sentences) unless they ask for detail.\n\nYou can answer questions about clients, team, assets, campaigns, and generate documents. When asked to create a document (email, brief, social copy, proposal, cost allocation, report, meeting agenda, presentation/deck/slides), respond with ONLY a JSON object like: {"doc_type":"email","client":"BARBRI","variant":"general"}\nFor presentations, include a topic field: {"doc_type":"presentation","client":"Thortful","topic":"Campaign"}\n\nValid doc_type values: email, brief, social, proposal, cost, report, agenda, presentation\nValid email variants: general, intro, followup, update\n\nFor all other messages, just reply conversationally.\n\nCLIENTS (' + CL.length + '):\n' + clientData + '\n\nTEAM (' + TEAM.length + '):\n' + teamData + '\n\nNoise Media specialises in paid social, content production, and brand storytelling. Services: content strategy, creative production (video, photo, design), paid social management, UGC/influencer, community management.' + getMemoryContext();
 }
 
 async function aiCall(sysPrompt, msgs, maxTok) {
@@ -982,8 +982,8 @@ function docWriterPrompt(docType) {
   var un = currentUser ? currentUser.name : 'Team Member';
   var ur = currentUser ? currentUser.role : '';
   var se = currentUser ? currentUser.name.toLowerCase().replace(/\s/g,'.') + '@noisemedia.co.uk' : 'hello@noisemedia.co.uk';
-  var teamInfo = TEAM.map(function(t) { return t.name + ' â ' + t.role; }).join(', ');
-  var base = 'You are a document writer for Noise Media, a creative agency specialising in paid social, content production, and brand storytelling. Write on behalf of ' + un + ' (' + ur + ', email: ' + se + '). Write complete, professional, ready-to-send content â NOT templates with placeholders. Use real names, real details from context. Be warm, professional, and concise.\n\nTeam: ' + teamInfo + '\n\n';
+  var teamInfo = TEAM.map(function(t) { return t.name + '  —  ' + t.role; }).join(', ');
+  var base = 'You are a document writer for Noise Media, a creative agency specialising in paid social, content production, and brand storytelling. Write on behalf of ' + un + ' (' + ur + ', email: ' + se + '). Write complete, professional, ready-to-send content  —  NOT templates with placeholders. Use real names, real details from context. Be warm, professional, and concise.\n\nTeam: ' + teamInfo + '\n\n';
 
   if (docType === 'email') {
     return base + 'Write a complete professional email in HTML format. Structure:\n<div style="max-width:640px;margin:0 auto;">\n<div style="background:#F0EFED;padding:16px 20px;border-radius:8px;margin-bottom:20px;font-size:13px;">From/To/Subject/Date header</div>\n<p>Email body paragraphs</p>\n<p>Sign-off with sender name, role, Noise Media</p>\n</div>\n\nFill in ALL fields with real content based on context. If names are mentioned, use them. If a topic is given, write about it. Today is ' + fmtDate() + '. The sender is ' + un + ' (' + ur + ').';
@@ -1007,7 +1007,7 @@ function docWriterPrompt(docType) {
     return base + 'Write a meeting agenda in HTML. Include attendees, timed topics, action items. Use <h1>, <h2>, <table>. Fill in realistic content based on context.';
   }
   if (docType === 'presentation') {
-    return base + 'Write presentation content in HTML with branded slides. Start with a dark title slide (background:#1B1B1B, white text, NOISE MEDIA header in red #C73C1E), then content sections with <h2> headers, tables, and a dark closing slide. Write real content â not placeholders.';
+    return base + 'Write presentation content in HTML with branded slides. Start with a dark title slide (background:#1B1B1B, white text, NOISE MEDIA header in red #C73C1E), then content sections with <h2> headers, tables, and a dark closing slide. Write real content  —  not placeholders.';
   }
   return base + 'Write the requested document in HTML format using <h1>, <h2>, <p>, <table> tags. Write real, complete content.';
 }
@@ -1051,7 +1051,7 @@ async function callClaude(userMsg) {
         }
 
         if (docHtml) {
-          var chatMsg = 'Done! I\'ve written a ' + docReq.doc_type + ' for ' + dcn + ' â it\'s in the document panel. Edit and export when ready.';
+          var chatMsg = 'Done! I\'ve written a ' + docReq.doc_type + ' for ' + dcn + '  —  it\'s in the document panel. Edit and export when ready.';
           conversationHistory[conversationHistory.length - 1].content = chatMsg;
           return { chat: chatMsg, doc: docHtml };
         }
@@ -1146,7 +1146,7 @@ function exportPDF() {
   });
 }
 
-/* DOCX Export (HTML blob method â opens in Word) */
+/* DOCX Export (HTML blob method  —  opens in Word) */
 function exportDOCX() {
   var dc = document.getElementById('docC');
   if (dc.style.display==='none') { alert('Generate a document first.'); return; }
@@ -1180,7 +1180,8 @@ function exportPPTX() {
   pptx.author = currentUser ? currentUser.name : 'Noise Intelligence';
   pptx.company = 'Noise Media';
   pptx.title = title;
-  pptx.layout = 'LAYOUT_WIDE';
+  pptx.defineLayout({ name:'NOISE_LAYOUT', width:13.33, height:7.5 });
+  pptx.layout = 'NOISE_LAYOUT';
 
   pptx.defineSlideMaster({
     title: 'NOISE_MASTER',
@@ -1276,7 +1277,7 @@ function sr() { return currentUser ? currentUser.role : ''; }
 /* --- Document builders (keep these separate so chat responses stay clean) --- */
 function buildBrief(cn, cc) {
   const d = fmtDate();
-  return `<h1>${cn} â Content Brief</h1>
+  return `<h1>${cn}  —  Content Brief</h1>
 <div class="dm">Prepared by ${sn()} &middot; ${d} &middot; Noise Media</div>
 <h2>1. Overview</h2>
 <p><strong>Client:</strong> ${cn}<br><strong>Category:</strong> ${cc}<br><strong>Brief Type:</strong> Content Brief<br><strong>Prepared by:</strong> ${sn()} (${sr()})</p>
@@ -1311,16 +1312,16 @@ function buildEmail(cn, cc, type) {
   const d = fmtDate();
   let subj, body;
   if (type==='intro') {
-    subj = 'Introduction â Noise Media Ã ' + cn;
+    subj = 'Introduction  —  Noise Media x ' + cn;
     body = '<p>Hi [Contact Name],</p><p>My name is ' + sn() + ' and I\'m the ' + sr() + ' at Noise Media. I\'m thrilled to be working with ' + cn + ' and wanted to introduce myself as your point of contact.</p><p>We\'ve been doing some initial research into your brand and we\'re excited about the creative possibilities. I\'d love to schedule a quick call to discuss your key priorities, any upcoming campaigns, brand guidelines, and preferred ways of working.</p><p>Please feel free to share any materials you\'d like us to review ahead of our call.</p><p>Looking forward to getting started!</p>';
   } else if (type==='followup') {
-    subj = 'Following Up â ' + cn + ' Campaign Progress';
-    body = '<p>Hi [Contact Name],</p><p>Hope you\'re well! Just wanted to touch base regarding our current workstream for ' + cn + '.</p><p>Here\'s where things stand:</p><table><tr><th>Item</th><th>Status</th><th>Next Step</th></tr><tr><td>Creative assets</td><td>In progress</td><td>First drafts ready for review by [date]</td></tr><tr><td>Campaign strategy</td><td>Approved</td><td>Build out in Ads Manager</td></tr><tr><td>Content calendar</td><td>Draft</td><td>Awaiting client sign-off</td></tr></table><p>Happy to jump on a quick call if easier â just let me know what works.</p>';
+    subj = 'Following Up  —  ' + cn + ' Campaign Progress';
+    body = '<p>Hi [Contact Name],</p><p>Hope you\'re well! Just wanted to touch base regarding our current workstream for ' + cn + '.</p><p>Here\'s where things stand:</p><table><tr><th>Item</th><th>Status</th><th>Next Step</th></tr><tr><td>Creative assets</td><td>In progress</td><td>First drafts ready for review by [date]</td></tr><tr><td>Campaign strategy</td><td>Approved</td><td>Build out in Ads Manager</td></tr><tr><td>Content calendar</td><td>Draft</td><td>Awaiting client sign-off</td></tr></table><p>Happy to jump on a quick call if easier  —  just let me know what works.</p>';
   } else if (type==='update') {
-    subj = cn + ' â Campaign Status Update';
-    body = '<p>Hi [Contact Name],</p><p>Please find below your latest campaign status update for ' + cn + '.</p><table><tr><th>Campaign</th><th>Platform</th><th>Status</th></tr><tr><td>Awareness â Spring</td><td>Meta / TikTok</td><td>Live</td></tr><tr><td>Retargeting</td><td>Meta</td><td>In review</td></tr><tr><td>UGC Push</td><td>TikTok / IG Reels</td><td>Production</td></tr></table><p>Let me know if you have any questions.</p>';
+    subj = cn + '  —  Campaign Status Update';
+    body = '<p>Hi [Contact Name],</p><p>Please find below your latest campaign status update for ' + cn + '.</p><table><tr><th>Campaign</th><th>Platform</th><th>Status</th></tr><tr><td>Awareness  —  Spring</td><td>Meta / TikTok</td><td>Live</td></tr><tr><td>Retargeting</td><td>Meta</td><td>In review</td></tr><tr><td>UGC Push</td><td>TikTok / IG Reels</td><td>Production</td></tr></table><p>Let me know if you have any questions.</p>';
   } else {
-    subj = cn + (cc ? ' â ' + cc + ' | ' : ' â ') + 'Noise Media';
+    subj = cn + (cc ? '  —  ' + cc + ' | ' : '  —  ') + 'Noise Media';
     body = '<p>Hi [Contact Name],</p><p>I hope you\'re having a great week. I\'m reaching out regarding ' + cn + '.</p><p>[Your message here]</p><p>Could we schedule a quick call to discuss next steps? Happy to work around your availability.</p><p>Looking forward to hearing from you.</p>';
   }
   var se = currentUser ? currentUser.name.toLowerCase().replace(/\s/g,'.') + '@noisemedia.co.uk' : '[you]@noisemedia.co.uk';
@@ -1329,27 +1330,27 @@ function buildEmail(cn, cc, type) {
 
 function buildSocial(cn, cc) {
   const d = fmtDate();
-  return '<h1>' + cn + ' â Social Media Copy</h1><div class="dm">Prepared by ' + sn() + ' &middot; ' + d + ' &middot; Noise Media</div><h2>Post 1 â Hero / Awareness</h2><p><strong>Platform:</strong> Instagram Feed + Stories</p><p><strong>Caption:</strong> [Hero message about ' + cn + '. Lead with value, not sell. 1-2 sentences max.]</p><p>[Supporting line + CTA]</p><p><em>#' + cn.replace(/\s/g,'') + ' #NoiseMade</em></p><h2>Post 2 â Educational</h2><p><strong>Platform:</strong> TikTok / Reels</p><p><strong>Hook:</strong> "Did you know [surprising fact about ' + (cc||'the brand') + ']?"</p><p>[Teach something, tie back to product, CTA: Save this]</p><h2>Post 3 â UGC / Social Proof</h2><p><strong>Platform:</strong> IG / TikTok</p><p>[Real customer words. Brand response. Soft CTA.]</p><h2>Scheduling</h2><table><tr><th>Post</th><th>Day</th><th>Time</th></tr><tr><td>1</td><td>Tue/Thu</td><td>11-13:00</td></tr><tr><td>2</td><td>Wed/Fri</td><td>18-20:00</td></tr><tr><td>3</td><td>Sat</td><td>10-12:00</td></tr></table>';
+  return '<h1>' + cn + '  —  Social Media Copy</h1><div class="dm">Prepared by ' + sn() + ' &middot; ' + d + ' &middot; Noise Media</div><h2>Post 1  —  Hero / Awareness</h2><p><strong>Platform:</strong> Instagram Feed + Stories</p><p><strong>Caption:</strong> [Hero message about ' + cn + '. Lead with value, not sell. 1-2 sentences max.]</p><p>[Supporting line + CTA]</p><p><em>#' + cn.replace(/\s/g,'') + ' #NoiseMade</em></p><h2>Post 2  —  Educational</h2><p><strong>Platform:</strong> TikTok / Reels</p><p><strong>Hook:</strong> "Did you know [surprising fact about ' + (cc||'the brand') + ']?"</p><p>[Teach something, tie back to product, CTA: Save this]</p><h2>Post 3  —  UGC / Social Proof</h2><p><strong>Platform:</strong> IG / TikTok</p><p>[Real customer words. Brand response. Soft CTA.]</p><h2>Scheduling</h2><table><tr><th>Post</th><th>Day</th><th>Time</th></tr><tr><td>1</td><td>Tue/Thu</td><td>11-13:00</td></tr><tr><td>2</td><td>Wed/Fri</td><td>18-20:00</td></tr><tr><td>3</td><td>Sat</td><td>10-12:00</td></tr></table>';
 }
 
 function buildProposal(cn) {
   const d = fmtDate();
-  return '<h1>Proposal â Noise Media Ã ' + cn + '</h1><div class="dm">Prepared by ' + sn() + ' &middot; ' + d + '</div><h2>1. About Noise Media</h2><p>Creative agency specialising in paid social, content production, and brand storytelling.</p><h2>2. Your Needs</h2><p>[To be completed after discovery call]</p><h2>3. Services</h2><table><tr><th>Service</th><th>Description</th></tr><tr><td>Content Strategy</td><td>Audience research, platform strategy, content pillars</td></tr><tr><td>Creative Production</td><td>Video, photography, design</td></tr><tr><td>Paid Social</td><td>Campaign setup, optimisation, reporting</td></tr><tr><td>UGC / Influencer</td><td>Creator sourcing, briefing, content rights</td></tr></table><h2>4. Investment</h2><table><tr><th>Package</th><th>Scope</th><th>Monthly</th></tr><tr><td>Starter</td><td>Strategy + 8 posts + reporting</td><td>Â£2,500</td></tr><tr><td>Growth</td><td>+ paid media mgmt + 16 posts</td><td>Â£5,000</td></tr><tr><td>Full Service</td><td>All services + video + UGC</td><td>Â£8,500+</td></tr></table><p><em>Media spend additional. Prices ex. VAT.</em></p><h2>5. Next Steps</h2><ol><li>Discovery call</li><li>Tailored scope & timeline</li><li>Contract & onboarding</li><li>Kick-off</li></ol>';
+  return '<h1>Proposal  —  Noise Media x ' + cn + '</h1><div class="dm">Prepared by ' + sn() + ' &middot; ' + d + '</div><h2>1. About Noise Media</h2><p>Creative agency specialising in paid social, content production, and brand storytelling.</p><h2>2. Your Needs</h2><p>[To be completed after discovery call]</p><h2>3. Services</h2><table><tr><th>Service</th><th>Description</th></tr><tr><td>Content Strategy</td><td>Audience research, platform strategy, content pillars</td></tr><tr><td>Creative Production</td><td>Video, photography, design</td></tr><tr><td>Paid Social</td><td>Campaign setup, optimisation, reporting</td></tr><tr><td>UGC / Influencer</td><td>Creator sourcing, briefing, content rights</td></tr></table><h2>4. Investment</h2><table><tr><th>Package</th><th>Scope</th><th>Monthly</th></tr><tr><td>Starter</td><td>Strategy + 8 posts + reporting</td><td>£2,500</td></tr><tr><td>Growth</td><td>+ paid media mgmt + 16 posts</td><td>£5,000</td></tr><tr><td>Full Service</td><td>All services + video + UGC</td><td>£8,500+</td></tr></table><p><em>Media spend additional. Prices ex. VAT.</em></p><h2>5. Next Steps</h2><ol><li>Discovery call</li><li>Tailored scope & timeline</li><li>Contract & onboarding</li><li>Kick-off</li></ol>';
 }
 
 function buildCost(cn) {
   const d = fmtDate();
-  return '<h1>' + cn + ' â Cost Allocation</h1><div class="dm">Prepared by ' + sn() + ' &middot; ' + d + '</div><h2>Cost Breakdown</h2><table><tr><th>Line Item</th><th>Cost</th></tr><tr><td>Strategy & Planning</td><td>Â£1,200</td></tr><tr><td>Creative Production</td><td>Â£2,500</td></tr><tr><td>UGC Management</td><td>Â£800</td></tr><tr><td>Paid Media Mgmt</td><td>Â£1,500</td></tr><tr><td>Media Spend</td><td>TBC</td></tr></table><h3>Total Agency Fee: Â£6,000 + media</h3><h2>Team Hours</h2><table><tr><th>Person</th><th>Role</th><th>Hours</th><th>Rate</th></tr><tr><td>Sam</td><td>Operations</td><td>4</td><td>Â£150/hr</td></tr><tr><td>Mike</td><td>Production</td><td>8</td><td>Â£125/hr</td></tr><tr><td>Adam/Luke</td><td>Motion</td><td>16</td><td>Â£100/hr</td></tr><tr><td>Dan</td><td>Paid Media</td><td>12</td><td>Â£100/hr</td></tr><tr><td>Louise</td><td>Account</td><td>6</td><td>Â£100/hr</td></tr></table>';
+  return '<h1>' + cn + '  —  Cost Allocation</h1><div class="dm">Prepared by ' + sn() + ' &middot; ' + d + '</div><h2>Cost Breakdown</h2><table><tr><th>Line Item</th><th>Cost</th></tr><tr><td>Strategy & Planning</td><td>£1,200</td></tr><tr><td>Creative Production</td><td>£2,500</td></tr><tr><td>UGC Management</td><td>£800</td></tr><tr><td>Paid Media Mgmt</td><td>£1,500</td></tr><tr><td>Media Spend</td><td>TBC</td></tr></table><h3>Total Agency Fee: £6,000 + media</h3><h2>Team Hours</h2><table><tr><th>Person</th><th>Role</th><th>Hours</th><th>Rate</th></tr><tr><td>Sam</td><td>Operations</td><td>4</td><td>£150/hr</td></tr><tr><td>Mike</td><td>Production</td><td>8</td><td>£125/hr</td></tr><tr><td>Adam/Luke</td><td>Motion</td><td>16</td><td>£100/hr</td></tr><tr><td>Dan</td><td>Paid Media</td><td>12</td><td>£100/hr</td></tr><tr><td>Louise</td><td>Account</td><td>6</td><td>£100/hr</td></tr></table>';
 }
 
 function buildReport(cn) {
   const d = fmtDate();
-  return '<h1>' + cn + ' â Performance Report</h1><div class="dm">Prepared by ' + sn() + ' &middot; ' + d + '</div><h2>Key Metrics</h2><table><tr><th>Metric</th><th>This Period</th><th>Previous</th><th>Change</th></tr><tr><td>Impressions</td><td>â</td><td>â</td><td>â</td></tr><tr><td>Reach</td><td>â</td><td>â</td><td>â</td></tr><tr><td>Engagement Rate</td><td>â</td><td>â</td><td>â</td></tr><tr><td>Link Clicks</td><td>â</td><td>â</td><td>â</td></tr><tr><td>CPC</td><td>â</td><td>â</td><td>â</td></tr></table><h2>Top Creative</h2><p>[Insert top 3 creatives with performance data]</p><h2>Recommendations</h2><ul><li>Scale top-performing ad sets</li><li>Test new creative formats</li><li>Review audience targeting</li></ul>';
+  return '<h1>' + cn + '  —  Performance Report</h1><div class="dm">Prepared by ' + sn() + ' &middot; ' + d + '</div><h2>Key Metrics</h2><table><tr><th>Metric</th><th>This Period</th><th>Previous</th><th>Change</th></tr><tr><td>Impressions</td><td> — </td><td> — </td><td> — </td></tr><tr><td>Reach</td><td> — </td><td> — </td><td> — </td></tr><tr><td>Engagement Rate</td><td> — </td><td> — </td><td> — </td></tr><tr><td>Link Clicks</td><td> — </td><td> — </td><td> — </td></tr><tr><td>CPC</td><td> — </td><td> — </td><td> — </td></tr></table><h2>Top Creative</h2><p>[Insert top 3 creatives with performance data]</p><h2>Recommendations</h2><ul><li>Scale top-performing ad sets</li><li>Test new creative formats</li><li>Review audience targeting</li></ul>';
 }
 
 function buildAgenda(cn) {
   const d = fmtDate();
-  return '<h1>' + cn + ' â Meeting Agenda</h1><div class="dm">' + sn() + ' &middot; ' + d + '</div><table><tr><th>Detail</th><th></th></tr><tr><td>Date</td><td>[Date & Time]</td></tr><tr><td>Attendees</td><td>' + sn() + ' (Noise), [Client]</td></tr><tr><td>Duration</td><td>30 min</td></tr></table><h2>Agenda</h2><table><tr><th>#</th><th>Topic</th><th>Owner</th><th>Time</th></tr><tr><td>1</td><td>Welcome</td><td>' + sn() + '</td><td>2 min</td></tr><tr><td>2</td><td>Campaign performance</td><td>Dan</td><td>5 min</td></tr><tr><td>3</td><td>Creative update</td><td>Beau</td><td>5 min</td></tr><tr><td>4</td><td>Content calendar</td><td>' + sn() + '</td><td>8 min</td></tr><tr><td>5</td><td>Client feedback</td><td>[Client]</td><td>5 min</td></tr><tr><td>6</td><td>Actions & next steps</td><td>All</td><td>5 min</td></tr></table><h2>Action Items</h2><table><tr><th>Action</th><th>Owner</th><th>Due</th></tr><tr><td>[To be completed]</td><td></td><td></td></tr></table>';
+  return '<h1>' + cn + '  —  Meeting Agenda</h1><div class="dm">' + sn() + ' &middot; ' + d + '</div><table><tr><th>Detail</th><th></th></tr><tr><td>Date</td><td>[Date & Time]</td></tr><tr><td>Attendees</td><td>' + sn() + ' (Noise), [Client]</td></tr><tr><td>Duration</td><td>30 min</td></tr></table><h2>Agenda</h2><table><tr><th>#</th><th>Topic</th><th>Owner</th><th>Time</th></tr><tr><td>1</td><td>Welcome</td><td>' + sn() + '</td><td>2 min</td></tr><tr><td>2</td><td>Campaign performance</td><td>Dan</td><td>5 min</td></tr><tr><td>3</td><td>Creative update</td><td>Beau</td><td>5 min</td></tr><tr><td>4</td><td>Content calendar</td><td>' + sn() + '</td><td>8 min</td></tr><tr><td>5</td><td>Client feedback</td><td>[Client]</td><td>5 min</td></tr><tr><td>6</td><td>Actions & next steps</td><td>All</td><td>5 min</td></tr></table><h2>Action Items</h2><table><tr><th>Action</th><th>Owner</th><th>Due</th></tr><tr><td>[To be completed]</td><td></td><td></td></tr></table>';
 }
 
 function buildPresentation(cn, cc, topic) {
@@ -1373,7 +1374,7 @@ function buildPresentation(cn, cc, topic) {
     '<h2>1. Overview & Objectives</h2>' +
     '<p><strong>Client:</strong> ' + cn + (cc ? ' (' + cc + ')' : '') + '</p>' +
     '<p><strong>Objective:</strong> [Define the primary campaign/project objective]</p>' +
-    '<p><strong>KPIs:</strong> [Reach, Engagement Rate, Conversions, ROAS â set targets]</p>' +
+    '<p><strong>KPIs:</strong> [Reach, Engagement Rate, Conversions, ROAS  —  set targets]</p>' +
     '<h2>2. Strategy & Approach</h2>' +
     '<p><strong>Target Audience:</strong> [Demographics, interests, behaviours]</p>' +
     '<p><strong>Key Insight:</strong> [The consumer truth driving this campaign]</p>' +
@@ -1383,23 +1384,23 @@ function buildPresentation(cn, cc, topic) {
     '<p><strong>Tone of Voice:</strong> [Brand voice direction]</p>' +
     '<p><strong>Content Formats:</strong></p>' +
     '<table><tr><th>Format</th><th>Platform</th><th>Quantity</th></tr>' +
-    '<tr><td>Short-form Video (Reels/TikTok)</td><td>Instagram, TikTok</td><td>â</td></tr>' +
-    '<tr><td>Static Posts</td><td>Instagram, Facebook</td><td>â</td></tr>' +
-    '<tr><td>Stories</td><td>Instagram</td><td>â</td></tr>' +
-    '<tr><td>UGC Content</td><td>All platforms</td><td>â</td></tr></table>' +
+    '<tr><td>Short-form Video (Reels/TikTok)</td><td>Instagram, TikTok</td><td> — </td></tr>' +
+    '<tr><td>Static Posts</td><td>Instagram, Facebook</td><td> — </td></tr>' +
+    '<tr><td>Stories</td><td>Instagram</td><td> — </td></tr>' +
+    '<tr><td>UGC Content</td><td>All platforms</td><td> — </td></tr></table>' +
     '<h2>4. Channel Plan</h2>' +
     '<table><tr><th>Channel</th><th>Role</th><th>Budget Split</th></tr>' +
-    '<tr><td>Instagram (Organic)</td><td>Brand awareness & community</td><td>â</td></tr>' +
-    '<tr><td>Instagram (Paid)</td><td>Reach & conversions</td><td>â</td></tr>' +
-    '<tr><td>TikTok</td><td>Discovery & engagement</td><td>â</td></tr>' +
-    '<tr><td>Facebook</td><td>Retargeting & conversions</td><td>â</td></tr></table>' +
+    '<tr><td>Instagram (Organic)</td><td>Brand awareness & community</td><td> — </td></tr>' +
+    '<tr><td>Instagram (Paid)</td><td>Reach & conversions</td><td> — </td></tr>' +
+    '<tr><td>TikTok</td><td>Discovery & engagement</td><td> — </td></tr>' +
+    '<tr><td>Facebook</td><td>Retargeting & conversions</td><td> — </td></tr></table>' +
     '<h2>5. Timeline & Budget</h2>' +
     '<table><tr><th>Phase</th><th>Dates</th><th>Activity</th></tr>' +
     '<tr><td>Phase 1: Pre-launch</td><td>[Dates]</td><td>Strategy, creative production, asset prep</td></tr>' +
     '<tr><td>Phase 2: Launch</td><td>[Dates]</td><td>Content rollout, paid activation</td></tr>' +
     '<tr><td>Phase 3: Optimise</td><td>[Dates]</td><td>Performance review, creative refresh</td></tr>' +
     '<tr><td>Phase 4: Report</td><td>[Dates]</td><td>Wrap-up report, learnings</td></tr></table>' +
-    '<p><strong>Total Budget:</strong> Â£[TBC] (Agency fee + Media spend)</p>' +
+    '<p><strong>Total Budget:</strong> £[TBC] (Agency fee + Media spend)</p>' +
     '<h2>6. Next Steps</h2>' +
     '<table><tr><th>Action</th><th>Owner</th><th>Due</th></tr>' +
     '<tr><td>Client approval on strategy</td><td>[Client]</td><td>[Date]</td></tr>' +
@@ -1431,13 +1432,13 @@ function getResponse(q) {
   }
 
   if (ql.match(/social|caption|post.*for|instagram|tiktok|reel|content.*cal|copy.*for/))
-    return { chat: 'Social copy for <strong>' + cn + '</strong> is in the doc panel â 3 posts covering awareness, education, and UGC with scheduling suggestions.', doc: buildSocial(cn, cc) };
+    return { chat: 'Social copy for <strong>' + cn + '</strong> is in the doc panel  —  3 posts covering awareness, education, and UGC with scheduling suggestions.', doc: buildSocial(cn, cc) };
 
   if (ql.match(/presentation|ppt|pptx|slide|deck|pitch.*deck/))
-    return { chat: 'Presentation for <strong>' + cn + '</strong> is ready in the document panel â full Noise-branded deck with strategy, creative, channel plan, and timeline. Edit the content, then hit .pptx to export.', doc: buildPresentation(cn, cc) };
+    return { chat: 'Presentation for <strong>' + cn + '</strong> is ready in the document panel  —  full Noise-branded deck with strategy, creative, channel plan, and timeline. Edit the content, then hit .pptx to export.', doc: buildPresentation(cn, cc) };
 
   if (ql.match(/proposal|pitch|scope.*work|sow/))
-    return { chat: 'Proposal for <strong>' + cn + '</strong> is ready â includes services, pricing tiers, and next steps. Edit and export to share.', doc: buildProposal(cn) };
+    return { chat: 'Proposal for <strong>' + cn + '</strong> is ready  —  includes services, pricing tiers, and next steps. Edit and export to share.', doc: buildProposal(cn) };
 
   if (ql.match(/agenda|meeting.*note|call.*prep|kick.?off/))
     return { chat: 'Meeting agenda for <strong>' + cn + '</strong> is in the document panel. Add the date and any specific talking points.', doc: buildAgenda(cn) };
@@ -1466,14 +1467,14 @@ function getResponse(q) {
     return { chat: 'Good ' + (new Date().getHours() < 12 ? 'morning' : new Date().getHours() < 17 ? 'afternoon' : 'evening') + ', ' + un + '! What do you need?', doc: null };
 
   if (ql.match(/how are you|you alright|you good|you ok/))
-    return { chat: 'All good here! Ready to help â what do you need?', doc: null };
+    return { chat: 'All good here! Ready to help  —  what do you need?', doc: null };
 
   if (ql.match(/what.*your name|who are you|what are you/))
-    return { chat: 'I\'m Noise Intelligence â the agency knowledge hub. I know all ' + CL.length + ' clients, every asset we\'ve catalogued, and the full team. Ask me anything or tell me to create a document.', doc: null };
+    return { chat: 'I\'m Noise Intelligence  —  the agency knowledge hub. I know all ' + CL.length + ' clients, every asset we\'ve catalogued, and the full team. Ask me anything or tell me to create a document.', doc: null };
 
   // --- Help ---
   if (ql.match(/help|what can you|what do you do|capabilities|what.*you.*know/))
-    return { chat: 'I know all ' + CL.length + ' of our clients, their ' + totalAssets + '+ catalogued assets, campaign history, and Drive folders. I also know the full team. You can ask me things like "what do we have for Davines?" or "who handles motion?" â or tell me to write an email, brief, social copy, presentation, report, proposal, cost allocation, or meeting agenda for any client.', doc: null };
+    return { chat: 'I know all ' + CL.length + ' of our clients, their ' + totalAssets + '+ catalogued assets, campaign history, and Drive folders. I also know the full team. You can ask me things like "what do we have for Davines?" or "who handles motion?"  —  or tell me to write an email, brief, social copy, presentation, report, proposal, cost allocation, or meeting agenda for any client.', doc: null };
 
   // --- Client count ---
   if (ql.match(/how many.*client|total.*client|client.*count/))
@@ -1514,7 +1515,7 @@ function getResponse(q) {
 
   // --- About Noise ---
   if (ql.match(/what do we do|about noise|what.*noise.*do|our services|what services|what.*we.*offer/))
-    return { chat: 'Noise Media is a creative agency specialising in paid social, content production, and brand storytelling. We do content strategy, creative production, paid social management, UGC/influencer campaigns, and community management â currently working with ' + CL.length + ' clients across beauty, drinks, fintech, hospitality, and more.', doc: null };
+    return { chat: 'Noise Media is a creative agency specialising in paid social, content production, and brand storytelling. We do content strategy, creative production, paid social management, UGC/influencer campaigns, and community management  —  currently working with ' + CL.length + ' clients across beauty, drinks, fintech, hospitality, and more.', doc: null };
 
   // --- Category / sector ---
   if (ql.match(/beauty|drinks|fintech|hospitality|food|fashion|tech|energy|entertainment|luxury|automotive|travel|storage|skincare|haircare/)) {
@@ -1527,25 +1528,25 @@ function getResponse(q) {
 
   // --- Specific client (ready) ---
   if (cm && cm.s==='r')
-    return { chat: '<strong>' + cm.n + '</strong> â ' + cm.cat + '. ' + cm.sum + '<br><br>' + cm.a + ' assets, ' + cm.c + ' campaigns. Want me to create something for them?', doc: null };
+    return { chat: '<strong>' + cm.n + '</strong>  —  ' + cm.cat + '. ' + cm.sum + '<br><br>' + cm.a + ' assets, ' + cm.c + ' campaigns. Want me to create something for them?', doc: null };
 
   // --- Specific client (inventoried) ---
   if (cm && cm.s==='i') {
-    var r = '<strong>' + cm.n + '</strong> â ' + cm.cat + '. Inventoried from Drive';
+    var r = '<strong>' + cm.n + '</strong>  —  ' + cm.cat + '. Inventoried from Drive';
     if (cm.f && cm.f.length) r += ' (' + cm.f.length + ' folders: ' + cm.f.join(', ') + ')';
-    r += '. Not fully ingested yet â I have the folder structure but not individual files.';
+    r += '. Not fully ingested yet  —  I have the folder structure but not individual files.';
     return { chat: r, doc: null };
   }
 
   // --- Vague / conversational fallbacks ---
   if (ql.match(/i need|can you|could you|i want|please|would you/))
-    return { chat: 'Of course â what do you need? If it\'s about a specific client, just mention their name and I\'ll pull up everything I know.', doc: null };
+    return { chat: 'Of course  —  what do you need? If it\'s about a specific client, just mention their name and I\'ll pull up everything I know.', doc: null };
 
   if (ql.match(/idea|suggest|recommend|what should/))
     return { chat: 'What client or project are you thinking about? I can pull up their assets and campaigns, or help you draft something.', doc: null };
 
   if (ql.match(/busy|deadline|stressed|rush|urgent/))
-    return { chat: 'Let\'s get it done â which client and what do you need? I can generate docs fast.', doc: null };
+    return { chat: 'Let\'s get it done  —  which client and what do you need? I can generate docs fast.', doc: null };
 
   // --- True fallback ---
   return { chat: 'Not sure I caught that, ' + un + '. Try mentioning a client name, or ask me something like "what assets do we have for Davines?" or "write an email to BARBRI."', doc: null };
@@ -1561,7 +1562,7 @@ function showSettings() {
   bg.innerHTML = '<div class="modal"><h3>AI Settings</h3>' +
     '<p>Connect a Claude API key to enable fully conversational AI. Without it, the bot uses a built-in keyword engine (limited).</p>' +
     '<input type="password" id="apiKeyInput" placeholder="sk-ant-api03-..." value="' + (AI_KEY || '') + '">' +
-    '<p style="font-size:11px;color:var(--text-muted)">Your key stays in this browser session only â it\'s never stored or sent anywhere except Anthropic\'s API.</p>' +
+    '<p style="font-size:11px;color:var(--text-muted)">Your key stays in this browser session only  —  it\'s never stored or sent anywhere except Anthropic\'s API.</p>' +
     '<div class="modal-btns">' +
     '<button class="btn-cancel" onclick="this.closest(\'.modal-bg\').remove()">Cancel</button>' +
     '<button class="btn-save" onclick="saveApiKey()">Save</button>' +

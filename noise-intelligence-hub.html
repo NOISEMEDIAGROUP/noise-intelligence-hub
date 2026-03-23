@@ -1006,13 +1006,14 @@ function removeTyping() { var el = document.getElementById('typ'); if (el) el.re
 
 /* Helper: process a response for any chat surface */
 async function processMsg(text) {
-  if (AI_KEY) {
-    var aiResp = await callClaude(text);
-    return aiResp || getResponse(text);
-  } else {
-    await new Promise(function(r) { setTimeout(r, 400); });
-    return getResponse(text);
+  if (AI_KEY && AI_KEY.length > 10) {
+    try {
+      var aiResp = await callClaude(text);
+      if (aiResp && aiResp.chat) return aiResp;
+    } catch(e) { console.warn('AI fallback:', e.message); }
   }
+  await new Promise(function(r) { setTimeout(r, 300 + Math.random() * 300); });
+  return getResponse(text);
 }
 
 /* Hub chat (primary surface) */
@@ -1066,7 +1067,7 @@ async function hubSend() {
 }
 
 /* ============ AI CONFIG ============ */
-let AI_KEY = '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';
+let AI_KEY = '';
 let conversationHistory = []; // for Claude API context
 
 /* ============ STRATEGY KNOWLEDGE BASE ============ */
@@ -1171,24 +1172,34 @@ function buildSystemPrompt() {
 }
 
 async function aiCall(sysPrompt, msgs, maxTok) {
-  var res = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': AI_KEY,
-      'anthropic-version': '2023-06-01',
-      'anthropic-dangerous-direct-browser-access': 'true'
-    },
-    body: JSON.stringify({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: maxTok || 400,
-      system: sysPrompt,
-      messages: msgs
-    })
-  });
-  var data = await res.json();
-  if (data.content && data.content[0]) return data.content[0].text;
-  return null;
+  var controller = new AbortController();
+  var timeout = setTimeout(function() { controller.abort(); }, 10000);
+  try {
+    var res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      signal: controller.signal,
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': AI_KEY,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: maxTok || 400,
+        system: sysPrompt,
+        messages: msgs
+      })
+    });
+    clearTimeout(timeout);
+    var data = await res.json();
+    if (data.content && data.content[0]) return data.content[0].text;
+    return null;
+  } catch(e) {
+    clearTimeout(timeout);
+    console.warn('AI call failed:', e.message);
+    return null;
+  }
 }
 
 function docWriterPrompt(docType) {

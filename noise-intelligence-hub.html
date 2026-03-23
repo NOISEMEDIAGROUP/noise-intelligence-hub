@@ -465,6 +465,24 @@
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
   ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+  /* ============ EDIT TOOLBAR ============ */
+  .edit-toolbar {
+    display: none; padding: 6px 12px; background: var(--surface2);
+    border-bottom: 1px solid var(--border); gap: 4px; flex-wrap: wrap; align-items: center;
+  }
+  .edit-toolbar.active { display: flex; }
+  .edit-toolbar button {
+    padding: 4px 8px; border: 1px solid var(--border); border-radius: 4px;
+    background: var(--surface); cursor: pointer; font-size: 12px; font-weight: 600;
+    color: var(--text-muted); transition: all 0.15s; font-family: inherit; line-height: 1;
+  }
+  .edit-toolbar button:hover { border-color: var(--accent); color: var(--text); }
+  .edit-toolbar .tb-sep { width: 1px; height: 20px; background: var(--border); margin: 0 4px; }
+  .edit-toolbar input[type="color"] {
+    width: 24px; height: 24px; border: 1px solid var(--border); border-radius: 4px;
+    cursor: pointer; padding: 0; background: none;
+  }
 </style>
 </head>
 <body>
@@ -539,7 +557,26 @@
         <button class="dt-btn" onclick="exportDOCX()" style="background:#2B579A;color:white;border-color:#2B579A;">.docx</button>
         <button class="dt-btn gs" onclick="exportXLSX()">.xlsx</button>
         <button class="dt-btn gsl" onclick="exportPPTX()">.pptx</button>
+        <button class="dt-btn" onclick="saveToDrive()" style="background:#4285F4;color:white;border-color:#4285F4;" title="Open in Google Docs">&#9729; Drive</button>
       </div>
+    </div>
+    <div class="edit-toolbar" id="editToolbar">
+      <button onclick="execFmt('bold')" title="Bold"><b>B</b></button>
+      <button onclick="execFmt('italic')" title="Italic"><i>I</i></button>
+      <button onclick="execFmt('underline')" title="Underline"><u>U</u></button>
+      <div class="tb-sep"></div>
+      <button onclick="execFmt('formatBlock','h1')" title="Heading 1">H1</button>
+      <button onclick="execFmt('formatBlock','h2')" title="Heading 2">H2</button>
+      <button onclick="execFmt('formatBlock','h3')" title="Heading 3">H3</button>
+      <button onclick="execFmt('formatBlock','p')" title="Paragraph">P</button>
+      <div class="tb-sep"></div>
+      <button onclick="execFmt('justifyLeft')" title="Align Left">&#9776;</button>
+      <button onclick="execFmt('justifyCenter')" title="Align Center">&#8801;</button>
+      <button onclick="execFmt('justifyRight')" title="Align Right">&#9776;</button>
+      <div class="tb-sep"></div>
+      <input type="color" id="tbColor" value="#1B1B1B" onchange="execFmt('foreColor', this.value)" title="Text Colour">
+      <button onclick="insertEditTable()" title="Insert Table">Table</button>
+      <button onclick="execFmt('insertUnorderedList')" title="Bullet List">&#8226; List</button>
     </div>
     <div class="p2-dc">
       <button class="slide-nav slide-prev disabled" id="slidePrev" onclick="slideGo(-1)">&#8249;</button>
@@ -1205,7 +1242,7 @@ async function aiCall(sysPrompt, msgs, maxTok) {
 function docWriterPrompt(docType) {
   var un = currentUser ? currentUser.name : 'Team Member';
   var ur = currentUser ? currentUser.role : '';
-  var se = currentUser ? currentUser.name.toLowerCase().replace(/\s/g,'.') + '@noisemedia.co.uk' : 'hello@noisemedia.co.uk';
+  var se = currentUser ? currentUser.name.toLowerCase().replace(/\s/g,'.') + '@noisemediagroup.co.uk' : 'hello@noisemediagroup.co.uk';
   var teamInfo = TEAM.map(function(t) { return t.name + ' — ' + t.role; }).join(', ');
   var base = 'You are a document writer for Noise Media, a creative agency specialising in paid social, content production, and brand storytelling. Write on behalf of ' + un + ' (' + ur + ', email: ' + se + '). Write complete, professional, ready-to-send content — NOT templates with placeholders. Use real names, real details from context. Be warm, professional, and concise.\n\nTeam: ' + teamInfo + '\n\n';
 
@@ -1392,7 +1429,7 @@ function showSlides(html, dc) {
     '<h1>' + titleName + '</h1>' +
     '<p class="sub">' + titleSub + '</p>' +
     '<div class="meta">' + titleMeta + '</div>' +
-    '<div class="slide-footer">noisemedia.co.uk</div>'
+    '<div class="slide-footer">noisemediagroup.co.uk</div>'
   );
   slideTypes.push('slide-title');
 
@@ -1419,7 +1456,7 @@ function showSlides(html, dc) {
   /* End slide */
   slidePages.push(
     '<div class="noise-end">NOISE<span>.</span></div>' +
-    '<div class="url">noisemedia.co.uk</div>'
+    '<div class="url">noisemediagroup.co.uk</div>'
   );
   slideTypes.push('slide-end');
 
@@ -1457,12 +1494,23 @@ function slideGo(dir) {
 }
 
 function togEdit() {
-  const p = document.getElementById('docP');
-  const on = p.contentEditable === 'true';
+  var p = document.getElementById('docP');
+  var on = p.contentEditable === 'true';
   p.contentEditable = on ? 'false' : 'true';
   document.getElementById('dtEdit').classList.toggle('active');
   document.getElementById('dtPrev').classList.toggle('active');
+  document.getElementById('editToolbar').classList.toggle('active', !on);
   if (!on) p.focus();
+}
+
+function execFmt(cmd, val) {
+  if (cmd === 'formatBlock') val = '<' + val + '>';
+  document.execCommand(cmd, false, val || null);
+}
+
+function insertEditTable() {
+  var html = '<table><tr><th>Column 1</th><th>Column 2</th><th>Column 3</th></tr><tr><td>—</td><td>—</td><td>—</td></tr><tr><td>—</td><td>—</td><td>—</td></tr></table>';
+  document.execCommand('insertHTML', false, html);
 }
 
 function copyDoc() {
@@ -1570,7 +1618,7 @@ function exportPPTX() {
   slide1.addText(h1 ? h1.textContent : title, { x: 0.8, y: 2.0, w: 11, h: 1.5, fontSize: 32, color: 'FFFFFF', fontFace: 'Calibri', bold: true, valign: 'middle' });
   var dm = dc.querySelector('.dm');
   if (dm) slide1.addText(dm.textContent, { x: 0.8, y: 3.6, w: 8, h: 0.5, fontSize: 12, color: '888888', fontFace: 'Calibri' });
-  slide1.addText('noisemedia.co.uk', { x: 0.8, y: 6.6, w: 3, h: 0.3, fontSize: 9, color: '666666', fontFace: 'Calibri' });
+  slide1.addText('noisemediagroup.co.uk', { x: 0.8, y: 6.6, w: 3, h: 0.3, fontSize: 9, color: '666666', fontFace: 'Calibri' });
 
   // Content slides — one per h2 section
   var sections = dc.querySelectorAll('h2');
@@ -1653,9 +1701,26 @@ function exportPPTX() {
   endSlide.background = { color: '1B1B1B' };
   endSlide.addShape(pptx.shapes.RECTANGLE, { x: 0, y: 0, w: 0.12, h: '100%', fill: { color: 'C73C1E' } });
   endSlide.addText('NOISE.', { x: 0, y: 2.5, w: 13.33, h: 1.2, fontSize: 42, color: 'FFFFFF', fontFace: 'Calibri', bold: true, align: 'center' });
-  endSlide.addText('noisemedia.co.uk', { x: 0, y: 3.7, w: 13.33, h: 0.5, fontSize: 13, color: '888888', fontFace: 'Calibri', align: 'center' });
+  endSlide.addText('noisemediagroup.co.uk', { x: 0, y: 3.7, w: 13.33, h: 0.5, fontSize: 13, color: '888888', fontFace: 'Calibri', align: 'center' });
 
   pptx.writeFile({ fileName: title + '.pptx' });
+}
+
+function saveToDrive() {
+  var dc = document.getElementById('docC');
+  if (dc.style.display==='none') { alert('Generate a document first.'); return; }
+  var title = getDocTitle();
+  var html = '<!DOCTYPE html><html><head><meta charset="utf-8"><style>body{font-family:Calibri,sans-serif;font-size:11pt;line-height:1.6;color:#1B1B1B;max-width:700px;margin:0 auto;padding:20px;}h1{font-size:18pt;margin-bottom:4px;}h2{font-size:14pt;margin-top:16px;border-bottom:1px solid #ddd;padding-bottom:4px;}table{width:100%;border-collapse:collapse;margin:10px 0;}th,td{border:1px solid #ccc;padding:6px 10px;font-size:10pt;}th{background:#f5f5f5;font-weight:bold;}</style></head><body>' + dc.innerHTML + '</body></html>';
+  var blob = new Blob([html], { type: 'text/html' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = title + '.html';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  alert('File downloaded! Open it in Google Drive:\n1. Go to drive.google.com\n2. Click "+ New" → "File upload"\n3. Upload the downloaded file\n4. Right-click → "Open with" → "Google Docs"');
 }
 
 /* ============ RESPONSE ENGINE ============ */
@@ -1726,7 +1791,7 @@ function buildEmail(cn, cc, type) {
     subj = cn + (cc ? ' — ' + cc + ' | ' : ' — ') + 'Noise Media';
     body = '<p>Hi [Contact Name],</p><p>I hope you\'re having a great week. I\'m reaching out regarding ' + cn + '.</p><p>[Your message here]</p><p>Could we schedule a quick call to discuss next steps? Happy to work around your availability.</p><p>Looking forward to hearing from you.</p>';
   }
-  var se = currentUser ? currentUser.name.toLowerCase().replace(/\s/g,'.') + '@noisemedia.co.uk' : '[you]@noisemedia.co.uk';
+  var se = currentUser ? currentUser.name.toLowerCase().replace(/\s/g,'.') + '@noisemediagroup.co.uk' : '[you]@noisemediagroup.co.uk';
   return '<div style="max-width:640px;margin:0 auto;"><div style="background:var(--surface2);padding:16px 20px;border-radius:8px;margin-bottom:20px;font-size:13px;"><div><strong>From:</strong> ' + sn() + ' &lt;' + se + '&gt;</div><div><strong>To:</strong> [Contact Name] &lt;[email]&gt;</div><div><strong>Subject:</strong> ' + subj + '</div><div><strong>Date:</strong> ' + d + '</div></div>' + body + '<p>Best regards,<br><strong>' + sn() + '</strong><br>' + sr() + '<br>Noise Media</p></div>';
 }
 
@@ -1811,7 +1876,7 @@ function buildPresentation(cn, cc, topic) {
     '<tr><td>Campaign go-live</td><td>Noise</td><td>[Date]</td></tr></table>' +
     '<div style="background:#1B1B1B;color:white;padding:40px 48px;margin:32px -20px -20px -20px;border-radius:4px;text-align:center;">' +
       '<div style="font-family:Reddit Mono,monospace;font-size:18px;font-weight:700;letter-spacing:2px;">NOISE<span style="color:#C73C1E;">.</span></div>' +
-      '<div style="font-size:12px;color:rgba(255,255,255,0.4);margin-top:8px;">noisemedia.co.uk</div>' +
+      '<div style="font-size:12px;color:rgba(255,255,255,0.4);margin-top:8px;">noisemediagroup.co.uk</div>' +
     '</div>' +
   '</div>';
 }
@@ -2118,7 +2183,7 @@ function updateAiBadge() {
     el.id = 'aiBadge';
     document.querySelector('.header-title').appendChild(el);
   }
-  if (AI_KEY) {
+  if (AI_KEY && AI_KEY.length > 10) {
     el.className = 'ai-badge ai-on';
     el.textContent = 'AI';
   } else {

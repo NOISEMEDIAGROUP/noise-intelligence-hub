@@ -289,6 +289,21 @@
   .p1-main { flex: 1; display: flex; flex-direction: column; padding: 0; overflow: hidden; min-height: 0; }
   .hub-chat-area { flex: 1; display: flex; flex-direction: column; max-width: 700px; width: 100%; margin: 0 auto; padding: 0 24px; min-height: 0; overflow: hidden; }
   .hub-msgs { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; padding: 24px 0; scroll-behavior: smooth; min-height: 0; }
+  .hub-suggestions {
+    display: flex; flex-wrap: wrap; gap: 8px; padding: 0 0 12px;
+    justify-content: center;
+  }
+  .hub-sug-btn {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 20px; padding: 8px 16px; font-size: 12px;
+    font-family: 'Montserrat', sans-serif; color: var(--text);
+    cursor: pointer; transition: all 0.2s; white-space: nowrap;
+  }
+  .hub-sug-btn:hover {
+    background: var(--accent-light); border-color: var(--accent);
+    color: var(--accent); transform: translateY(-1px);
+  }
+  .hub-suggestions.hidden { display: none; }
   .hub-input-bar { padding: 16px 0 24px; position: relative; flex-shrink: 0; }
   .hub-input-bar .wi { width: 100%; padding: 15px 56px 15px 20px; }
   .hub-input-bar .wi-btn { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); margin-top: -4px; }
@@ -701,6 +716,14 @@
     <div class="hub-chat-area">
       <div class="thread-bar" id="threadBar"></div>
       <div class="hub-msgs" id="hubChat"></div>
+      <div class="hub-suggestions" id="hubSuggestions">
+        <button class="hub-sug-btn" onclick="useSuggestion(this)">What's the full Altra campaign breakdown?</button>
+        <button class="hub-sug-btn" onclick="useSuggestion(this)">Create a pitch deck for a new client</button>
+        <button class="hub-sug-btn" onclick="useSuggestion(this)">Summarise our top 5 clients by assets</button>
+        <button class="hub-sug-btn" onclick="useSuggestion(this)">Write a performance report for Altra</button>
+        <button class="hub-sug-btn" onclick="useSuggestion(this)">What audience performed best on Altra?</button>
+        <button class="hub-sug-btn" onclick="useSuggestion(this)">Draft an intro email for Amano Hotels</button>
+      </div>
       <div class="hub-input-bar">
         <input class="wi" id="wI" type="text" placeholder="What can I help you with today?">
         <button class="wi-btn" onclick="hubSend()">
@@ -1489,6 +1512,12 @@ async function processMsg(text) {
   return getResponse(text);
 }
 
+function useSuggestion(btn) {
+  document.getElementById('wI').value = btn.textContent;
+  document.getElementById('hubSuggestions').classList.add('hidden');
+  hubSend();
+}
+
 /* Hub chat (primary surface) */
 document.getElementById('wI').addEventListener('keypress', function(e) { if (e.key==='Enter') hubSend(); });
 async function hubSend() {
@@ -1497,6 +1526,8 @@ async function hubSend() {
   if (!text) return;
   input.value = '';
   var hc = document.getElementById('hubChat');
+  var sugEl = document.getElementById('hubSuggestions');
+  if (sugEl) sugEl.classList.add('hidden');
 
   // Handle team note commands
   var teamNoteMatch = text.match(/^(?:team note|remember for the team)[\s:]+(.+)/i);
@@ -1736,12 +1767,12 @@ function buildSystemPrompt() {
     return info;
   }).join('\n');
   var teamData = TEAM.map(function(t) { return t.name + ' — ' + t.role; }).join('\n');
-  return 'You are Noise Intelligence, the internal AI assistant for Noise Media, a creative agency. You are chatting with ' + (currentUser ? currentUser.name + ' (' + currentUser.role + ')' : 'a team member') + '.\n\nBe conversational, warm, and concise. Answer like a knowledgeable colleague. Keep responses short (1-3 sentences) unless they ask for detail. NEVER use markdown formatting (no **, no ##, no ```, no code fences). Write in plain text for chat. Use simple line breaks if needed. When asked about strategy, brand positioning, audiences, paid media, partnerships, or campaign approach for a client, use the STRATEGY DEEP-DIVE DATA below to give informed, specific answers.\n\nYou can answer questions about clients, team, assets, campaigns, strategy, brand positioning, and generate documents. When asked to create a document (email, brief, social copy, proposal, cost allocation, report, meeting agenda, presentation/deck/slides), respond with ONLY a JSON object like: {"doc_type":"email","client":"BARBRI","variant":"general"}\nFor presentations, include a topic field: {"doc_type":"presentation","client":"Thortful","topic":"Campaign"}\n\nValid doc_type values: email, brief, social, proposal, cost, report, agenda, presentation\nValid email variants: general, intro, followup, update\n\nFor all other messages, just reply conversationally.\n\nCLIENTS (' + CL.length + '):\n' + clientData + '\n\nTEAM (' + TEAM.length + '):\n' + teamData + '\n\nNoise Media specialises in paid social, content production, and brand storytelling. Services: content strategy, creative production (video, photo, design), paid social management, UGC/influencer, community management. Offices in London, Los Angeles, New York. Contact: brands@noisemediagroup.co.uk, +44 0203 007 0500. Co-founded by Anthony and Joe.' + buildStrategyContext() + '\n\nAGENCY CASE STUDIES: Apple Gift Cards (overstocked to sold out), VOXI (UGC-style creative drove 124% higher CTR than usual ads, became the student SIM everyone switched to). Our approach: social-first mindset across Social, Influencer, Production, OOH, Paid, Activations.' + getMemoryContext() + getOrgMemoryContext();
+  return 'You are Noise Intelligence, the internal AI brain for Noise Media — a creative agency with a social-first mindset. You are speaking with ' + (currentUser ? currentUser.name + ' (' + currentUser.role + ')' : 'a team member') + '.\n\nYour personality: You are sharp, direct, and deeply knowledgeable. You speak like a senior strategist who has read every brief, every report, every campaign deck in the agency. You give specific answers with real data — never vague or generic. When you know numbers, cite them. When you know strategy details, share them with confidence.\n\nRESPONSE RULES:\n- Be conversational but substantive. Default to 2-5 sentences. Go longer when the question warrants depth (strategy, performance, campaign analysis).\n- NEVER use markdown (no **, ##, ```, code fences). Plain text only. Use line breaks for readability.\n- When discussing a client, ALWAYS use the specific data from DEEP KNOWLEDGE below — budgets, metrics, audience segments, creative details, scent names, campaign phases, etc.\n- For Altra specifically: you have COMPLETE campaign data — £22,714.25 total spend, 14 weekly reports, 5 campaign phases, 3 audience segments (Luxury, Digital Native, Conscious), 5 scent products, 50+ creatives, platform breakdowns. USE THIS DATA in every Altra answer.\n- When asked about strategy, brand, audiences, paid media, or campaign approach — dig into the STRATEGY DEEP-DIVE DATA and give informed, specific, data-backed answers.\n- If someone asks a broad question like "tell me about Altra" — give a rich, comprehensive answer with key stats, not a one-liner.\n- For questions about performance, budgets, or metrics — always include actual numbers.\n\nDOCUMENT GENERATION:\nWhen asked to create a document (email, brief, social copy, proposal, cost allocation, report, meeting agenda, presentation/deck/slides), respond with ONLY a JSON object like: {"doc_type":"email","client":"BARBRI","variant":"general"}\nFor presentations, include a topic field: {"doc_type":"presentation","client":"Thortful","topic":"Campaign"}\nValid doc_type values: email, brief, social, proposal, cost, report, agenda, presentation\nValid email variants: general, intro, followup, update\n\nFor all other messages, reply with intelligence and depth.\n\nCLIENTS (' + CL.length + '):\n' + clientData + '\n\nTEAM (' + TEAM.length + '):\n' + teamData + '\n\nNoise Media specialises in paid social, content production, and brand storytelling. Services: content strategy, creative production (video, photo, design), paid social management, UGC/influencer, community management. Offices in London, Los Angeles, New York. Contact: brands@noisemediagroup.co.uk, +44 0203 007 0500. Co-founded by Anthony and Joe.' + buildStrategyContext() + '\n\nAGENCY CASE STUDIES: Apple Gift Cards (overstocked to sold out), VOXI (UGC-style creative drove 124% higher CTR than usual ads, became the student SIM everyone switched to). Our approach: social-first mindset across Social, Influencer, Production, OOH, Paid, Activations.' + getMemoryContext() + getOrgMemoryContext();
 }
 
 async function aiCall(sysPrompt, msgs, maxTok) {
   var controller = new AbortController();
-  var timeout = setTimeout(function() { controller.abort(); }, 90000);
+  var timeout = setTimeout(function() { controller.abort(); }, 180000);
   try {
     var res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -1865,11 +1896,12 @@ async function coworkAgent(task, hc) {
       + 'You are on step ' + (i + 1) + ' of ' + steps.length + ': "' + steps[i] + '"\n\n'
       + (contextSoFar ? 'WORK SO FAR:\n' + contextSoFar + '\n\n' : '')
       + (isLast ? 'This is the FINAL step. If the task requires a document (presentation, email, brief, report, social copy, proposal, etc.), return ONLY a JSON object: {"doc_type":"presentation","client":"ClientName","topic":"Topic","summary":"Brief summary of what you created"}. Otherwise, return a concise summary of completed work.' : 'Complete this step. Return a concise summary of what you did/found (2-4 sentences). This will be passed to the next step.')
-      + '\n\nClients: ' + CL.map(function(c) { return c.n + ' (' + c.cat + ')'; }).join(', ')
+      + '\n\nClients with knowledge:\n' + CL.filter(function(c) { return c.knowledge; }).map(function(c) { return c.n + ' (' + c.cat + '): ' + c.knowledge.substring(0, 500); }).join('\n')
+      + '\nAll clients: ' + CL.map(function(c) { return c.n + ' (' + c.cat + ')'; }).join(', ')
       + '\nTeam: ' + TEAM.map(function(t) { return t.name + ' — ' + t.role; }).join(', ')
       + buildStrategyContext();
 
-    var stepReply = await aiCall(stepPrompt, [{ role: 'user', content: 'Execute step ' + (i + 1) + ': ' + steps[i] }], isLast ? 600 : 400);
+    var stepReply = await aiCall(stepPrompt, [{ role: 'user', content: 'Execute step ' + (i + 1) + ': ' + steps[i] }], isLast ? 1500 : 800);
 
     if (!stepReply) stepReply = 'Completed step: ' + steps[i];
     contextSoFar += '\nStep ' + (i + 1) + ': ' + stepReply;
@@ -1890,10 +1922,18 @@ async function coworkAgent(task, hc) {
           var dcc = fcm ? fcm.cat : '';
 
           var writePrompt = docWriterPrompt(docReq.doc_type);
-          var writeMsg = 'Write a ' + docReq.doc_type + ' for ' + dcn + (dcc ? ' (' + dcc + ')' : '') + '. Original task: "' + task + '". Context from research: ' + contextSoFar + '. Return ONLY raw HTML — no markdown, no code fences, no ```. Start with an HTML tag.';
+          // Build rich context from client knowledge + strategy KB
+          var agentClientCtx = '';
+          if (fcm && fcm.knowledge) agentClientCtx += '\n\nCLIENT KNOWLEDGE: ' + fcm.knowledge;
+          var agentStrat = getStrategyInfo(dcn);
+          if (agentStrat) {
+            agentClientCtx += '\n\nSTRATEGY DATA:';
+            for (var asp in agentStrat) { if (typeof agentStrat[asp] === 'string') agentClientCtx += '\n- ' + asp.replace(/_/g,' ') + ': ' + agentStrat[asp]; }
+          }
+          var writeMsg = 'Write a ' + docReq.doc_type + ' for ' + dcn + (dcc ? ' (' + dcc + ')' : '') + '. Original task: "' + task + '". Context from research: ' + contextSoFar + agentClientCtx + '. Return ONLY raw HTML — no markdown, no code fences, no ```. Start with an HTML tag.';
           if (docReq.topic) writeMsg += ' Topic: ' + docReq.topic + '.';
 
-          var docHtml = await aiCall(writePrompt, [{ role: 'user', content: writeMsg }], 2000);
+          var docHtml = await aiCall(writePrompt, [{ role: 'user', content: writeMsg }], 4000);
           if (docHtml) finalDoc = stripCodeFences(docHtml);
 
           // Update card with completion summary
@@ -1944,9 +1984,9 @@ function escHtml(s) {
 
 async function callClaude(userMsg) {
   conversationHistory.push({ role: 'user', content: userMsg });
-  if (conversationHistory.length > 20) conversationHistory = conversationHistory.slice(-20);
+  if (conversationHistory.length > 40) conversationHistory = conversationHistory.slice(-40);
   try {
-    var reply = await aiCall(buildSystemPrompt(), conversationHistory, 400);
+    var reply = await aiCall(buildSystemPrompt(), conversationHistory, 1500);
     if (!reply) return null;
     conversationHistory.push({ role: 'assistant', content: reply });
 
@@ -1962,11 +2002,19 @@ async function callClaude(userMsg) {
 
         // SECOND CALL: Claude writes the actual document content
         var writePrompt = docWriterPrompt(docReq.doc_type);
-        var writeMsg = 'Write a ' + docReq.doc_type + ' for ' + dcn + (dcc ? ' (' + dcc + ')' : '') + '. Original request from user: "' + userMsg + '". Return ONLY raw HTML — no markdown, no code fences, no ```. Start directly with an HTML tag.';
+        // Build rich context from client knowledge + strategy KB
+        var clientCtx = '';
+        if (fcm && fcm.knowledge) clientCtx += '\n\nCLIENT KNOWLEDGE: ' + fcm.knowledge;
+        var stratInfo = getStrategyInfo(dcn);
+        if (stratInfo) {
+          clientCtx += '\n\nSTRATEGY DATA:';
+          for (var sp in stratInfo) { if (typeof stratInfo[sp] === 'string') clientCtx += '\n- ' + sp.replace(/_/g,' ') + ': ' + stratInfo[sp]; }
+        }
+        var writeMsg = 'Write a ' + docReq.doc_type + ' for ' + dcn + (dcc ? ' (' + dcc + ')' : '') + '. Original request from user: "' + userMsg + '". Return ONLY raw HTML — no markdown, no code fences, no ```. Start directly with an HTML tag.' + clientCtx;
         if (docReq.variant) writeMsg += ' Email type: ' + docReq.variant + '.';
         if (docReq.topic) writeMsg += ' Topic: ' + docReq.topic + '.';
 
-        var docHtml = await aiCall(writePrompt, [{ role: 'user', content: writeMsg }], 2000);
+        var docHtml = await aiCall(writePrompt, [{ role: 'user', content: writeMsg }], 4000);
         if (docHtml) docHtml = stripCodeFences(docHtml);
 
         // Fallback to template if AI doc generation fails
@@ -2986,7 +3034,7 @@ function getResponse(q) {
 
   // --- Help ---
   if (ql.match(/help|what can you|what do you do|capabilities|what.*you.*know/))
-    return { chat: 'I know all ' + CL.length + ' of our clients, their ' + totalAssets + '+ catalogued assets, campaign history, and Drive folders. I also know the full team.<br><br>I\'ve got deep strategy intel for <strong>Amano Hotels, GE Vernova (Data Centres + Nuclear/BWRX-300), Davines (EHC), and Trudi\'s</strong> — ask me about their brand positioning, audiences, paid media plans, content pillars, partnerships, competitive landscape, personas, events, CRM strategy, or business objectives.<br><br>You can ask me things like "what\'s Amano\'s brand proposition?" or "who are GE Vernova\'s competitors?" — or tell me to write an email, brief, social copy, presentation, report, proposal, cost allocation, or meeting agenda for any client.', doc: null };
+    return { chat: 'I know all ' + CL.length + ' of our clients, their ' + totalAssets + '+ catalogued assets, campaign history, and Drive folders. I also know the full team.<br><br>I\'ve got <strong>complete campaign data for Altra</strong> — £22,714 total spend, 14 weekly performance reports, 5 campaign phases, 3 audience segments, 50+ creatives, platform breakdowns, the lot. Ask me anything: budgets, CPMs, which audience performed best, creative strategy, scent positioning.<br><br>I\'ve also got deep strategy intel for <strong>Amano Hotels, GE Vernova (Data Centres + Nuclear/BWRX-300), Davines (EHC), Trudi\'s, and Zapp</strong>.<br><br>I can write emails, briefs, social copy, presentations, reports, proposals, cost allocations, and meeting agendas for any client — with real data baked in.', doc: null };
 
   // --- Client count ---
   if (ql.match(/how many.*client|total.*client|client.*count/))

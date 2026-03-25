@@ -620,29 +620,33 @@
 
   /* Right sidebar for integrations */
   .p1-right-sidebar {
-    width: 280px; background: var(--surface); border-left: 1px solid var(--border);
-    display: flex; flex-direction: column; flex-shrink: 0; overflow: hidden;
+    width: 240px; background: var(--surface); border-left: 1px solid var(--border);
+    display: flex; flex-direction: column; flex-shrink: 0; overflow-y: auto;
   }
   .p1-right-sidebar .rs-header {
     font-family: 'Reddit Mono', monospace; font-size: 9px; font-weight: 700;
     text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-muted);
-    padding: 16px 16px 8px;
+    padding: 12px 12px 8px;
   }
-  .p1-right-sidebar .rs-list { flex: 1; overflow-y: auto; padding: 0 8px 8px; }
+  .p1-right-sidebar .rs-list { padding: 0 8px 8px; }
+  .rs-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 6px; padding: 0 4px;
+  }
   .rs-app {
-    display: flex; align-items: center; gap: 10px; padding: 8px 10px;
-    border-radius: 8px; transition: background 0.15s; cursor: pointer;
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+    padding: 8px 4px; border-radius: 8px; border: 1px solid var(--border);
+    transition: all 0.15s; cursor: pointer; text-align: center; background: var(--bg);
   }
-  .rs-app:hover { background: var(--surface2); }
-  .rs-app-icon { font-size: 18px; width: 28px; text-align: center; flex-shrink: 0; }
-  .rs-app-name { font-size: 12px; font-weight: 500; color: var(--text); flex: 1; }
+  .rs-app:hover { border-color: var(--accent); background: var(--accent-light); }
+  .rs-app-icon { font-size: 16px; }
+  .rs-app-name { font-size: 9px; font-weight: 600; color: var(--text); line-height: 1.2; }
   .rs-app-status {
-    font-size: 9px; font-weight: 600; font-family: 'Reddit Mono', monospace;
-    padding: 2px 8px; border-radius: 10px; text-transform: uppercase; letter-spacing: 0.5px;
+    font-size: 7px; font-weight: 600; font-family: 'Reddit Mono', monospace;
+    padding: 1px 6px; border-radius: 8px; text-transform: uppercase; letter-spacing: 0.3px;
   }
   .rs-app-status.connected { background: var(--green-bg); color: var(--green); }
   .rs-app-status.connect { background: var(--accent-light); color: var(--accent); cursor: pointer; }
-  .rs-divider { height: 1px; background: var(--border); margin: 8px 16px; }
+  .rs-divider { height: 1px; background: var(--border); margin: 8px 12px; }
   .rs-section {
     display: flex; align-items: center; gap: 8px; padding: 8px 10px; margin: 0 8px;
     border-radius: 8px; border: 1px dashed var(--border); cursor: pointer;
@@ -698,19 +702,19 @@
 
   /* Skill cards for Co-Work */
   .skill-card {
-    background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
-    padding: 20px; cursor: default; transition: all 0.2s;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 12px 14px; cursor: default; transition: all 0.2s;
   }
   .skill-card:hover { border-color: var(--accent); box-shadow: var(--shadow-sm); }
-  .skill-card-emoji { font-size: 28px; margin-bottom: 10px; }
+  .skill-card-emoji { font-size: 20px; margin-bottom: 6px; }
   .skill-card-title {
-    font-size: 14px; font-weight: 700; margin-bottom: 12px;
+    font-size: 12px; font-weight: 700; margin-bottom: 8px;
     font-family: 'Reddit Mono', monospace; text-transform: uppercase; letter-spacing: 0.8px;
   }
-  .skill-card-subs { display: flex; flex-direction: column; gap: 6px; }
+  .skill-card-subs { display: flex; flex-direction: column; gap: 4px; }
   .skill-sub-btn {
-    background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
-    padding: 8px 12px; font-size: 12px; font-family: 'Montserrat', sans-serif;
+    background: var(--bg); border: 1px solid var(--border); border-radius: 6px;
+    padding: 5px 10px; font-size: 11px; font-family: 'Montserrat', sans-serif;
     color: var(--text); cursor: pointer; transition: all 0.2s; text-align: left;
   }
   .skill-sub-btn:hover {
@@ -839,10 +843,11 @@
       </div>
     </div>
   </div>
-  <div id="coworkView" style="display:none;flex:1;overflow:auto;padding:24px;">
+  <div id="coworkView" style="display:none;flex:1;flex-direction:column;overflow:hidden;">
+    <div style="flex:1;overflow:auto;padding:20px;">
     <div style="max-width:1200px;margin:0 auto;">
-      <h2 style="font-size:18px;font-weight:600;margin-bottom:20px;font-family:'Reddit Mono',monospace;text-transform:uppercase;letter-spacing:1px;">Skills & Services</h2>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;">
+      <h2 style="font-size:16px;font-weight:600;margin-bottom:16px;font-family:'Reddit Mono',monospace;text-transform:uppercase;letter-spacing:1px;">Skills & Services</h2>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">
 
         <div class="skill-card">
           <div class="skill-card-emoji">🌐</div>
@@ -936,6 +941,13 @@
 
       </div>
     </div>
+    </div>
+    <div class="hub-input-bar" style="padding:12px 24px 16px;flex-shrink:0;">
+      <input class="wi" id="cwI" type="text" placeholder="+ What can I help you with today?" onkeydown="if(event.key==='Enter'){document.getElementById('wI').value=this.value;this.value='';hubSend();}">
+      <button class="wi-btn" onclick="document.getElementById('wI').value=document.getElementById('cwI').value;document.getElementById('cwI').value='';hubSend();" style="position:absolute;right:32px;top:50%;transform:translateY(-50%);">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+      </button>
+    </div>
   </div>
   <!-- INLINE DOC PANEL (shown when document is generated) -->
   <div class="p1-doc" id="p1Doc">
@@ -979,50 +991,52 @@
   <div class="p1-right-sidebar" id="rightSidebar">
     <div class="rs-header">Integrations</div>
     <div class="rs-list">
-      <div class="rs-app" onclick="connectIntegration('gmail')">
-        <div class="rs-app-icon">✉️</div>
-        <div class="rs-app-name">Gmail</div>
-        <span class="rs-app-status connect">Connect</span>
-      </div>
-      <div class="rs-app" onclick="connectIntegration('google-sheets')">
-        <div class="rs-app-icon">📊</div>
-        <div class="rs-app-name">Google Sheets</div>
-        <span class="rs-app-status connect">Connect</span>
-      </div>
-      <div class="rs-app" onclick="connectIntegration('google-docs')">
-        <div class="rs-app-icon">📄</div>
-        <div class="rs-app-name">Google Docs</div>
-        <span class="rs-app-status connect">Connect</span>
-      </div>
-      <div class="rs-app" onclick="connectIntegration('adobe-photoshop')">
-        <div class="rs-app-icon">🎨</div>
-        <div class="rs-app-name">Adobe Photoshop</div>
-        <span class="rs-app-status connect">Connect</span>
-      </div>
-      <div class="rs-app" onclick="connectIntegration('google-calendar')">
-        <div class="rs-app-icon">📅</div>
-        <div class="rs-app-name">Google Calendar</div>
-        <span class="rs-app-status connect">Connect</span>
-      </div>
-      <div class="rs-app" onclick="connectIntegration('slack')">
-        <div class="rs-app-icon">💬</div>
-        <div class="rs-app-name">Slack</div>
-        <span class="rs-app-status connect">Connect</span>
-      </div>
-      <div class="rs-app" onclick="connectIntegration('pdf')">
-        <div class="rs-app-icon">📕</div>
-        <div class="rs-app-name">PDF</div>
-        <span class="rs-app-status connected">Active</span>
-      </div>
-      <div class="rs-app" onclick="connectIntegration('granola')">
-        <div class="rs-app-icon">🎙️</div>
-        <div class="rs-app-name">Granola</div>
-        <span class="rs-app-status connect">Connect</span>
-      </div>
-      <div class="rs-app" onclick="connectIntegration('google-drive')">
-        <div class="rs-app-icon">📁</div>
-        <div class="rs-app-name">Google Drive</div>
-        <span class="rs-app-status connect" id="rsDriveStatus">Connect</span>
+      <div class="rs-grid">
+        <div class="rs-app" onclick="connectIntegration('gmail')">
+          <div class="rs-app-icon">✉️</div>
+          <div class="rs-app-name">Gmail</div>
+          <span class="rs-app-status connect">Connect</span>
+        </div>
+        <div class="rs-app" onclick="connectIntegration('google-sheets')">
+          <div class="rs-app-icon">📊</div>
+          <div class="rs-app-name">Google Sheets</div>
+          <span class="rs-app-status connect">Connect</span>
+        </div>
+        <div class="rs-app" onclick="connectIntegration('google-docs')">
+          <div class="rs-app-icon">📄</div>
+          <div class="rs-app-name">Google Docs</div>
+          <span class="rs-app-status connect">Connect</span>
+        </div>
+        <div class="rs-app" onclick="connectIntegration('adobe-photoshop')">
+          <div class="rs-app-icon">🎨</div>
+          <div class="rs-app-name">Adobe Photoshop</div>
+          <span class="rs-app-status connect">Connect</span>
+        </div>
+        <div class="rs-app" onclick="connectIntegration('google-calendar')">
+          <div class="rs-app-icon">📅</div>
+          <div class="rs-app-name">Google Calendar</div>
+          <span class="rs-app-status connect">Connect</span>
+        </div>
+        <div class="rs-app" onclick="connectIntegration('slack')">
+          <div class="rs-app-icon">💬</div>
+          <div class="rs-app-name">Slack</div>
+          <span class="rs-app-status connect">Connect</span>
+        </div>
+        <div class="rs-app" onclick="connectIntegration('pdf')">
+          <div class="rs-app-icon">📕</div>
+          <div class="rs-app-name">PDF</div>
+          <span class="rs-app-status connected">Active</span>
+        </div>
+        <div class="rs-app" onclick="connectIntegration('granola')">
+          <div class="rs-app-icon">🎙️</div>
+          <div class="rs-app-name">Granola</div>
+          <span class="rs-app-status connect">Connect</span>
+        </div>
+        <div class="rs-app" onclick="connectIntegration('google-drive')">
+          <div class="rs-app-icon">📁</div>
+          <div class="rs-app-name">Google Drive</div>
+          <span class="rs-app-status connect" id="rsDriveStatus">Connect</span>
+        </div>
       </div>
       <div class="rs-divider"></div>
       <div class="rs-section" onclick="togglePluginsPanel()">

@@ -695,6 +695,27 @@
   .p1-top-row {
     flex: 1; display: flex; flex-direction: row; min-height: 0;
   }
+
+  /* Skill cards for Co-Work */
+  .skill-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+    padding: 20px; cursor: default; transition: all 0.2s;
+  }
+  .skill-card:hover { border-color: var(--accent); box-shadow: var(--shadow-sm); }
+  .skill-card-emoji { font-size: 28px; margin-bottom: 10px; }
+  .skill-card-title {
+    font-size: 14px; font-weight: 700; margin-bottom: 12px;
+    font-family: 'Reddit Mono', monospace; text-transform: uppercase; letter-spacing: 0.8px;
+  }
+  .skill-card-subs { display: flex; flex-direction: column; gap: 6px; }
+  .skill-sub-btn {
+    background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
+    padding: 8px 12px; font-size: 12px; font-family: 'Montserrat', sans-serif;
+    color: var(--text); cursor: pointer; transition: all 0.2s; text-align: left;
+  }
+  .skill-sub-btn:hover {
+    background: var(--accent-light); border-color: var(--accent); color: var(--accent);
+  }
 </style>
 </head>
 <body>
@@ -734,16 +755,20 @@
     <div class="p1-clients-label">CLIENTS A-Z</div>
     <div class="p1-clients-section" id="clientList"></div>
     <div class="p1-sb-divider"></div>
-    <div class="p1-list" id="sbL"></div>
     <div class="p1-sb-sections">
-      <div class="sb-section-label">Ideas</div>
+      <div class="sb-section-label">Conversation History</div>
+      <div class="p1-list" id="sbL" style="flex:1;max-height:none;border-bottom:1px solid var(--border);"></div>
+      <div class="sb-section-label">Messages</div>
+      <div class="sb-messages" id="sbMessages" style="padding:6px 8px;overflow-y:auto;max-height:160px;">
+        <div style="font-size:11px;color:var(--text-muted);padding:8px;">No messages yet.</div>
+      </div>
+    </div>
+    <!-- Hidden panels for teach/drive functionality (JS still works) -->
+    <div style="display:none" id="hiddenPanels">
       <div class="sb-filter-row" id="ideaFilters"></div>
       <div class="sb-ideas" id="ideaList"></div>
-      <div class="sb-section-label">Connected</div>
       <div class="sb-connectors" id="connList"></div>
-      <div class="sb-section-label" onclick="toggleTeachPanel()" style="cursor:pointer;">Teach</div>
-      <div class="sb-section-label" onclick="toggleDrivePanel()" style="cursor:pointer;margin-top:4px;border-top:1px solid var(--border);padding-top:8px;">Drive Scanner</div>
-      <div class="sb-connectors" id="teachPanel" style="display:none">
+      <div class="sb-connectors" id="teachPanel">
         <div style="padding:12px 0;">
           <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;">Teach the Bot</div>
           <textarea id="teachInput" placeholder="Paste knowledge, corrections, brand guidelines, client info, or anything the bot should know..." style="width:100%;height:100px;padding:10px;border:1px solid var(--border);border-radius:8px;font-family:Montserrat,sans-serif;font-size:12px;resize:vertical;background:var(--surface);color:var(--text);"></textarea>
@@ -759,7 +784,7 @@
         </div>
         <div id="learningsList" style="margin-top:16px;"></div>
       </div>
-      <div class="sb-connectors" id="drivePanel" style="display:none">
+      <div class="sb-connectors" id="drivePanel">
         <div style="padding:12px 0;">
           <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;">Google Drive Connection</div>
           <div id="driveStatus" style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:12px;">
@@ -807,7 +832,7 @@
         <button class="hub-sug-btn" onclick="useSuggestion(this)">Draft an intro email for Amano Hotels</button>
       </div>
       <div class="hub-input-bar">
-        <input class="wi" id="wI" type="text" placeholder="What can I help you with today?">
+        <input class="wi" id="wI" type="text" placeholder="+ What can I help you with today?">
         <button class="wi-btn" onclick="hubSend()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
         </button>
@@ -817,52 +842,98 @@
   <div id="coworkView" style="display:none;flex:1;overflow:auto;padding:24px;">
     <div style="max-width:1200px;margin:0 auto;">
       <h2 style="font-size:18px;font-weight:600;margin-bottom:20px;font-family:'Reddit Mono',monospace;text-transform:uppercase;letter-spacing:1px;">Skills & Services</h2>
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;">
-        <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;cursor:pointer;transition:all 0.2s;" onclick="startSkillChat('social')">
-          <div style="font-size:28px;margin-bottom:12px;">🌐</div>
-          <div style="font-size:14px;font-weight:600;margin-bottom:8px;">Social</div>
-          <div style="font-size:12px;color:var(--text-muted);">Social strategy, content calendars, platform audits</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;">
+
+        <div class="skill-card">
+          <div class="skill-card-emoji">🌐</div>
+          <div class="skill-card-title">Social</div>
+          <div class="skill-card-subs">
+            <button class="skill-sub-btn" onclick="startSkillChat('social','Create a social media strategy')">Create a social strategy</button>
+            <button class="skill-sub-btn" onclick="startSkillChat('social','Write an influencer brief')">Influencer brief</button>
+            <button class="skill-sub-btn" onclick="startSkillChat('social','Research relevant hashtags')">Hashtag research</button>
+          </div>
         </div>
-        <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;cursor:pointer;transition:all 0.2s;" onclick="startSkillChat('strategy')">
-          <div style="font-size:28px;margin-bottom:12px;">🎯</div>
-          <div style="font-size:14px;font-weight:600;margin-bottom:8px;">Strategy</div>
-          <div style="font-size:12px;color:var(--text-muted);">Brand strategy, campaign planning, competitor analysis</div>
+
+        <div class="skill-card">
+          <div class="skill-card-emoji">🎯</div>
+          <div class="skill-card-title">Strategy</div>
+          <div class="skill-card-subs">
+            <button class="skill-sub-btn" onclick="startSkillChat('strategy','Create a brand positioning document')">Brand positioning</button>
+            <button class="skill-sub-btn" onclick="startSkillChat('strategy','Plan a marketing campaign')">Campaign planning</button>
+            <button class="skill-sub-btn" onclick="startSkillChat('strategy','Do a competitor analysis')">Competitor analysis</button>
+          </div>
         </div>
-        <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;cursor:pointer;transition:all 0.2s;" onclick="startSkillChat('creative')">
-          <div style="font-size:28px;margin-bottom:12px;">🎨</div>
-          <div style="font-size:14px;font-weight:600;margin-bottom:8px;">Creative</div>
-          <div style="font-size:12px;color:var(--text-muted);">Creative briefs, concept development, art direction</div>
+
+        <div class="skill-card">
+          <div class="skill-card-emoji">🎨</div>
+          <div class="skill-card-title">Creative</div>
+          <div class="skill-card-subs">
+            <button class="skill-sub-btn" onclick="startSkillChat('creative','Write a creative brief')">Creative brief</button>
+            <button class="skill-sub-btn" onclick="startSkillChat('creative','Develop a creative concept')">Concept development</button>
+            <button class="skill-sub-btn" onclick="startSkillChat('creative','Create art direction guidelines')">Art direction</button>
+          </div>
         </div>
-        <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;cursor:pointer;transition:all 0.2s;" onclick="startSkillChat('analytics')">
-          <div style="font-size:28px;margin-bottom:12px;">📊</div>
-          <div style="font-size:14px;font-weight:600;margin-bottom:8px;">Analytics</div>
-          <div style="font-size:12px;color:var(--text-muted);">Performance reports, data analysis, KPI tracking</div>
+
+        <div class="skill-card">
+          <div class="skill-card-emoji">📊</div>
+          <div class="skill-card-title">Analytics</div>
+          <div class="skill-card-subs">
+            <button class="skill-sub-btn" onclick="startSkillChat('analytics','Build a performance report')">Performance report</button>
+            <button class="skill-sub-btn" onclick="startSkillChat('analytics','Analyse campaign data')">Data analysis</button>
+            <button class="skill-sub-btn" onclick="startSkillChat('analytics','Set up a KPI dashboard')">KPI dashboard</button>
+          </div>
         </div>
-        <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;cursor:pointer;transition:all 0.2s;" onclick="startSkillChat('production')">
-          <div style="font-size:28px;margin-bottom:12px;">📹</div>
-          <div style="font-size:14px;font-weight:600;margin-bottom:8px;">Production</div>
-          <div style="font-size:12px;color:var(--text-muted);">Video production, photo shoots, asset management</div>
+
+        <div class="skill-card">
+          <div class="skill-card-emoji">📹</div>
+          <div class="skill-card-title">Production</div>
+          <div class="skill-card-subs">
+            <button class="skill-sub-btn" onclick="startSkillChat('production','Write a video production brief')">Video brief</button>
+            <button class="skill-sub-btn" onclick="startSkillChat('production','Plan a photo shoot')">Photo shoot plan</button>
+            <button class="skill-sub-btn" onclick="startSkillChat('production','Organise asset management')">Asset management</button>
+          </div>
         </div>
-        <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;cursor:pointer;transition:all 0.2s;" onclick="startSkillChat('research')">
-          <div style="font-size:28px;margin-bottom:12px;">🔍</div>
-          <div style="font-size:14px;font-weight:600;margin-bottom:8px;">Research</div>
-          <div style="font-size:12px;color:var(--text-muted);">Market research, audience insights, trend analysis</div>
+
+        <div class="skill-card">
+          <div class="skill-card-emoji">🔍</div>
+          <div class="skill-card-title">Research</div>
+          <div class="skill-card-subs">
+            <button class="skill-sub-btn" onclick="startSkillChat('research','Conduct market research')">Market research</button>
+            <button class="skill-sub-btn" onclick="startSkillChat('research','Generate audience insights')">Audience insights</button>
+            <button class="skill-sub-btn" onclick="startSkillChat('research','Analyse trends')">Trend analysis</button>
+          </div>
         </div>
-        <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;cursor:pointer;transition:all 0.2s;" onclick="startSkillChat('copywriting')">
-          <div style="font-size:28px;margin-bottom:12px;">✒️</div>
-          <div style="font-size:14px;font-weight:600;margin-bottom:8px;">Copywriting</div>
-          <div style="font-size:12px;color:var(--text-muted);">Ad copy, social captions, email marketing</div>
+
+        <div class="skill-card">
+          <div class="skill-card-emoji">✒️</div>
+          <div class="skill-card-title">Copywriting</div>
+          <div class="skill-card-subs">
+            <button class="skill-sub-btn" onclick="startSkillChat('copywriting','Write ad copy')">Ad copy</button>
+            <button class="skill-sub-btn" onclick="startSkillChat('copywriting','Write social media captions')">Social captions</button>
+            <button class="skill-sub-btn" onclick="startSkillChat('copywriting','Draft email marketing copy')">Email marketing</button>
+          </div>
         </div>
-        <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;cursor:pointer;transition:all 0.2s;" onclick="startSkillChat('reporting')">
-          <div style="font-size:28px;margin-bottom:12px;">📋</div>
-          <div style="font-size:14px;font-weight:600;margin-bottom:8px;">Reporting</div>
-          <div style="font-size:12px;color:var(--text-muted);">Client reports, monthly reviews, campaign summaries</div>
+
+        <div class="skill-card">
+          <div class="skill-card-emoji">📋</div>
+          <div class="skill-card-title">Reporting</div>
+          <div class="skill-card-subs">
+            <button class="skill-sub-btn" onclick="startSkillChat('reporting','Build a client report')">Client report</button>
+            <button class="skill-sub-btn" onclick="startSkillChat('reporting','Create a monthly review')">Monthly review</button>
+            <button class="skill-sub-btn" onclick="startSkillChat('reporting','Write a campaign summary')">Campaign summary</button>
+          </div>
         </div>
-        <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;cursor:pointer;transition:all 0.2s;" onclick="startSkillChat('calendar')">
-          <div style="font-size:28px;margin-bottom:12px;">📅</div>
-          <div style="font-size:14px;font-weight:600;margin-bottom:8px;">Calendar</div>
-          <div style="font-size:12px;color:var(--text-muted);">Content calendars, scheduling, campaign timelines</div>
+
+        <div class="skill-card">
+          <div class="skill-card-emoji">📅</div>
+          <div class="skill-card-title">Calendar</div>
+          <div class="skill-card-subs">
+            <button class="skill-sub-btn" onclick="startSkillChat('calendar','Create a content calendar')">Content calendar</button>
+            <button class="skill-sub-btn" onclick="startSkillChat('calendar','Plan a campaign timeline')">Campaign timeline</button>
+            <button class="skill-sub-btn" onclick="startSkillChat('calendar','Set up scheduling')">Scheduling</button>
+          </div>
         </div>
+
       </div>
     </div>
   </div>
@@ -971,11 +1042,23 @@
   </div><!-- end p1-top-row -->
   <!-- CONVERSATION HISTORY BAR -->
   <div class="conv-history-bar">
-    <div class="ch-header">
-      <span class="ch-title">Conversation History</span>
-    </div>
-    <div class="ch-list" id="convHistoryList">
-      <div style="padding:8px;font-size:11px;color:var(--text-muted);">Start chatting to build your conversation history.</div>
+    <div style="display:flex;flex:1;min-height:0;">
+      <div style="flex:1;display:flex;flex-direction:column;border-right:1px solid var(--border);">
+        <div class="ch-header">
+          <span class="ch-title">Conversation History</span>
+        </div>
+        <div class="ch-list" id="convHistoryList">
+          <div style="padding:8px;font-size:11px;color:var(--text-muted);">Start chatting to build your conversation history.</div>
+        </div>
+      </div>
+      <div style="width:280px;display:flex;flex-direction:column;flex-shrink:0;">
+        <div class="ch-header">
+          <span class="ch-title">Messages</span>
+        </div>
+        <div style="flex:1;overflow-y:auto;padding:0 12px 8px;">
+          <div style="padding:8px;font-size:11px;color:var(--text-muted);">No team messages yet.</div>
+        </div>
+      </div>
     </div>
   </div>
   </div><!-- end p1-content-wrapper -->
@@ -3902,22 +3985,30 @@ function switchTab(tab) {
 }
 
 /* ============ NEW: SKILL CARD CLICK ============ */
-function startSkillChat(skill) {
+function startSkillChat(skill, prompt) {
   switchTab('chat');
-  var prompts = {
-    social: 'I need help with social media strategy. Let\'s work on ',
-    strategy: 'I need help with brand/campaign strategy. Let\'s work on ',
-    creative: 'I need help with creative direction. Let\'s work on ',
-    analytics: 'I need help analysing performance data. Let\'s look at ',
-    production: 'I need help with production planning. Let\'s work on ',
-    research: 'I need help with market research. Let\'s investigate ',
-    copywriting: 'I need help writing copy. Let\'s work on ',
-    reporting: 'I need help creating a report. Let\'s build ',
-    calendar: 'I need help with content scheduling. Let\'s plan '
-  };
   var input = document.getElementById('wI');
-  input.value = prompts[skill] || '';
-  input.focus();
+  if (prompt) {
+    // Use the specific sub-task prompt
+    input.value = prompt;
+    input.focus();
+    hubSend();
+  } else {
+    // Use the generic skill prompt
+    var prompts = {
+      social: 'I need help with social media strategy. Let\'s work on ',
+      strategy: 'I need help with brand/campaign strategy. Let\'s work on ',
+      creative: 'I need help with creative direction. Let\'s work on ',
+      analytics: 'I need help analysing performance data. Let\'s look at ',
+      production: 'I need help with production planning. Let\'s work on ',
+      research: 'I need help with market research. Let\'s investigate ',
+      copywriting: 'I need help writing copy. Let\'s work on ',
+      reporting: 'I need help creating a report. Let\'s build ',
+      calendar: 'I need help with content scheduling. Let\'s plan '
+    };
+    input.value = prompts[skill] || '';
+    input.focus();
+  }
 }
 
 /* ============ NEW: CLIENT SIDEBAR ============ */

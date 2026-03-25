@@ -720,6 +720,26 @@
   .skill-sub-btn:hover {
     background: var(--accent-light); border-color: var(--accent); color: var(--accent);
   }
+
+  /* Plus menu for input bar */
+  .plus-menu-btn {
+    position: absolute; left: 10px; top: 50%; transform: translateY(-50%); z-index: 5;
+    width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--border);
+    background: var(--surface); color: var(--accent); font-size: 18px; font-weight: 600;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s; line-height: 1;
+  }
+  .plus-menu-btn:hover { background: var(--accent); color: white; border-color: var(--accent); }
+  .plus-menu {
+    position: absolute; bottom: calc(100% + 8px); left: 0;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    box-shadow: var(--shadow-lg); min-width: 180px; z-index: 100; overflow: hidden;
+  }
+  .plus-menu-item {
+    padding: 10px 14px; font-size: 12px; font-weight: 500; cursor: pointer;
+    transition: background 0.15s; display: flex; align-items: center; gap: 8px;
+  }
+  .plus-menu-item:hover { background: var(--accent-light); color: var(--accent); }
 </style>
 </head>
 <body>
@@ -827,7 +847,7 @@
     <div class="hub-chat-area">
       <div class="thread-bar" id="threadBar"></div>
       <div class="hub-msgs" id="hubChat"></div>
-      <div class="hub-suggestions" id="hubSuggestions">
+      <div class="hub-suggestions" id="hubSuggestions" style="display:none;">
         <button class="hub-sug-btn" onclick="useSuggestion(this)">What's the full Altra campaign breakdown?</button>
         <button class="hub-sug-btn" onclick="useSuggestion(this)">Create a pitch deck for a new client</button>
         <button class="hub-sug-btn" onclick="useSuggestion(this)">Summarise our top 5 clients by assets</button>
@@ -836,10 +856,19 @@
         <button class="hub-sug-btn" onclick="useSuggestion(this)">Draft an intro email for Amano Hotels</button>
       </div>
       <div class="hub-input-bar">
-        <input class="wi" id="wI" type="text" placeholder="+ What can I help you with today?">
+        <div style="position:relative;display:inline-block;">
+          <button class="plus-menu-btn" onclick="togglePlusMenu()" title="Plugins, Connectors, Add Files">+</button>
+          <div class="plus-menu" id="plusMenu" style="display:none;">
+            <div class="plus-menu-item" onclick="togglePluginsPanel();togglePlusMenu();">🧩 Plugins</div>
+            <div class="plus-menu-item" onclick="toggleDrivePanel();togglePlusMenu();">🔗 Connectors</div>
+            <div class="plus-menu-item" onclick="triggerFileUpload();togglePlusMenu();">📎 Add Files</div>
+          </div>
+        </div>
+        <input class="wi" id="wI" type="text" placeholder="What can I help you with today?" style="padding-left:44px;">
         <button class="wi-btn" onclick="hubSend()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
         </button>
+        <input type="file" id="fileUploadInput" style="display:none;" multiple onchange="handleFileUpload(this.files)">
       </div>
     </div>
   </div>
@@ -939,11 +968,39 @@
           </div>
         </div>
 
+        <div class="skill-card" style="border-color:var(--accent);border-width:2px;">
+          <div class="skill-card-emoji">📱</div>
+          <div class="skill-card-title">Social Media Bot</div>
+          <div class="skill-card-subs">
+            <button class="skill-sub-btn" onclick="startSkillChat('social-bot','Scan all Noise Media socials (Instagram, TikTok, LinkedIn, Facebook) and summarise today\'s trends')">Daily social scan</button>
+            <button class="skill-sub-btn" onclick="startSkillChat('social-bot','Generate a monthly social media report for all Noise Media channels')">Monthly report</button>
+            <button class="skill-sub-btn" onclick="startSkillChat('social-bot','Organise and analyse recent social media trends across all platforms')">Trend analysis</button>
+          </div>
+        </div>
+
+        <div class="skill-card" style="border-color:var(--accent);border-width:2px;">
+          <div class="skill-card-emoji">🔬</div>
+          <div class="skill-card-title">Deep Research</div>
+          <div class="skill-card-subs">
+            <button class="skill-sub-btn" onclick="startSkillChat('deep-research','Deep scan of Noise Media website, Instagram, TikTok, and LinkedIn presence')">Scan Noise Media</button>
+            <button class="skill-sub-btn" onclick="startSkillChat('deep-research','Deep scan and analysis of Noise Production across all platforms')">Scan Noise Production</button>
+            <button class="skill-sub-btn" onclick="startSkillChat('deep-research','Research and analyse competitor agencies and their digital presence')">Competitor deep dive</button>
+          </div>
+        </div>
+
       </div>
     </div>
     </div>
     <div class="hub-input-bar" style="padding:12px 24px 16px;flex-shrink:0;">
-      <input class="wi" id="cwI" type="text" placeholder="+ What can I help you with today?" onkeydown="if(event.key==='Enter'){document.getElementById('wI').value=this.value;this.value='';hubSend();}">
+      <div style="position:relative;display:inline-block;">
+        <button class="plus-menu-btn" onclick="togglePlusMenu()" title="Plugins, Connectors, Add Files">+</button>
+        <div class="plus-menu" id="plusMenu2" style="display:none;">
+          <div class="plus-menu-item" onclick="togglePluginsPanel();togglePlusMenu2();">🧩 Plugins</div>
+          <div class="plus-menu-item" onclick="toggleDrivePanel();togglePlusMenu2();">🔗 Connectors</div>
+          <div class="plus-menu-item" onclick="triggerFileUpload();togglePlusMenu2();">📎 Add Files</div>
+        </div>
+      </div>
+      <input class="wi" id="cwI" type="text" placeholder="What can I help you with today?" style="padding-left:44px;" onkeydown="if(event.key==='Enter'){document.getElementById('wI').value=this.value;this.value='';hubSend();}">
       <button class="wi-btn" onclick="document.getElementById('wI').value=document.getElementById('cwI').value;document.getElementById('cwI').value='';hubSend();" style="position:absolute;right:32px;top:50%;transform:translateY(-50%);">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
       </button>
@@ -2500,7 +2557,7 @@ function buildSystemPrompt() {
     return info;
   }).join('\n');
   var teamData = TEAM.map(function(t) { return t.name + ' — ' + t.role; }).join('\n');
-  return 'You are Noise Intelligence, the internal AI brain for Noise Media — a creative agency with a social-first mindset. You are speaking with ' + (currentUser ? currentUser.name + ' (' + currentUser.role + ')' : 'a team member') + '.\n\nYour personality: You are sharp, direct, and deeply knowledgeable. You speak like a senior strategist who has read every brief, every report, every campaign deck in the agency. You give specific answers with real data — never vague or generic. When you know numbers, cite them. When you know strategy details, share them with confidence.\n\nRESPONSE RULES:\n- Be conversational but substantive. Default to 2-5 sentences. Go longer when the question warrants depth (strategy, performance, campaign analysis).\n- NEVER use markdown (no **, ##, ```, code fences). Plain text only. Use line breaks for readability.\n- When discussing a client, ALWAYS use the specific data from DEEP KNOWLEDGE below — budgets, metrics, audience segments, creative details, scent names, campaign phases, etc.\n- For Altra specifically: you have COMPLETE campaign data — £22,714.25 total spend, 14 weekly reports, 5 campaign phases, 3 audience segments (Luxury, Digital Native, Conscious), 5 scent products, 50+ creatives, platform breakdowns. USE THIS DATA in every Altra answer.\n- When asked about strategy, brand, audiences, paid media, or campaign approach — dig into the STRATEGY DEEP-DIVE DATA and give informed, specific, data-backed answers.\n- If someone asks a broad question like "tell me about Altra" — give a rich, comprehensive answer with key stats, not a one-liner.\n- For questions about performance, budgets, or metrics — always include actual numbers.\n\nDOCUMENT GENERATION:\nWhen asked to create a document (email, brief, social copy, proposal, cost allocation, report, meeting agenda, presentation/deck/slides), respond with ONLY a JSON object like: {"doc_type":"email","client":"BARBRI","variant":"general"}\nFor presentations, include a topic field: {"doc_type":"presentation","client":"Thortful","topic":"Campaign"}\nValid doc_type values: email, brief, social, proposal, cost, report, agenda, presentation\nValid email variants: general, intro, followup, update\n\nWEB SEARCH:\nYou have web search capability. If the user asks about current events, trends, competitors, industry news, or anything you need live data for, include [SEARCH:your search query] in your response and the system will fetch results and let you respond with them. Only use this when you genuinely need external info — your internal client knowledge is already comprehensive.\n\nFor all other messages, reply with intelligence and depth.\n\nCLIENTS (' + CL.length + '):\n' + clientData + '\n\nTEAM (' + TEAM.length + '):\n' + teamData + '\n\nNoise Media specialises in paid social, content production, and brand storytelling. Services: content strategy, creative production (video, photo, design), paid social management, UGC/influencer, community management. Offices in London, Los Angeles, New York. Contact: brands@noisemediagroup.co.uk, +44 0203 007 0500. Co-founded by Anthony and Joe.' + buildStrategyContext() + '\n\nAGENCY CASE STUDIES: Apple Gift Cards (overstocked to sold out), VOXI (UGC-style creative drove 124% higher CTR than usual ads, became the student SIM everyone switched to). Our approach: social-first mindset across Social, Influencer, Production, OOH, Paid, Activations.' + getMemoryContext() + getOrgMemoryContext() + getLearningContext();
+  return 'You are Noise Intelligence, the internal AI brain for Noise Media — a creative agency with a social-first mindset. You are speaking with ' + (currentUser ? currentUser.name + ' (' + currentUser.role + ')' : 'a team member') + '.\n\nYour personality: You are sharp, direct, and deeply knowledgeable. You speak like a senior strategist who has read every brief, every report, every campaign deck in the agency. You give specific answers with real data — never vague or generic. When you know numbers, cite them. When you know strategy details, share them with confidence.\n\nRESPONSE RULES:\n- Be conversational but substantive. Default to 2-5 sentences. Go longer when the question warrants depth (strategy, performance, campaign analysis).\n- NEVER use markdown (no **, ##, ```, code fences). Plain text only. Use line breaks for readability.\n- When discussing a client, ALWAYS use the specific data from DEEP KNOWLEDGE below — budgets, metrics, audience segments, creative details, scent names, campaign phases, etc.\n- For Altra specifically: you have COMPLETE campaign data — £22,714.25 total spend, 14 weekly reports, 5 campaign phases, 3 audience segments (Luxury, Digital Native, Conscious), 5 scent products, 50+ creatives, platform breakdowns. USE THIS DATA in every Altra answer.\n- When asked about strategy, brand, audiences, paid media, or campaign approach — dig into the STRATEGY DEEP-DIVE DATA and give informed, specific, data-backed answers.\n- If someone asks a broad question like "tell me about Altra" — give a rich, comprehensive answer with key stats, not a one-liner.\n- For questions about performance, budgets, or metrics — always include actual numbers.\n\nDOCUMENT GENERATION:\nWhen asked to create a document (email, brief, social copy, proposal, cost allocation, report, meeting agenda, presentation/deck/slides), respond with ONLY a JSON object like: {"doc_type":"email","client":"BARBRI","variant":"general"}\nFor presentations, include a topic field: {"doc_type":"presentation","client":"Thortful","topic":"Campaign"}\nValid doc_type values: email, brief, social, proposal, cost, report, agenda, presentation\nValid email variants: general, intro, followup, update\n\nWEB SEARCH:\nYou have web search capability. If the user asks about current events, trends, competitors, industry news, or anything you need live data for, include [SEARCH:your search query] in your response and the system will fetch results and let you respond with them. Only use this when you genuinely need external info — your internal client knowledge is already comprehensive.\n\nFor all other messages, reply with intelligence and depth.\n\nCLIENTS (' + CL.length + '):\n' + clientData + '\n\nTEAM (' + TEAM.length + '):\n' + teamData + '\n\nNoise Media specialises in paid social, content production, and brand storytelling. Services: content strategy, creative production (video, photo, design), paid social management, UGC/influencer, community management. Offices in London, Los Angeles, New York. Contact: brands@noisemediagroup.co.uk, +44 0203 007 0500. Co-founded by Anthony and Joe.' + buildStrategyContext() + '\n\nAGENCY CASE STUDIES: Apple Gift Cards (overstocked to sold out), VOXI (UGC-style creative drove 124% higher CTR than usual ads, became the student SIM everyone switched to). Our approach: social-first mindset across Social, Influencer, Production, OOH, Paid, Activations.\n\nADVANCED SKILLS:\n\nSOCIAL MEDIA BOT: You can scan and analyse all Noise Media social channels (Instagram: @noisemedia, TikTok: @noisemedia, LinkedIn: Noise Media, Facebook: Noise Media). Provide daily trend summaries, monthly reports, engagement analysis, and content performance metrics. Use web search to pull latest data from all platforms. You are expert at identifying trending content, audience sentiment, viral opportunities, and competitive positioning across social.\n\nDEEP RESEARCH: You can perform deep research scans of Noise Media\'s digital presence including their website (noisemedia.co.uk), social channels, and Noise Production. Analyse SEO performance, content strategy, engagement metrics, and competitive positioning. Use web search extensively to pull comprehensive data about the agency, their competitors, industry trends, and digital landscape. Provide detailed reports with actionable insights.' + getMemoryContext() + getOrgMemoryContext() + getLearningContext();
 }
 
 async function aiCall(sysPrompt, msgs, maxTok) {
@@ -4107,6 +4164,79 @@ function togglePluginsPanel() {
     + '</div>'
     + '<button onclick="this.closest(\'.modal-bg\').remove()" style="margin-top:16px;padding:8px 20px;background:var(--accent);color:white;border:none;border-radius:8px;font-size:12px;cursor:pointer;">Close</button>'
     + '</div>';
+  document.body.appendChild(modal);
+}
+
+function togglePlusMenu() {
+  var menu = document.getElementById('plusMenu');
+  if (menu) menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+}
+
+function togglePlusMenu2() {
+  var menu = document.getElementById('plusMenu2');
+  if (menu) menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+}
+
+// Close plus menu when clicking outside
+document.addEventListener('click', function(e) {
+  var menu = document.getElementById('plusMenu');
+  var menu2 = document.getElementById('plusMenu2');
+  if (menu && menu.style.display !== 'none' && !e.target.closest('.plus-menu') && !e.target.closest('.plus-menu-btn')) {
+    menu.style.display = 'none';
+  }
+  if (menu2 && menu2.style.display !== 'none' && !e.target.closest('.plus-menu') && !e.target.closest('.plus-menu-btn')) {
+    menu2.style.display = 'none';
+  }
+});
+
+function triggerFileUpload() {
+  document.getElementById('fileUploadInput').click();
+}
+
+function handleFileUpload(files) {
+  if (!files || files.length === 0) return;
+  var fileList = [];
+  for (var i = 0; i < files.length; i++) {
+    var f = files[i];
+    fileList.push(f.name + ' (' + (f.size / 1024).toFixed(1) + ' KB)');
+    // Store file reference for the bot to use
+    if (!window.uploadedFiles) window.uploadedFiles = [];
+    window.uploadedFiles.push(f);
+  }
+  // Show confirmation in chat
+  var msg = 'Files uploaded: ' + fileList.join(', ');
+  var hc = document.getElementById('hubChat');
+  if (hc) {
+    var userMsg = document.createElement('div');
+    userMsg.className = 'hub-msg user';
+    userMsg.innerHTML = '<div class="hub-msg-av hub-msg-av-user">U</div><div class="hub-msg-body">' + escHtml(msg) + '</div>';
+    hc.appendChild(userMsg);
+    var botMsg = document.createElement('div');
+    botMsg.className = 'hub-msg bot';
+    botMsg.innerHTML = '<div class="hub-msg-av hub-msg-av-bot">NI</div><div class="hub-msg-body">I\'ve received ' + files.length + ' file(s). I can help you analyse, summarise, or work with these files. What would you like me to do?</div>';
+    hc.appendChild(botMsg);
+    hc.scrollTop = hc.scrollHeight;
+  }
+  document.getElementById('fileUploadInput').value = '';
+}
+
+function connectIntegration(name) {
+  if (name === 'google-drive') {
+    toggleDrivePanel();
+    return;
+  }
+  var modal = document.createElement('div');
+  modal.className = 'modal-bg';
+  modal.onclick = function(e) { if (e.target === modal) modal.remove(); };
+  var displayName = name.split('-').map(function(w) { return w.charAt(0).toUpperCase() + w.slice(1); }).join(' ');
+  modal.innerHTML = '<div class="modal">'
+    + '<h3>' + displayName + ' Integration</h3>'
+    + '<p>Connect ' + displayName + ' to enable the Intelligence Hub to read, search and interact with your ' + displayName + ' data.</p>'
+    + '<p style="font-size:11px;color:var(--text-muted);">This integration requires OAuth setup. Contact your admin or configure API credentials in Settings.</p>'
+    + '<div class="modal-btns">'
+    + '<button class="btn-cancel" onclick="this.closest(\'.modal-bg\').remove()">Cancel</button>'
+    + '<button class="btn-save" onclick="alert(\'OAuth flow for ' + displayName + ' coming soon. Contact admin for setup.\');this.closest(\'.modal-bg\').remove()">Connect</button>'
+    + '</div></div>';
   document.body.appendChild(modal);
 }
 

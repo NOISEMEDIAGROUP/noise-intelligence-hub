@@ -8,6 +8,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+<script src="https://apis.google.com/js/api.js"></script>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Reddit+Mono:wght@400;500;600;700&family=Montserrat:wght@300;400;500;600;700&display=swap');
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -371,11 +373,27 @@
   .typing span:nth-child(3) { animation-delay: 0.4s; }
   @keyframes bn { 0%,60%,100% { transform:translateY(0); } 30% { transform:translateY(-4px); } }
 
-  .msg-feedback { display: flex; gap: 4px; margin-top: 6px; opacity: 0; transition: opacity 0.2s; }
-  .msg:hover .msg-feedback { opacity: 1; }
+  .msg-feedback { display: flex; gap: 4px; margin-top: 6px; opacity: 0; transition: opacity 0.2s; align-items: center; }
+  .msg:hover .msg-feedback, .hub-msg:hover .msg-feedback { opacity: 1; }
   .fb-btn { background: none; border: 1px solid var(--border); border-radius: 12px; padding: 2px 8px; font-size: 12px; cursor: pointer; transition: all 0.2s; }
   .fb-btn:hover { background: var(--surface2); }
   .fb-btn.selected { border-color: var(--accent); background: var(--accent-light); }
+  .fb-expand { background: none; border: 1px solid var(--border); border-radius: 12px; padding: 2px 8px; font-size: 10px; cursor: pointer; color: var(--text-muted); transition: all 0.2s; }
+  .fb-expand:hover { background: var(--surface2); color: var(--text); }
+  .fb-panel { display: none; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px; margin-top: 8px; font-size: 12px; }
+  .fb-panel.open { display: block; }
+  .fb-panel .fb-section { margin-bottom: 10px; }
+  .fb-panel .fb-label { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 4px; font-weight: 600; }
+  .fb-rating { display: flex; gap: 4px; }
+  .fb-rating button { width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--border); background: var(--surface); cursor: pointer; font-size: 11px; font-weight: 600; color: var(--text-muted); transition: all 0.15s; }
+  .fb-rating button:hover, .fb-rating button.active { background: var(--accent); color: white; border-color: var(--accent); }
+  .fb-correction { width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: 8px; font-family: Montserrat, sans-serif; font-size: 11px; resize: vertical; min-height: 50px; background: var(--bg); color: var(--text); }
+  .fb-correction::placeholder { color: var(--text-muted); }
+  .fb-edit-area { width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: 8px; font-family: Montserrat, sans-serif; font-size: 11px; min-height: 60px; background: var(--bg); color: var(--text); }
+  .fb-edit-area:focus { border-color: var(--accent); outline: none; }
+  .fb-submit { background: var(--accent); color: white; border: none; border-radius: 8px; padding: 6px 14px; font-size: 11px; font-weight: 600; cursor: pointer; margin-top: 6px; }
+  .fb-submit:hover { opacity: 0.9; }
+  .fb-saved { color: var(--green); font-size: 11px; font-weight: 600; margin-left: 8px; }
 
   .p2-in { padding: 12px 16px; border-top: 1px solid var(--border); }
   .p2-ir { display: flex; gap: 8px; }
@@ -717,6 +735,7 @@
       <div class="sb-section-label">Connected</div>
       <div class="sb-connectors" id="connList"></div>
       <div class="sb-section-label" onclick="toggleTeachPanel()" style="cursor:pointer;">Teach</div>
+      <div class="sb-section-label" onclick="toggleDrivePanel()" style="cursor:pointer;margin-top:4px;border-top:1px solid var(--border);padding-top:8px;">Drive Scanner</div>
       <div class="sb-connectors" id="teachPanel" style="display:none">
         <div style="padding:12px 0;">
           <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;">Teach the Bot</div>
@@ -732,6 +751,37 @@
           <button onclick="submitTeaching()" style="width:100%;padding:10px;background:var(--accent);color:white;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;">Teach</button>
         </div>
         <div id="learningsList" style="margin-top:16px;"></div>
+      </div>
+      <div class="sb-connectors" id="drivePanel" style="display:none">
+        <div style="padding:12px 0;">
+          <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;">Google Drive Connection</div>
+          <div id="driveStatus" style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:12px;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+              <span id="driveStatusDot" style="width:8px;height:8px;border-radius:50%;background:#ccc;"></span>
+              <span id="driveStatusText" style="font-size:12px;font-weight:500;">Not connected</span>
+            </div>
+            <button id="driveConnectBtn" onclick="connectGoogleDrive()" style="width:100%;padding:10px;background:#4285F4;color:white;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
+              <span>Connect Google Drive</span>
+            </button>
+          </div>
+          <div id="driveConfig" style="display:none;">
+            <div class="fb-label" style="margin-bottom:4px;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);font-weight:600;">Drive Folder ID (from URL)</div>
+            <input id="driveFolderId" type="text" placeholder="e.g. 1aBcDeFgHiJkLmNoPqRsTuV" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;font-size:12px;margin-bottom:8px;background:var(--surface);color:var(--text);">
+            <div style="display:flex;gap:6px;">
+              <button onclick="scanDriveNow()" style="flex:1;padding:8px;background:var(--accent);color:white;border:none;border-radius:8px;font-size:11px;font-weight:600;cursor:pointer;">Scan Now</button>
+              <button onclick="toggleAutoScan()" id="autoScanBtn" style="flex:1;padding:8px;background:var(--surface);color:var(--text);border:1px solid var(--border);border-radius:8px;font-size:11px;font-weight:600;cursor:pointer;">Auto-Scan: Off</button>
+            </div>
+            <div id="scanLog" style="margin-top:12px;max-height:200px;overflow-y:auto;"></div>
+          </div>
+          <div style="margin-top:16px;">
+            <div class="fb-label" style="margin-bottom:4px;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);font-weight:600;">Setup Required</div>
+            <div style="font-size:11px;color:var(--text-muted);line-height:1.5;">
+              <p style="margin-bottom:8px;">To connect Drive, you need a Google Cloud Client ID. <button onclick="showDriveSetupGuide()" style="background:none;border:none;color:var(--accent);font-size:11px;cursor:pointer;text-decoration:underline;padding:0;">View setup guide</button></p>
+              <input id="driveClientId" type="text" placeholder="Your Google OAuth Client ID" value="" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;font-size:11px;margin-bottom:6px;background:var(--surface);color:var(--text);">
+              <button onclick="saveDriveClientId()" style="width:100%;padding:8px;background:var(--surface);border:1px solid var(--border);border-radius:8px;font-size:11px;cursor:pointer;">Save Client ID</button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -1066,11 +1116,24 @@ function getLearningContext() {
   return ctx;
 }
 
-function learnFromInteraction(userMsg, botResponse, feedback) {
+function learnFromInteraction(userMsg, botResponse, feedback, details) {
   if (feedback === 'positive') {
     addLearning('Good response pattern: User asked "' + userMsg.substring(0, 100) + '" — response was well-received.', 'interaction', 'feedback');
   } else if (feedback === 'negative') {
     addLearning('Needs improvement: User asked "' + userMsg.substring(0, 100) + '" — response was not helpful. Adjust approach.', 'correction', 'feedback');
+  } else if (feedback === 'rich' && details) {
+    var note = '';
+    if (details.ratings) {
+      note += 'Ratings — Accuracy: ' + (details.ratings.accuracy||'?') + '/5, Tone: ' + (details.ratings.tone||'?') + '/5, Completeness: ' + (details.ratings.completeness||'?') + '/5. ';
+    }
+    if (details.correction) {
+      note += 'Correction: "' + details.correction.substring(0, 300) + '". ';
+    }
+    if (details.editedResponse) {
+      note += 'Preferred response: "' + details.editedResponse.substring(0, 300) + '". ';
+    }
+    note += 'Original question: "' + userMsg.substring(0, 100) + '"';
+    addLearning(note, 'correction', 'rich-feedback');
   }
 }
 
@@ -1507,6 +1570,217 @@ function renderLearnings() {
   el.innerHTML = html;
 }
 
+/* ============ GOOGLE DRIVE INTEGRATION ============ */
+var DRIVE_CLIENT_ID = localStorage.getItem('nih_drive_client_id') || '';
+var DRIVE_SCOPES = 'https://www.googleapis.com/auth/drive.readonly';
+var driveTokenClient = null;
+var driveAccessToken = null;
+var autoScanInterval = null;
+
+function saveDriveClientId() {
+  var id = document.getElementById('driveClientId').value.trim();
+  if (!id) return;
+  DRIVE_CLIENT_ID = id;
+  localStorage.setItem('nih_drive_client_id', id);
+  alert('Client ID saved! You can now connect to Google Drive.');
+}
+
+function connectGoogleDrive() {
+  if (!DRIVE_CLIENT_ID) {
+    alert('Enter your Google OAuth Client ID first (in the Drive panel setup section).');
+    return;
+  }
+  try {
+    driveTokenClient = google.accounts.oauth2.initTokenClient({
+      client_id: DRIVE_CLIENT_ID,
+      scope: DRIVE_SCOPES,
+      callback: function(response) {
+        if (response.error) {
+          console.error('Drive auth error:', response);
+          updateDriveStatus('error', 'Auth failed');
+          return;
+        }
+        driveAccessToken = response.access_token;
+        updateDriveStatus('connected', 'Connected');
+        document.getElementById('driveConfig').style.display = 'block';
+        var savedFolder = localStorage.getItem('nih_drive_folder');
+        if (savedFolder) document.getElementById('driveFolderId').value = savedFolder;
+      }
+    });
+    driveTokenClient.requestAccessToken();
+  } catch(e) {
+    console.error('Drive init error:', e);
+    alert('Failed to initialise Google auth. Make sure the Client ID is correct and the Google scripts have loaded.');
+  }
+}
+
+function updateDriveStatus(status, text) {
+  var dot = document.getElementById('driveStatusDot');
+  var txt = document.getElementById('driveStatusText');
+  var btn = document.getElementById('driveConnectBtn');
+  if (status === 'connected') {
+    dot.style.background = '#2D8A4E';
+    txt.textContent = text || 'Connected';
+    btn.textContent = 'Reconnect';
+    btn.style.background = 'var(--surface)';
+    btn.style.color = 'var(--text)';
+    btn.style.border = '1px solid var(--border)';
+  } else if (status === 'scanning') {
+    dot.style.background = '#F4B400';
+    txt.textContent = text || 'Scanning...';
+  } else if (status === 'error') {
+    dot.style.background = '#C73C1E';
+    txt.textContent = text || 'Error';
+  } else {
+    dot.style.background = '#ccc';
+    txt.textContent = text || 'Not connected';
+  }
+}
+
+async function scanDriveNow() {
+  if (!driveAccessToken) { alert('Connect to Google Drive first.'); return; }
+  var folderId = document.getElementById('driveFolderId').value.trim();
+  if (!folderId) { alert('Enter a Drive folder ID.'); return; }
+  localStorage.setItem('nih_drive_folder', folderId);
+  updateDriveStatus('scanning', 'Scanning...');
+  addScanLog('Starting scan...');
+
+  try {
+    var files = await listDriveFiles(folderId);
+    addScanLog('Found ' + files.length + ' files');
+    var absorbed = 0;
+    for (var i = 0; i < files.length; i++) {
+      var f = files[i];
+      var mime = f.mimeType || '';
+      if (mime.includes('document') || mime.includes('spreadsheet') || mime.includes('presentation') ||
+          mime.includes('text') || mime.includes('pdf') || f.name.match(/\.(txt|csv|md|json)$/i)) {
+        try {
+          var content = await exportDriveFile(f.id, mime);
+          if (content && content.length > 20) {
+            var summary = content.substring(0, 500);
+            addLearning('From Drive file "' + f.name + '": ' + summary, 'drive-scan', 'drive');
+            absorbed++;
+            addScanLog('Absorbed: ' + f.name);
+          }
+        } catch(e) {
+          addScanLog('Skipped: ' + f.name + ' (' + e.message + ')');
+        }
+      }
+    }
+    addScanLog('Scan complete: ' + absorbed + ' files absorbed, ' + (files.length - absorbed) + ' skipped');
+    updateDriveStatus('connected', 'Connected (' + absorbed + ' files absorbed)');
+    renderLearnings();
+  } catch(e) {
+    console.error('Drive scan error:', e);
+    addScanLog('Error: ' + e.message);
+    updateDriveStatus('error', 'Scan failed');
+  }
+}
+
+async function listDriveFiles(folderId, pageToken) {
+  var url = 'https://www.googleapis.com/drive/v3/files?q=%27' + folderId + '%27+in+parents+and+trashed=false&fields=files(id,name,mimeType,modifiedTime)&pageSize=100';
+  if (pageToken) url += '&pageToken=' + pageToken;
+  var res = await fetch(url, { headers: { 'Authorization': 'Bearer ' + driveAccessToken } });
+  if (!res.ok) throw new Error('Drive API error: ' + res.status);
+  var data = await res.json();
+  var files = data.files || [];
+  if (data.nextPageToken) {
+    var more = await listDriveFiles(folderId, data.nextPageToken);
+    files = files.concat(more);
+  }
+  return files;
+}
+
+async function exportDriveFile(fileId, mimeType) {
+  var url;
+  if (mimeType.includes('document')) {
+    url = 'https://www.googleapis.com/drive/v3/files/' + fileId + '/export?mimeType=text/plain';
+  } else if (mimeType.includes('spreadsheet')) {
+    url = 'https://www.googleapis.com/drive/v3/files/' + fileId + '/export?mimeType=text/csv';
+  } else if (mimeType.includes('presentation')) {
+    url = 'https://www.googleapis.com/drive/v3/files/' + fileId + '/export?mimeType=text/plain';
+  } else {
+    url = 'https://www.googleapis.com/drive/v3/files/' + fileId + '?alt=media';
+  }
+  var res = await fetch(url, { headers: { 'Authorization': 'Bearer ' + driveAccessToken } });
+  if (!res.ok) throw new Error('Export failed: ' + res.status);
+  return await res.text();
+}
+
+function addScanLog(msg) {
+  var log = document.getElementById('scanLog');
+  if (!log) return;
+  var d = document.createElement('div');
+  d.style.cssText = 'font-size:10px;color:var(--text-muted);padding:3px 0;border-bottom:1px solid var(--border);';
+  var time = new Date().toLocaleTimeString('en-GB', {hour:'2-digit',minute:'2-digit'});
+  d.textContent = time + ' — ' + msg;
+  log.prepend(d);
+}
+
+function toggleAutoScan() {
+  var btn = document.getElementById('autoScanBtn');
+  if (autoScanInterval) {
+    clearInterval(autoScanInterval);
+    autoScanInterval = null;
+    btn.textContent = 'Auto-Scan: Off';
+    btn.style.background = 'var(--surface)';
+    addScanLog('Auto-scan disabled');
+  } else {
+    autoScanInterval = setInterval(function() { scanDriveNow(); }, 30 * 60 * 1000);
+    btn.textContent = 'Auto-Scan: On (30m)';
+    btn.style.background = 'var(--green-bg)';
+    btn.style.borderColor = 'var(--green)';
+    addScanLog('Auto-scan enabled (every 30 minutes)');
+    scanDriveNow();
+  }
+}
+
+function showDriveSetupGuide() {
+  var guide = document.createElement('div');
+  guide.className = 'modal-bg';
+  guide.onclick = function(e) { if (e.target === guide) guide.remove(); };
+  guide.innerHTML = '<div class="modal" style="max-width:560px;max-height:80vh;overflow-y:auto;">'
+    + '<h3 style="margin-bottom:12px;">Google Drive Setup Guide</h3>'
+    + '<div style="font-size:12px;line-height:1.7;color:var(--text);">'
+    + '<p><strong>Step 1:</strong> Go to <a href="https://console.cloud.google.com" target="_blank" style="color:var(--accent);">console.cloud.google.com</a></p>'
+    + '<p><strong>Step 2:</strong> Create a new project (or select existing one)</p>'
+    + '<p><strong>Step 3:</strong> Go to "APIs & Services" → "Library"</p>'
+    + '<p><strong>Step 4:</strong> Search for "Google Drive API" and enable it</p>'
+    + '<p><strong>Step 5:</strong> Go to "APIs & Services" → "Credentials"</p>'
+    + '<p><strong>Step 6:</strong> Click "Create Credentials" → "OAuth client ID"</p>'
+    + '<p><strong>Step 7:</strong> Application type: "Web application"</p>'
+    + '<p><strong>Step 8:</strong> Add Authorised JavaScript origins:</p>'
+    + '<div style="background:var(--surface2);padding:8px;border-radius:6px;font-family:monospace;font-size:11px;margin:6px 0;">'
+    + 'https://noisemediagroup.github.io</div>'
+    + '<p><strong>Step 9:</strong> Add Authorised redirect URIs:</p>'
+    + '<div style="background:var(--surface2);padding:8px;border-radius:6px;font-family:monospace;font-size:11px;margin:6px 0;">'
+    + 'https://noisemediagroup.github.io/noise-intelligence-hub/noise-intelligence-hub.html</div>'
+    + '<p><strong>Step 10:</strong> Copy the Client ID and paste it in the Drive panel below</p>'
+    + '<p style="margin-top:12px;"><strong>To get a folder ID:</strong> Open the folder in Google Drive. The URL will look like:<br>'
+    + '<span style="font-family:monospace;font-size:10px;">drive.google.com/drive/folders/<strong style="color:var(--accent);">1aBcDeFgHiJk...</strong></span><br>'
+    + 'Copy the highlighted part — that is your folder ID.</p>'
+    + '</div>'
+    + '<button onclick="this.closest(\'.modal-bg\').remove()" style="margin-top:12px;padding:8px 20px;background:var(--accent);color:white;border:none;border-radius:8px;font-size:12px;cursor:pointer;">Got it</button>'
+    + '</div>';
+  document.body.appendChild(guide);
+}
+
+function toggleDrivePanel() {
+  var teach = document.getElementById('teachPanel');
+  var drive = document.getElementById('drivePanel');
+  var conn = document.getElementById('connList');
+  if (drive.style.display === 'none') {
+    drive.style.display = 'block';
+    if (teach) teach.style.display = 'none';
+    if (conn) conn.style.display = 'none';
+    var savedId = localStorage.getItem('nih_drive_client_id');
+    if (savedId) document.getElementById('driveClientId').value = savedId;
+  } else {
+    drive.style.display = 'none';
+    if (conn) conn.style.display = 'block';
+  }
+}
+
 function renderMemoryList(el, filter) {
   if (!currentUser) return;
   var mems = getMemories(currentUser.name);
@@ -1618,11 +1892,31 @@ function addMsgTo(container, text, isUser, senderInfo) {
   var displayText = isUser ? escHtml(text) : fmtChat(text);
   el.innerHTML = '<div class="m-av ' + avCls + '" style="background:' + avCol + '">' + avInit + '</div><div class="m-body"><div class="msg-text">' + displayText + '</div></div>';
   if (!isUser) {
+    var fbId = 'fb_' + Date.now() + '_' + Math.random().toString(36).substr(2,5);
     var fb = document.createElement('div');
     fb.className = 'msg-feedback';
-    fb.innerHTML = '<button class="fb-btn fb-up" onclick="handleFeedback(this,\'positive\')" title="Good response">&#128077;</button>'
-      + '<button class="fb-btn fb-down" onclick="handleFeedback(this,\'negative\')" title="Needs improvement">&#128078;</button>';
+    fb.innerHTML = '<button class="fb-btn fb-up" onclick="quickFeedback(this,\'positive\')" title="Good response">&#128077;</button>'
+      + '<button class="fb-btn fb-down" onclick="quickFeedback(this,\'negative\')" title="Needs improvement">&#128078;</button>'
+      + '<button class="fb-expand" onclick="toggleFeedbackPanel(\'' + fbId + '\')">Feedback</button>';
     el.querySelector('.m-body').appendChild(fb);
+    var panel = document.createElement('div');
+    panel.className = 'fb-panel';
+    panel.id = fbId;
+    panel.innerHTML = '<div class="fb-section"><div class="fb-label">Rate this response</div>'
+      + '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;">'
+      + '<div><div class="fb-label" style="font-size:9px;">Accuracy</div><div class="fb-rating" data-cat="accuracy">'
+      + '<button onclick="setRating(this,1)">1</button><button onclick="setRating(this,2)">2</button><button onclick="setRating(this,3)">3</button><button onclick="setRating(this,4)">4</button><button onclick="setRating(this,5)">5</button></div></div>'
+      + '<div><div class="fb-label" style="font-size:9px;">Tone</div><div class="fb-rating" data-cat="tone">'
+      + '<button onclick="setRating(this,1)">1</button><button onclick="setRating(this,2)">2</button><button onclick="setRating(this,3)">3</button><button onclick="setRating(this,4)">4</button><button onclick="setRating(this,5)">5</button></div></div>'
+      + '<div><div class="fb-label" style="font-size:9px;">Completeness</div><div class="fb-rating" data-cat="completeness">'
+      + '<button onclick="setRating(this,1)">1</button><button onclick="setRating(this,2)">2</button><button onclick="setRating(this,3)">3</button><button onclick="setRating(this,4)">4</button><button onclick="setRating(this,5)">5</button></div></div>'
+      + '</div></div>'
+      + '<div class="fb-section"><div class="fb-label">Write a correction</div>'
+      + '<textarea class="fb-correction" placeholder="Actually, the correct info is..."></textarea></div>'
+      + '<div class="fb-section"><div class="fb-label">Edit the response (your version will be saved)</div>'
+      + '<div class="fb-edit-area" contenteditable="true">' + displayText + '</div></div>'
+      + '<button class="fb-submit" onclick="submitRichFeedback(\'' + fbId + '\')">Save Feedback</button>';
+    el.querySelector('.m-body').appendChild(panel);
   }
   if (senderInfo) el.setAttribute('data-sender', JSON.stringify(senderInfo));
   container.appendChild(el);
@@ -1639,22 +1933,71 @@ function addTypingTo(container) {
 
 function removeTyping() { var el = document.getElementById('typ'); if (el) el.remove(); }
 
-function handleFeedback(btn, type) {
+function quickFeedback(btn, type) {
   var msgDiv = btn.closest('.msg');
   var feedbackDiv = btn.parentElement;
   var botText = msgDiv.querySelector('.msg-text') ? msgDiv.querySelector('.msg-text').textContent : msgDiv.textContent;
-  var allMsgs = msgDiv.parentElement.children;
-  var prevUserMsg = '';
-  for (var i = 0; i < allMsgs.length; i++) {
-    if (allMsgs[i] === msgDiv && i > 0) {
-      prevUserMsg = allMsgs[i-1].textContent || '';
-      break;
-    }
-  }
-  learnFromInteraction(prevUserMsg.substring(0, 200), botText.substring(0, 200), type);
+  var prevUserMsg = getPrevUserMsg(msgDiv);
+  learnFromInteraction(prevUserMsg, botText.substring(0, 200), type);
   feedbackDiv.querySelectorAll('.fb-btn').forEach(function(b) { b.classList.remove('selected'); });
   btn.classList.add('selected');
   feedbackDiv.style.opacity = '1';
+}
+
+function getPrevUserMsg(msgDiv) {
+  var allMsgs = msgDiv.parentElement.children;
+  for (var i = 0; i < allMsgs.length; i++) {
+    if (allMsgs[i] === msgDiv && i > 0) return (allMsgs[i-1].textContent || '').substring(0, 200);
+  }
+  return '';
+}
+
+function toggleFeedbackPanel(id) {
+  var panel = document.getElementById(id);
+  if (panel) panel.classList.toggle('open');
+}
+
+function setRating(btn, val) {
+  var row = btn.parentElement;
+  row.querySelectorAll('button').forEach(function(b) { b.classList.remove('active'); });
+  for (var i = 0; i < val; i++) { row.children[i].classList.add('active'); }
+  row.setAttribute('data-val', val);
+}
+
+function submitRichFeedback(panelId) {
+  var panel = document.getElementById(panelId);
+  if (!panel) return;
+  var msgDiv = panel.closest('.msg');
+  var botText = msgDiv.querySelector('.msg-text') ? msgDiv.querySelector('.msg-text').textContent : '';
+  var prevUserMsg = getPrevUserMsg(msgDiv);
+
+  var ratings = {};
+  panel.querySelectorAll('.fb-rating').forEach(function(r) {
+    var cat = r.getAttribute('data-cat');
+    var val = r.getAttribute('data-val');
+    if (val) ratings[cat] = parseInt(val);
+  });
+
+  var correction = panel.querySelector('.fb-correction') ? panel.querySelector('.fb-correction').value.trim() : '';
+  var editArea = panel.querySelector('.fb-edit-area');
+  var editedResponse = editArea ? editArea.textContent.trim() : '';
+  var originalText = botText.trim();
+  var hasEdits = editedResponse !== originalText;
+
+  var details = {};
+  if (Object.keys(ratings).length > 0) details.ratings = ratings;
+  if (correction) details.correction = correction;
+  if (hasEdits) details.editedResponse = editedResponse;
+
+  if (Object.keys(details).length === 0) { alert('Add a rating, correction, or edit before saving.'); return; }
+
+  learnFromInteraction(prevUserMsg, botText.substring(0, 200), 'rich', details);
+
+  var savedEl = document.createElement('span');
+  savedEl.className = 'fb-saved';
+  savedEl.textContent = 'Saved!';
+  panel.querySelector('.fb-submit').after(savedEl);
+  setTimeout(function() { panel.classList.remove('open'); }, 1500);
 }
 
 /* Helper: process a response for any chat surface */

@@ -2408,7 +2408,7 @@ function buildSystemPrompt() {
 
 async function aiCall(sysPrompt, msgs, maxTok) {
   var controller = new AbortController();
-  var timeout = setTimeout(function() { controller.abort(); }, 180000);
+  var timeout = setTimeout(function() { controller.abort(); }, 300000);
   try {
     var res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -2539,7 +2539,11 @@ async function coworkAgent(task, hc) {
 
     var stepReply = await aiCall(stepPrompt, [{ role: 'user', content: 'Execute step ' + (i + 1) + ': ' + steps[i] }], isLast ? 1500 : 800);
 
-    if (!stepReply) stepReply = 'Completed step: ' + steps[i];
+    if (!stepReply) {
+      // Retry once with a simpler prompt if the step failed
+      stepReply = await aiCall(stepPrompt, [{ role: 'user', content: steps[i] }], isLast ? 1500 : 800);
+      if (!stepReply) stepReply = 'Completed: ' + steps[i];
+    }
     contextSoFar += '\nStep ' + (i + 1) + ': ' + stepReply;
 
     // Mark step done
@@ -2550,8 +2554,10 @@ async function coworkAgent(task, hc) {
     if (isLast) {
       try {
         var trimmed = stepReply.trim();
-        if (trimmed.startsWith('{') && trimmed.includes('doc_type')) {
-          var docReq = JSON.parse(trimmed);
+        // Extract JSON from response even if wrapped in text
+        var jsonMatch = trimmed.match(/\{[^{}]*"doc_type"[^{}]*\}/);
+        if (jsonMatch) {
+          var docReq = JSON.parse(jsonMatch[0]);
           var dcn = docReq.client || 'Client';
           var fcm = CL.find(function(c) { return c.n.toLowerCase() === dcn.toLowerCase(); });
           if (fcm) { dcn = fcm.n; }

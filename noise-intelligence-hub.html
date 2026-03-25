@@ -371,6 +371,12 @@
   .typing span:nth-child(3) { animation-delay: 0.4s; }
   @keyframes bn { 0%,60%,100% { transform:translateY(0); } 30% { transform:translateY(-4px); } }
 
+  .msg-feedback { display: flex; gap: 4px; margin-top: 6px; opacity: 0; transition: opacity 0.2s; }
+  .msg:hover .msg-feedback { opacity: 1; }
+  .fb-btn { background: none; border: 1px solid var(--border); border-radius: 12px; padding: 2px 8px; font-size: 12px; cursor: pointer; transition: all 0.2s; }
+  .fb-btn:hover { background: var(--surface2); }
+  .fb-btn.selected { border-color: var(--accent); background: var(--accent-light); }
+
   .p2-in { padding: 12px 16px; border-top: 1px solid var(--border); }
   .p2-ir { display: flex; gap: 8px; }
   .p2-ir input { flex: 1; padding: 12px 16px; background: var(--surface2); border: 1px solid var(--border); border-radius: 12px; color: var(--text); font-size: 14px; outline: none; }
@@ -710,6 +716,23 @@
       <div class="sb-ideas" id="ideaList"></div>
       <div class="sb-section-label">Connected</div>
       <div class="sb-connectors" id="connList"></div>
+      <div class="sb-section-label" onclick="toggleTeachPanel()" style="cursor:pointer;">Teach</div>
+      <div class="sb-connectors" id="teachPanel" style="display:none">
+        <div style="padding:12px 0;">
+          <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;">Teach the Bot</div>
+          <textarea id="teachInput" placeholder="Paste knowledge, corrections, brand guidelines, client info, or anything the bot should know..." style="width:100%;height:100px;padding:10px;border:1px solid var(--border);border-radius:8px;font-family:Montserrat,sans-serif;font-size:12px;resize:vertical;background:var(--surface);color:var(--text);"></textarea>
+          <select id="teachCategory" style="width:100%;padding:8px;margin:8px 0;border:1px solid var(--border);border-radius:6px;font-size:12px;background:var(--surface);color:var(--text);">
+            <option value="brand">Brand Guidelines</option>
+            <option value="client">Client Info</option>
+            <option value="process">Process / Workflow</option>
+            <option value="creative">Creative Direction</option>
+            <option value="correction">Correction / Preference</option>
+            <option value="general">General Knowledge</option>
+          </select>
+          <button onclick="submitTeaching()" style="width:100%;padding:10px;background:var(--accent);color:white;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;">Teach</button>
+        </div>
+        <div id="learningsList" style="margin-top:16px;"></div>
+      </div>
     </div>
   </div>
   <div class="p1-main">
@@ -745,8 +768,23 @@
         <button class="dt-btn" onclick="exportDOCX()" style="background:#2B579A;color:white;border-color:#2B579A;">.docx</button>
         <button class="dt-btn gs" onclick="exportXLSX()">.xlsx</button>
         <button class="dt-btn gsl" onclick="exportPPTX()">.pptx</button>
+        <button class="dt-btn" onclick="openInGoogleDocs()" style="background:#4285F4;color:white;border-color:#4285F4;" title="Open in Google Docs">Docs</button>
+        <button class="dt-btn" onclick="openInGoogleSlides()" style="background:#F4B400;color:white;border-color:#F4B400;" title="Open in Google Slides">Slides</button>
+        <button class="dt-btn" onclick="openInGoogleSheets()" style="background:#0F9D58;color:white;border-color:#0F9D58;" title="Open in Google Sheets">Sheets</button>
         <button class="dt-btn" onclick="closeDocPanel()" title="Close" style="font-size:16px;padding:2px 6px;">×</button>
       </div>
+    </div>
+    <div class="edit-toolbar" id="p1EditToolbar">
+      <button onclick="execFmt('bold')" title="Bold"><b>B</b></button>
+      <button onclick="execFmt('italic')" title="Italic"><i>I</i></button>
+      <button onclick="execFmt('underline')" title="Underline"><u>U</u></button>
+      <div class="tb-sep"></div>
+      <button onclick="execFmt('formatBlock','h2')" title="Heading">H2</button>
+      <button onclick="execFmt('formatBlock','p')" title="Paragraph">P</button>
+      <div class="tb-sep"></div>
+      <input type="color" id="p1TbColor" value="#1B1B1B" onchange="execFmt('foreColor', this.value)" title="Text Colour">
+      <button onclick="insertEditTable()" title="Insert Table">Table</button>
+      <button onclick="execFmt('insertUnorderedList')" title="Bullet List">• List</button>
     </div>
     <div class="p2-dc" id="p1DocContainer">
       <div class="doc-paper" id="p1DocC" contenteditable="false"></div>
@@ -779,7 +817,9 @@
         <button class="dt-btn" onclick="exportDOCX()" style="background:#2B579A;color:white;border-color:#2B579A;">.docx</button>
         <button class="dt-btn gs" onclick="exportXLSX()">.xlsx</button>
         <button class="dt-btn gsl" onclick="exportPPTX()">.pptx</button>
-        <button class="dt-btn" onclick="saveToDrive()" style="background:#4285F4;color:white;border-color:#4285F4;" title="Open in Google Docs">&#9729; Drive</button>
+        <button class="dt-btn" onclick="openInGoogleDocs()" style="background:#4285F4;color:white;border-color:#4285F4;" title="Open in Google Docs">Docs</button>
+        <button class="dt-btn" onclick="openInGoogleSlides()" style="background:#F4B400;color:white;border-color:#F4B400;" title="Open in Google Slides">Slides</button>
+        <button class="dt-btn" onclick="openInGoogleSheets()" style="background:#0F9D58;color:white;border-color:#0F9D58;" title="Open in Google Sheets">Sheets</button>
       </div>
     </div>
     <div class="edit-toolbar" id="editToolbar">
@@ -985,6 +1025,53 @@ function getOrgMemoryContext() {
   var mems = getOrgMemory();
   if (mems.length === 0) return '';
   return '\n\nTEAM KNOWLEDGE BASE:\n' + mems.map(function(m) { return '- (' + m.category.toUpperCase() + ', ' + m.author + ') ' + m.text; }).join('\n');
+}
+
+/* ============ CONTINUOUS LEARNING SYSTEM ============ */
+function getLearnings() {
+  var store = loadStore();
+  return store.learnings || [];
+}
+
+function addLearning(content, category, source) {
+  var store = loadStore();
+  if (!store.learnings) store.learnings = [];
+  store.learnings.push({
+    id: Date.now(),
+    content: content,
+    category: category || 'general',
+    source: source || 'manual',
+    date: new Date().toISOString(),
+    addedBy: currentUser ? currentUser.name : 'unknown'
+  });
+  if (store.learnings.length > 500) store.learnings = store.learnings.slice(-500);
+  saveStore(store);
+}
+
+function deleteLearning(id) {
+  var store = loadStore();
+  if (!store.learnings) return;
+  store.learnings = store.learnings.filter(function(l) { return l.id !== id; });
+  saveStore(store);
+}
+
+function getLearningContext() {
+  var learnings = getLearnings();
+  if (learnings.length === 0) return '';
+  var ctx = '\n\nTEAM LEARNINGS & KNOWLEDGE (taught by team members — use this to inform your responses):\n';
+  var recent = learnings.slice(-50);
+  recent.forEach(function(l) {
+    ctx += '- [' + l.category + '] ' + l.content + ' (from ' + l.addedBy + ')\n';
+  });
+  return ctx;
+}
+
+function learnFromInteraction(userMsg, botResponse, feedback) {
+  if (feedback === 'positive') {
+    addLearning('Good response pattern: User asked "' + userMsg.substring(0, 100) + '" — response was well-received.', 'interaction', 'feedback');
+  } else if (feedback === 'negative') {
+    addLearning('Needs improvement: User asked "' + userMsg.substring(0, 100) + '" — response was not helpful. Adjust approach.', 'correction', 'feedback');
+  }
 }
 
 /* ============ THREAD SYSTEM ============ */
@@ -1280,6 +1367,16 @@ function renderSidebar() {
   renderThreadBar();
   renderIdeas();
   renderConnectors();
+  renderLearnings();
+}
+
+function toggleTeachPanel() {
+  var panel = document.getElementById('teachPanel');
+  if (!panel) return;
+  var isShowing = panel.style.display !== 'none';
+  document.getElementById('connList').style.display = isShowing ? 'block' : 'none';
+  panel.style.display = isShowing ? 'none' : 'block';
+  if (!isShowing) renderLearnings();
 }
 
 function initThreadsForUser(userName) {
@@ -1373,6 +1470,41 @@ function swTab(tab) {
 function rSb(q) {
   // Simplified — sidebar only shows threads now
   renderThreadBar();
+}
+
+function submitTeaching() {
+  var input = document.getElementById('teachInput');
+  var cat = document.getElementById('teachCategory').value;
+  var text = input.value.trim();
+  if (!text) return;
+  addLearning(text, cat, 'teach');
+  input.value = '';
+  renderLearnings();
+  var hc = document.getElementById('hubChat');
+  if (hc) addMsgTo(hc, 'Got it — I\'ve absorbed that ' + cat + ' knowledge. It\'ll inform my responses going forward.', false);
+}
+
+function renderLearnings() {
+  var el = document.getElementById('learningsList');
+  if (!el) return;
+  var learnings = getLearnings();
+  if (learnings.length === 0) {
+    el.innerHTML = '<div style="text-align:center;color:var(--text-muted);font-size:12px;padding:20px;">No learnings yet. Teach me something!</div>';
+    return;
+  }
+  var html = '<div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Knowledge Base (' + learnings.length + ')</div>';
+  learnings.slice().reverse().slice(0, 30).forEach(function(l) {
+    var date = new Date(l.date).toLocaleDateString('en-GB', {day:'numeric',month:'short'});
+    html += '<div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px;margin-bottom:6px;font-size:11px;">'
+      + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">'
+      + '<span style="background:var(--accent-light);color:var(--accent);padding:2px 6px;border-radius:10px;font-size:9px;text-transform:uppercase;font-weight:600;">' + l.category + '</span>'
+      + '<span style="color:var(--text-muted);font-size:9px;">' + date + ' · ' + (l.addedBy || '').split(' ')[0] + '</span>'
+      + '</div>'
+      + '<div style="color:var(--text);line-height:1.4;">' + escHtml(l.content).substring(0, 200) + (l.content.length > 200 ? '...' : '') + '</div>'
+      + '<button onclick="deleteLearning(' + l.id + ');renderLearnings();" style="background:none;border:none;color:var(--text-muted);font-size:9px;cursor:pointer;padding:4px 0;margin-top:4px;">Remove</button>'
+      + '</div>';
+  });
+  el.innerHTML = html;
 }
 
 function renderMemoryList(el, filter) {
@@ -1484,7 +1616,14 @@ function addMsgTo(container, text, isUser, senderInfo) {
   }
 
   var displayText = isUser ? escHtml(text) : fmtChat(text);
-  el.innerHTML = '<div class="m-av ' + avCls + '" style="background:' + avCol + '">' + avInit + '</div><div class="m-body">' + displayText + '</div>';
+  el.innerHTML = '<div class="m-av ' + avCls + '" style="background:' + avCol + '">' + avInit + '</div><div class="m-body"><div class="msg-text">' + displayText + '</div></div>';
+  if (!isUser) {
+    var fb = document.createElement('div');
+    fb.className = 'msg-feedback';
+    fb.innerHTML = '<button class="fb-btn fb-up" onclick="handleFeedback(this,\'positive\')" title="Good response">&#128077;</button>'
+      + '<button class="fb-btn fb-down" onclick="handleFeedback(this,\'negative\')" title="Needs improvement">&#128078;</button>';
+    el.querySelector('.m-body').appendChild(fb);
+  }
   if (senderInfo) el.setAttribute('data-sender', JSON.stringify(senderInfo));
   container.appendChild(el);
   container.scrollTop = container.scrollHeight;
@@ -1499,6 +1638,24 @@ function addTypingTo(container) {
 }
 
 function removeTyping() { var el = document.getElementById('typ'); if (el) el.remove(); }
+
+function handleFeedback(btn, type) {
+  var msgDiv = btn.closest('.msg');
+  var feedbackDiv = btn.parentElement;
+  var botText = msgDiv.querySelector('.msg-text') ? msgDiv.querySelector('.msg-text').textContent : msgDiv.textContent;
+  var allMsgs = msgDiv.parentElement.children;
+  var prevUserMsg = '';
+  for (var i = 0; i < allMsgs.length; i++) {
+    if (allMsgs[i] === msgDiv && i > 0) {
+      prevUserMsg = allMsgs[i-1].textContent || '';
+      break;
+    }
+  }
+  learnFromInteraction(prevUserMsg.substring(0, 200), botText.substring(0, 200), type);
+  feedbackDiv.querySelectorAll('.fb-btn').forEach(function(b) { b.classList.remove('selected'); });
+  btn.classList.add('selected');
+  feedbackDiv.style.opacity = '1';
+}
 
 /* Helper: process a response for any chat surface */
 async function processMsg(text) {
@@ -1767,7 +1924,7 @@ function buildSystemPrompt() {
     return info;
   }).join('\n');
   var teamData = TEAM.map(function(t) { return t.name + ' — ' + t.role; }).join('\n');
-  return 'You are Noise Intelligence, the internal AI brain for Noise Media — a creative agency with a social-first mindset. You are speaking with ' + (currentUser ? currentUser.name + ' (' + currentUser.role + ')' : 'a team member') + '.\n\nYour personality: You are sharp, direct, and deeply knowledgeable. You speak like a senior strategist who has read every brief, every report, every campaign deck in the agency. You give specific answers with real data — never vague or generic. When you know numbers, cite them. When you know strategy details, share them with confidence.\n\nRESPONSE RULES:\n- Be conversational but substantive. Default to 2-5 sentences. Go longer when the question warrants depth (strategy, performance, campaign analysis).\n- NEVER use markdown (no **, ##, ```, code fences). Plain text only. Use line breaks for readability.\n- When discussing a client, ALWAYS use the specific data from DEEP KNOWLEDGE below — budgets, metrics, audience segments, creative details, scent names, campaign phases, etc.\n- For Altra specifically: you have COMPLETE campaign data — £22,714.25 total spend, 14 weekly reports, 5 campaign phases, 3 audience segments (Luxury, Digital Native, Conscious), 5 scent products, 50+ creatives, platform breakdowns. USE THIS DATA in every Altra answer.\n- When asked about strategy, brand, audiences, paid media, or campaign approach — dig into the STRATEGY DEEP-DIVE DATA and give informed, specific, data-backed answers.\n- If someone asks a broad question like "tell me about Altra" — give a rich, comprehensive answer with key stats, not a one-liner.\n- For questions about performance, budgets, or metrics — always include actual numbers.\n\nDOCUMENT GENERATION:\nWhen asked to create a document (email, brief, social copy, proposal, cost allocation, report, meeting agenda, presentation/deck/slides), respond with ONLY a JSON object like: {"doc_type":"email","client":"BARBRI","variant":"general"}\nFor presentations, include a topic field: {"doc_type":"presentation","client":"Thortful","topic":"Campaign"}\nValid doc_type values: email, brief, social, proposal, cost, report, agenda, presentation\nValid email variants: general, intro, followup, update\n\nFor all other messages, reply with intelligence and depth.\n\nCLIENTS (' + CL.length + '):\n' + clientData + '\n\nTEAM (' + TEAM.length + '):\n' + teamData + '\n\nNoise Media specialises in paid social, content production, and brand storytelling. Services: content strategy, creative production (video, photo, design), paid social management, UGC/influencer, community management. Offices in London, Los Angeles, New York. Contact: brands@noisemediagroup.co.uk, +44 0203 007 0500. Co-founded by Anthony and Joe.' + buildStrategyContext() + '\n\nAGENCY CASE STUDIES: Apple Gift Cards (overstocked to sold out), VOXI (UGC-style creative drove 124% higher CTR than usual ads, became the student SIM everyone switched to). Our approach: social-first mindset across Social, Influencer, Production, OOH, Paid, Activations.' + getMemoryContext() + getOrgMemoryContext();
+  return 'You are Noise Intelligence, the internal AI brain for Noise Media — a creative agency with a social-first mindset. You are speaking with ' + (currentUser ? currentUser.name + ' (' + currentUser.role + ')' : 'a team member') + '.\n\nYour personality: You are sharp, direct, and deeply knowledgeable. You speak like a senior strategist who has read every brief, every report, every campaign deck in the agency. You give specific answers with real data — never vague or generic. When you know numbers, cite them. When you know strategy details, share them with confidence.\n\nRESPONSE RULES:\n- Be conversational but substantive. Default to 2-5 sentences. Go longer when the question warrants depth (strategy, performance, campaign analysis).\n- NEVER use markdown (no **, ##, ```, code fences). Plain text only. Use line breaks for readability.\n- When discussing a client, ALWAYS use the specific data from DEEP KNOWLEDGE below — budgets, metrics, audience segments, creative details, scent names, campaign phases, etc.\n- For Altra specifically: you have COMPLETE campaign data — £22,714.25 total spend, 14 weekly reports, 5 campaign phases, 3 audience segments (Luxury, Digital Native, Conscious), 5 scent products, 50+ creatives, platform breakdowns. USE THIS DATA in every Altra answer.\n- When asked about strategy, brand, audiences, paid media, or campaign approach — dig into the STRATEGY DEEP-DIVE DATA and give informed, specific, data-backed answers.\n- If someone asks a broad question like "tell me about Altra" — give a rich, comprehensive answer with key stats, not a one-liner.\n- For questions about performance, budgets, or metrics — always include actual numbers.\n\nDOCUMENT GENERATION:\nWhen asked to create a document (email, brief, social copy, proposal, cost allocation, report, meeting agenda, presentation/deck/slides), respond with ONLY a JSON object like: {"doc_type":"email","client":"BARBRI","variant":"general"}\nFor presentations, include a topic field: {"doc_type":"presentation","client":"Thortful","topic":"Campaign"}\nValid doc_type values: email, brief, social, proposal, cost, report, agenda, presentation\nValid email variants: general, intro, followup, update\n\nFor all other messages, reply with intelligence and depth.\n\nCLIENTS (' + CL.length + '):\n' + clientData + '\n\nTEAM (' + TEAM.length + '):\n' + teamData + '\n\nNoise Media specialises in paid social, content production, and brand storytelling. Services: content strategy, creative production (video, photo, design), paid social management, UGC/influencer, community management. Offices in London, Los Angeles, New York. Contact: brands@noisemediagroup.co.uk, +44 0203 007 0500. Co-founded by Anthony and Joe.' + buildStrategyContext() + '\n\nAGENCY CASE STUDIES: Apple Gift Cards (overstocked to sold out), VOXI (UGC-style creative drove 124% higher CTR than usual ads, became the student SIM everyone switched to). Our approach: social-first mindset across Social, Influencer, Production, OOH, Paid, Activations.' + getMemoryContext() + getOrgMemoryContext() + getLearningContext();
 }
 
 async function aiCall(sysPrompt, msgs, maxTok) {
@@ -2470,13 +2627,25 @@ function slideGo(dir) {
 }
 
 function togEdit() {
-  var p = document.getElementById('docP');
-  var on = p.contentEditable === 'true';
-  p.contentEditable = on ? 'false' : 'true';
-  document.getElementById('dtEdit').classList.toggle('active');
-  document.getElementById('dtPrev').classList.toggle('active');
-  document.getElementById('editToolbar').classList.toggle('active', !on);
-  if (!on) p.focus();
+  var onPage1 = document.getElementById('page1').classList.contains('has-doc');
+  if (onPage1) {
+    var p = document.getElementById('p1DocC');
+    var on = p.contentEditable === 'true';
+    p.contentEditable = on ? 'false' : 'true';
+    document.getElementById('p1dtEdit').classList.toggle('active');
+    document.getElementById('p1dtPrev').classList.toggle('active');
+    var tb = document.getElementById('p1EditToolbar');
+    if (tb) tb.classList.toggle('active', !on);
+    if (!on) p.focus();
+  } else {
+    var p = document.getElementById('docP');
+    var on = p.contentEditable === 'true';
+    p.contentEditable = on ? 'false' : 'true';
+    document.getElementById('dtEdit').classList.toggle('active');
+    document.getElementById('dtPrev').classList.toggle('active');
+    document.getElementById('editToolbar').classList.toggle('active', !on);
+    if (!on) p.focus();
+  }
 }
 
 function execFmt(cmd, val) {
@@ -2682,21 +2851,36 @@ function exportPPTX() {
   pptx.writeFile({ fileName: title + '.pptx' });
 }
 
-function saveToDrive() {
+function openInGoogleDocs() {
   var dc = document.getElementById('docC');
-  if (dc.style.display==='none') { alert('Generate a document first.'); return; }
+  var p1dc = document.getElementById('p1DocC');
+  var source = (dc && dc.style.display !== 'none') ? dc : p1dc;
+  if (!source || !source.innerHTML.trim()) { alert('Generate a document first.'); return; }
   var title = getDocTitle();
-  var html = '<!DOCTYPE html><html><head><meta charset="utf-8"><style>body{font-family:Calibri,sans-serif;font-size:11pt;line-height:1.6;color:#1B1B1B;max-width:700px;margin:0 auto;padding:20px;}h1{font-size:18pt;margin-bottom:4px;}h2{font-size:14pt;margin-top:16px;border-bottom:1px solid #ddd;padding-bottom:4px;}table{width:100%;border-collapse:collapse;margin:10px 0;}th,td{border:1px solid #ccc;padding:6px 10px;font-size:10pt;}th{background:#f5f5f5;font-weight:bold;}</style></head><body>' + dc.innerHTML + '</body></html>';
+  var html = '<!DOCTYPE html><html><head><meta charset="utf-8"><title>' + title + '</title><style>body{font-family:Calibri,sans-serif;font-size:11pt;line-height:1.6;color:#1B1B1B;max-width:700px;margin:0 auto;padding:20px;}h1{font-size:18pt;}h2{font-size:14pt;margin-top:16px;border-bottom:1px solid #ddd;padding-bottom:4px;}table{width:100%;border-collapse:collapse;margin:10px 0;}th,td{border:1px solid #ccc;padding:6px 10px;font-size:10pt;}th{background:#f5f5f5;}</style></head><body>' + source.innerHTML + '</body></html>';
   var blob = new Blob([html], { type: 'text/html' });
-  var url = URL.createObjectURL(blob);
-  var a = document.createElement('a');
-  a.href = url;
-  a.download = title + '.html';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-  alert('File downloaded! Open it in Google Drive:\n1. Go to drive.google.com\n2. Click "+ New" → "File upload"\n3. Upload the downloaded file\n4. Right-click → "Open with" → "Google Docs"');
+  triggerDownload(blob, title + '.html');
+  setTimeout(function() { alert('File downloaded! To open in Google Docs:\n1. Go to drive.google.com\n2. Click "+ New" → "File upload"\n3. Upload ' + title + '.html\n4. Right-click → "Open with" → Google Docs'); }, 500);
+}
+
+function openInGoogleSlides() {
+  var dc = document.getElementById('docC');
+  var p1dc = document.getElementById('p1DocC');
+  var source = (dc && dc.style.display !== 'none') ? dc : p1dc;
+  if (!source || !source.innerHTML.trim()) { alert('Generate a document first.'); return; }
+  exportPPTX();
+  setTimeout(function() { alert('PPTX downloaded! To open in Google Slides:\n1. Go to drive.google.com\n2. Click "+ New" → "File upload"\n3. Upload the .pptx file\n4. It opens directly in Google Slides'); }, 500);
+}
+
+function openInGoogleSheets() {
+  var dc = document.getElementById('docC');
+  var p1dc = document.getElementById('p1DocC');
+  var source = (dc && dc.style.display !== 'none') ? dc : p1dc;
+  if (!source || !source.innerHTML.trim()) { alert('Generate a document first.'); return; }
+  var tables = source.querySelectorAll('table');
+  if (tables.length === 0) { alert('No tables found in this document to export to Sheets.'); return; }
+  exportXLSX();
+  setTimeout(function() { alert('XLSX downloaded! To open in Google Sheets:\n1. Go to drive.google.com\n2. Click "+ New" → "File upload"\n3. Upload the .xlsx file\n4. It opens directly in Google Sheets'); }, 500);
 }
 
 /* ============ RESPONSE ENGINE ============ */

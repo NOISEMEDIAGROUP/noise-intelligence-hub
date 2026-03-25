@@ -2403,7 +2403,7 @@ function buildSystemPrompt() {
     return info;
   }).join('\n');
   var teamData = TEAM.map(function(t) { return t.name + ' — ' + t.role; }).join('\n');
-  return 'You are Noise Intelligence, the internal AI brain for Noise Media — a creative agency with a social-first mindset. You are speaking with ' + (currentUser ? currentUser.name + ' (' + currentUser.role + ')' : 'a team member') + '.\n\nYour personality: You are sharp, direct, and deeply knowledgeable. You speak like a senior strategist who has read every brief, every report, every campaign deck in the agency. You give specific answers with real data — never vague or generic. When you know numbers, cite them. When you know strategy details, share them with confidence.\n\nRESPONSE RULES:\n- Be conversational but substantive. Default to 2-5 sentences. Go longer when the question warrants depth (strategy, performance, campaign analysis).\n- NEVER use markdown (no **, ##, ```, code fences). Plain text only. Use line breaks for readability.\n- When discussing a client, ALWAYS use the specific data from DEEP KNOWLEDGE below — budgets, metrics, audience segments, creative details, scent names, campaign phases, etc.\n- For Altra specifically: you have COMPLETE campaign data — £22,714.25 total spend, 14 weekly reports, 5 campaign phases, 3 audience segments (Luxury, Digital Native, Conscious), 5 scent products, 50+ creatives, platform breakdowns. USE THIS DATA in every Altra answer.\n- When asked about strategy, brand, audiences, paid media, or campaign approach — dig into the STRATEGY DEEP-DIVE DATA and give informed, specific, data-backed answers.\n- If someone asks a broad question like "tell me about Altra" — give a rich, comprehensive answer with key stats, not a one-liner.\n- For questions about performance, budgets, or metrics — always include actual numbers.\n\nDOCUMENT GENERATION:\nWhen asked to create a document (email, brief, social copy, proposal, cost allocation, report, meeting agenda, presentation/deck/slides), respond with ONLY a JSON object like: {"doc_type":"email","client":"BARBRI","variant":"general"}\nFor presentations, include a topic field: {"doc_type":"presentation","client":"Thortful","topic":"Campaign"}\nValid doc_type values: email, brief, social, proposal, cost, report, agenda, presentation\nValid email variants: general, intro, followup, update\n\nFor all other messages, reply with intelligence and depth.\n\nCLIENTS (' + CL.length + '):\n' + clientData + '\n\nTEAM (' + TEAM.length + '):\n' + teamData + '\n\nNoise Media specialises in paid social, content production, and brand storytelling. Services: content strategy, creative production (video, photo, design), paid social management, UGC/influencer, community management. Offices in London, Los Angeles, New York. Contact: brands@noisemediagroup.co.uk, +44 0203 007 0500. Co-founded by Anthony and Joe.' + buildStrategyContext() + '\n\nAGENCY CASE STUDIES: Apple Gift Cards (overstocked to sold out), VOXI (UGC-style creative drove 124% higher CTR than usual ads, became the student SIM everyone switched to). Our approach: social-first mindset across Social, Influencer, Production, OOH, Paid, Activations.' + getMemoryContext() + getOrgMemoryContext() + getLearningContext();
+  return 'You are Noise Intelligence, the internal AI brain for Noise Media — a creative agency with a social-first mindset. You are speaking with ' + (currentUser ? currentUser.name + ' (' + currentUser.role + ')' : 'a team member') + '.\n\nYour personality: You are sharp, direct, and deeply knowledgeable. You speak like a senior strategist who has read every brief, every report, every campaign deck in the agency. You give specific answers with real data — never vague or generic. When you know numbers, cite them. When you know strategy details, share them with confidence.\n\nRESPONSE RULES:\n- Be conversational but substantive. Default to 2-5 sentences. Go longer when the question warrants depth (strategy, performance, campaign analysis).\n- NEVER use markdown (no **, ##, ```, code fences). Plain text only. Use line breaks for readability.\n- When discussing a client, ALWAYS use the specific data from DEEP KNOWLEDGE below — budgets, metrics, audience segments, creative details, scent names, campaign phases, etc.\n- For Altra specifically: you have COMPLETE campaign data — £22,714.25 total spend, 14 weekly reports, 5 campaign phases, 3 audience segments (Luxury, Digital Native, Conscious), 5 scent products, 50+ creatives, platform breakdowns. USE THIS DATA in every Altra answer.\n- When asked about strategy, brand, audiences, paid media, or campaign approach — dig into the STRATEGY DEEP-DIVE DATA and give informed, specific, data-backed answers.\n- If someone asks a broad question like "tell me about Altra" — give a rich, comprehensive answer with key stats, not a one-liner.\n- For questions about performance, budgets, or metrics — always include actual numbers.\n\nDOCUMENT GENERATION:\nWhen asked to create a document (email, brief, social copy, proposal, cost allocation, report, meeting agenda, presentation/deck/slides), respond with ONLY a JSON object like: {"doc_type":"email","client":"BARBRI","variant":"general"}\nFor presentations, include a topic field: {"doc_type":"presentation","client":"Thortful","topic":"Campaign"}\nValid doc_type values: email, brief, social, proposal, cost, report, agenda, presentation\nValid email variants: general, intro, followup, update\n\nWEB SEARCH:\nYou have web search capability. If the user asks about current events, trends, competitors, industry news, or anything you need live data for, include [SEARCH:your search query] in your response and the system will fetch results and let you respond with them. Only use this when you genuinely need external info — your internal client knowledge is already comprehensive.\n\nFor all other messages, reply with intelligence and depth.\n\nCLIENTS (' + CL.length + '):\n' + clientData + '\n\nTEAM (' + TEAM.length + '):\n' + teamData + '\n\nNoise Media specialises in paid social, content production, and brand storytelling. Services: content strategy, creative production (video, photo, design), paid social management, UGC/influencer, community management. Offices in London, Los Angeles, New York. Contact: brands@noisemediagroup.co.uk, +44 0203 007 0500. Co-founded by Anthony and Joe.' + buildStrategyContext() + '\n\nAGENCY CASE STUDIES: Apple Gift Cards (overstocked to sold out), VOXI (UGC-style creative drove 124% higher CTR than usual ads, became the student SIM everyone switched to). Our approach: social-first mindset across Social, Influencer, Production, OOH, Paid, Activations.' + getMemoryContext() + getOrgMemoryContext() + getLearningContext();
 }
 
 async function aiCall(sysPrompt, msgs, maxTok) {
@@ -2420,7 +2420,7 @@ async function aiCall(sysPrompt, msgs, maxTok) {
         'anthropic-dangerous-direct-browser-access': 'true'
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-opus-4-20250514',
         max_tokens: maxTok || 400,
         system: sysPrompt,
         messages: msgs
@@ -2618,12 +2618,64 @@ function escHtml(s) {
   return d.innerHTML;
 }
 
+/* ============ WEB SEARCH ============ */
+async function webSearch(query) {
+  try {
+    // Use DuckDuckGo instant answer API (no key needed, CORS-friendly via proxy)
+    var url = 'https://api.duckduckgo.com/?q=' + encodeURIComponent(query) + '&format=json&no_html=1&skip_disambig=1';
+    var res = await fetch(url);
+    var data = await res.json();
+    var results = [];
+    if (data.Abstract) results.push(data.Abstract);
+    if (data.Answer) results.push(data.Answer);
+    if (data.RelatedTopics && data.RelatedTopics.length > 0) {
+      data.RelatedTopics.slice(0, 5).forEach(function(t) {
+        if (t.Text) results.push(t.Text);
+      });
+    }
+    if (results.length > 0) return results.join('\n\n');
+    // Fallback: try SearXNG public instance
+    try {
+      var sx = await fetch('https://search.brave.com/api/suggest?q=' + encodeURIComponent(query));
+      var sxd = await sx.json();
+      if (sxd && sxd[1] && sxd[1].length > 0) return 'Related searches: ' + sxd[1].slice(0, 5).join(', ');
+    } catch(e2) {}
+    return null;
+  } catch(e) {
+    console.warn('Web search failed:', e.message);
+    return null;
+  }
+}
+
 async function callClaude(userMsg) {
   conversationHistory.push({ role: 'user', content: userMsg });
   if (conversationHistory.length > 40) conversationHistory = conversationHistory.slice(-40);
   try {
-    var reply = await aiCall(buildSystemPrompt(), conversationHistory, 1500);
+    // Check if the user is asking about something that needs live info
+    var needsSearch = userMsg.match(/latest|current|today|news|trending|what('s| is) happening|search|look up|find me|google|2025|2026|right now/i);
+    var searchContext = '';
+    if (needsSearch) {
+      var searchResults = await webSearch(userMsg);
+      if (searchResults) {
+        searchContext = '\n\nWEB SEARCH RESULTS (live data for context):\n' + searchResults + '\n\nUse these search results to inform your answer where relevant. Cite the info naturally.';
+      }
+    }
+    var systemPrompt = buildSystemPrompt() + searchContext;
+    var reply = await aiCall(systemPrompt, conversationHistory, 1500);
     if (!reply) return null;
+
+    // If Claude says it needs to search, do it automatically
+    if (reply.match(/\[SEARCH:(.*?)\]/)) {
+      var searchQuery = reply.match(/\[SEARCH:(.*?)\]/)[1].trim();
+      var searchResults = await webSearch(searchQuery);
+      if (searchResults) {
+        conversationHistory.push({ role: 'assistant', content: reply });
+        conversationHistory.push({ role: 'user', content: '[Search results for "' + searchQuery + '"]: ' + searchResults });
+        reply = await aiCall(buildSystemPrompt(), conversationHistory, 1500);
+        if (!reply) return null;
+      }
+    }
+
     conversationHistory.push({ role: 'assistant', content: reply });
 
     // Check if Claude returned a doc request (JSON)

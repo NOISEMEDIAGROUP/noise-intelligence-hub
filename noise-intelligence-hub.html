@@ -3118,7 +3118,7 @@ function toggleDrivePanel() {
     var isConnected = status && status.connected;
     var statusStyle = isConnected ? 'background:#2D8A4E;color:white;' : 'background:var(--surface2);color:var(--text-muted);';
     var statusText = isConnected ? 'Connected' : 'Connect';
-    return '<div onclick="this.closest(\\'.modal-bg\\').remove(); connectIntegration(\\'' + c.key + '\\');" style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--surface2);border-radius:8px;border:1px solid var(--border);cursor:pointer;">'
+    return '<div onclick="this.closest(\'.modal-bg\').remove(); connectIntegration(\'' + c.key + '\');" style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--surface2);border-radius:8px;border:1px solid var(--border);cursor:pointer;">'
       + '<div style="font-size:20px;">' + c.icon + '</div>'
       + '<div style="flex:1;"><div style="font-weight:600;font-size:13px;font-family:Montserrat,sans-serif;">' + c.name + '</div></div>'
       + '<button style="padding:4px 12px;border-radius:6px;border:none;font-size:10px;font-weight:600;font-family:Reddit Mono,monospace;text-transform:uppercase;letter-spacing:0.3px;cursor:pointer;' + statusStyle + '">' + statusText + '</button>'
@@ -3128,7 +3128,7 @@ function toggleDrivePanel() {
     + '<h3>Connectors</h3>'
     + '<p>Connect external tools and services to the Intelligence Hub.</p>'
     + '<div style="display:flex;flex-direction:column;gap:8px;max-height:360px;overflow-y:auto;">' + connectorsHtml + '</div>'
-    + '<div class="modal-btns"><button class="btn-cancel" onclick="this.closest(\\'.modal-bg\\').remove()">Close</button></div>'
+    + '<div class="modal-btns"><button class="btn-cancel" onclick="this.closest(\'.modal-bg\').remove()">Close</button></div>'
     + '</div>';
   document.body.appendChild(modal);
 }

@@ -1305,13 +1305,12 @@
             <div class="plus-menu-item">Connectors</div>
             <div class="plus-menu-sub">
               <div class="plus-menu-item" onclick="connectIntegration('gmail'); hidePlusMenu();">Gmail</div>
-              <div class="plus-menu-item" onclick="connectIntegration('google-sheets'); hidePlusMenu();">Google Sheets</div>
-              <div class="plus-menu-item" onclick="connectIntegration('google-docs'); hidePlusMenu();">Google Docs</div>
-              <div class="plus-menu-item" onclick="connectIntegration('adobe-photoshop'); hidePlusMenu();">Adobe Photoshop</div>
               <div class="plus-menu-item" onclick="connectIntegration('google-calendar'); hidePlusMenu();">Google Calendar</div>
+              <div class="plus-menu-item" onclick="connectIntegration('google-sheets'); hidePlusMenu();">Google Sheets</div>
+              <div class="plus-menu-item" onclick="connectIntegration('google-slides'); hidePlusMenu();">Google Slides</div>
+              <div class="plus-menu-item" onclick="connectIntegration('google-docs'); hidePlusMenu();">Google Docs</div>
               <div class="plus-menu-item" onclick="connectIntegration('slack'); hidePlusMenu();">Slack</div>
               <div class="plus-menu-item" onclick="connectIntegration('pdf'); hidePlusMenu();">PDF</div>
-              <div class="plus-menu-item" onclick="connectIntegration('granola'); hidePlusMenu();">Granola</div>
             </div>
           </div>
           <div class="plus-menu-item-parent">
@@ -1390,13 +1389,12 @@
             <div class="plus-menu-item">Connectors</div>
             <div class="plus-menu-sub">
               <div class="plus-menu-item" onclick="connectIntegration('gmail'); hidePlusMenu2();">Gmail</div>
-              <div class="plus-menu-item" onclick="connectIntegration('google-sheets'); hidePlusMenu2();">Google Sheets</div>
-              <div class="plus-menu-item" onclick="connectIntegration('google-docs'); hidePlusMenu2();">Google Docs</div>
-              <div class="plus-menu-item" onclick="connectIntegration('adobe-photoshop'); hidePlusMenu2();">Adobe Photoshop</div>
               <div class="plus-menu-item" onclick="connectIntegration('google-calendar'); hidePlusMenu2();">Google Calendar</div>
+              <div class="plus-menu-item" onclick="connectIntegration('google-sheets'); hidePlusMenu2();">Google Sheets</div>
+              <div class="plus-menu-item" onclick="connectIntegration('google-slides'); hidePlusMenu2();">Google Slides</div>
+              <div class="plus-menu-item" onclick="connectIntegration('google-docs'); hidePlusMenu2();">Google Docs</div>
               <div class="plus-menu-item" onclick="connectIntegration('slack'); hidePlusMenu2();">Slack</div>
               <div class="plus-menu-item" onclick="connectIntegration('pdf'); hidePlusMenu2();">PDF</div>
-              <div class="plus-menu-item" onclick="connectIntegration('granola'); hidePlusMenu2();">Granola</div>
             </div>
           </div>
           <div class="plus-menu-item-parent">
@@ -2669,6 +2667,275 @@ function renderLearnings() {
 /* ============ GOOGLE DRIVE INTEGRATION ============ */
 var DRIVE_CLIENT_ID = localStorage.getItem('nih_drive_client_id') || '';
 var DRIVE_SCOPES = 'https://www.googleapis.com/auth/drive.readonly';
+
+/* ============ UNIFIED GOOGLE OAUTH ============ */
+var GOOGLE_CLIENT_ID = localStorage.getItem('nih_google_client_id') || DRIVE_CLIENT_ID || '';
+var GOOGLE_SCOPES = [
+  'https://www.googleapis.com/auth/gmail.readonly',
+  'https://www.googleapis.com/auth/gmail.send',
+  'https://www.googleapis.com/auth/gmail.compose',
+  'https://www.googleapis.com/auth/calendar.readonly',
+  'https://www.googleapis.com/auth/calendar.events',
+  'https://www.googleapis.com/auth/spreadsheets',
+  'https://www.googleapis.com/auth/drive.readonly'
+].join(' ');
+var googleAccessToken = null;
+var googleTokenClient = null;
+var googleConnectedServices = {};
+
+function saveGoogleClientId(id) {
+  GOOGLE_CLIENT_ID = id;
+  DRIVE_CLIENT_ID = id;
+  localStorage.setItem('nih_google_client_id', id);
+  localStorage.setItem('nih_drive_client_id', id);
+}
+
+function initiateGoogleAuth(callback) {
+  if (!GOOGLE_CLIENT_ID) {
+    showGoogleSetupModal();
+    return;
+  }
+  try {
+    googleTokenClient = google.accounts.oauth2.initTokenClient({
+      client_id: GOOGLE_CLIENT_ID,
+      scope: GOOGLE_SCOPES,
+      callback: function(response) {
+        if (response.error) {
+          console.error('Google auth error:', response);
+          showToast('Google auth failed: ' + (response.error_description || response.error), 'error');
+          return;
+        }
+        googleAccessToken = response.access_token;
+        driveAccessToken = response.access_token;
+        googleConnectedServices = { gmail: true, calendar: true, sheets: true, drive: true };
+        localStorage.setItem('nih_google_connected', JSON.stringify(googleConnectedServices));
+        showToast('Connected to Google services', 'success');
+        if (callback) callback();
+      }
+    });
+    googleTokenClient.requestAccessToken();
+  } catch(e) {
+    console.error('Google auth init error:', e);
+    showToast('Failed to start Google auth. Check your Client ID.', 'error');
+  }
+}
+
+function isGoogleConnected() {
+  return googleAccessToken && googleConnectedServices.gmail;
+}
+
+function disconnectGoogle() {
+  if (googleAccessToken) {
+    google.accounts.oauth2.revoke(googleAccessToken, function() {});
+  }
+  googleAccessToken = null;
+  driveAccessToken = null;
+  googleConnectedServices = {};
+  localStorage.removeItem('nih_google_connected');
+  showToast('Disconnected from Google', 'success');
+}
+
+async function googleApiFetch(url, options) {
+  if (!googleAccessToken) { showToast('Please connect to Google first', 'error'); return null; }
+  var opts = options || {};
+  if (!opts.headers) opts.headers = {};
+  opts.headers['Authorization'] = 'Bearer ' + googleAccessToken;
+  try {
+    var res = await fetch(url, opts);
+    if (res.status === 401) {
+      showToast('Google session expired. Please reconnect.', 'error');
+      googleAccessToken = null;
+      return null;
+    }
+    if (!res.ok) throw new Error('API error: ' + res.status);
+    return await res.json();
+  } catch(e) {
+    console.error('Google API error:', e);
+    showToast('API error: ' + e.message, 'error');
+    return null;
+  }
+}
+
+/* ============ GMAIL API ============ */
+async function gmailListInbox(maxResults) {
+  var n = maxResults || 10;
+  var data = await googleApiFetch('https://gmail.googleapis.com/gmail/v1/users/me/messages?maxResults=' + n + '&labelIds=INBOX');
+  if (!data || !data.messages) return [];
+  var emails = [];
+  for (var i = 0; i < Math.min(data.messages.length, n); i++) {
+    var detail = await googleApiFetch('https://gmail.googleapis.com/gmail/v1/users/me/messages/' + data.messages[i].id + '?format=metadata&metadataHeaders=From&metadataHeaders=Subject&metadataHeaders=Date');
+    if (detail) {
+      var headers = {};
+      (detail.payload.headers || []).forEach(function(h) { headers[h.name] = h.value; });
+      emails.push({ id: detail.id, from: headers.From || '', subject: headers.Subject || '(no subject)', date: headers.Date || '', snippet: detail.snippet || '' });
+    }
+  }
+  return emails;
+}
+
+async function gmailGetMessage(messageId) {
+  var data = await googleApiFetch('https://gmail.googleapis.com/gmail/v1/users/me/messages/' + messageId + '?format=full');
+  if (!data) return null;
+  var headers = {};
+  (data.payload.headers || []).forEach(function(h) { headers[h.name] = h.value; });
+  var body = '';
+  if (data.payload.body && data.payload.body.data) {
+    body = atob(data.payload.body.data.replace(/-/g, '+').replace(/_/g, '/'));
+  } else if (data.payload.parts) {
+    var textPart = data.payload.parts.find(function(p) { return p.mimeType === 'text/plain'; });
+    if (textPart && textPart.body && textPart.body.data) {
+      body = atob(textPart.body.data.replace(/-/g, '+').replace(/_/g, '/'));
+    }
+  }
+  return { id: data.id, from: headers.From, to: headers.To, subject: headers.Subject, date: headers.Date, body: body, snippet: data.snippet };
+}
+
+async function gmailSendEmail(to, subject, body) {
+  var raw = 'To: ' + to + '\r\nSubject: ' + subject + '\r\nContent-Type: text/html; charset=utf-8\r\n\r\n' + body;
+  var encoded = btoa(unescape(encodeURIComponent(raw))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  var res = await fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages/send', {
+    method: 'POST',
+    headers: { 'Authorization': 'Bearer ' + googleAccessToken, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ raw: encoded })
+  });
+  if (!res.ok) { showToast('Failed to send email', 'error'); return null; }
+  showToast('Email sent', 'success');
+  return await res.json();
+}
+
+async function gmailSearchEmails(query, maxResults) {
+  var n = maxResults || 10;
+  var data = await googleApiFetch('https://gmail.googleapis.com/gmail/v1/users/me/messages?maxResults=' + n + '&q=' + encodeURIComponent(query));
+  if (!data || !data.messages) return [];
+  var emails = [];
+  for (var i = 0; i < Math.min(data.messages.length, n); i++) {
+    var detail = await googleApiFetch('https://gmail.googleapis.com/gmail/v1/users/me/messages/' + data.messages[i].id + '?format=metadata&metadataHeaders=From&metadataHeaders=Subject&metadataHeaders=Date');
+    if (detail) {
+      var headers = {};
+      (detail.payload.headers || []).forEach(function(h) { headers[h.name] = h.value; });
+      emails.push({ id: detail.id, from: headers.From || '', subject: headers.Subject || '', date: headers.Date || '', snippet: detail.snippet || '' });
+    }
+  }
+  return emails;
+}
+
+/* ============ GOOGLE CALENDAR API ============ */
+async function calendarListEvents(timeMin, timeMax, maxResults) {
+  var now = new Date();
+  var tMin = timeMin || now.toISOString();
+  var tMax = timeMax || new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString();
+  var n = maxResults || 20;
+  var data = await googleApiFetch('https://www.googleapis.com/calendar/v3/calendars/primary/events?timeMin=' + encodeURIComponent(tMin) + '&timeMax=' + encodeURIComponent(tMax) + '&maxResults=' + n + '&singleEvents=true&orderBy=startTime');
+  if (!data || !data.items) return [];
+  return data.items.map(function(ev) {
+    return {
+      id: ev.id,
+      summary: ev.summary || '(No title)',
+      start: ev.start.dateTime || ev.start.date,
+      end: ev.end.dateTime || ev.end.date,
+      location: ev.location || '',
+      attendees: (ev.attendees || []).map(function(a) { return a.email; }),
+      description: ev.description || ''
+    };
+  });
+}
+
+async function calendarCreateEvent(summary, startDateTime, endDateTime, description, attendees) {
+  var event = {
+    summary: summary,
+    start: { dateTime: startDateTime, timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone },
+    end: { dateTime: endDateTime, timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone }
+  };
+  if (description) event.description = description;
+  if (attendees && attendees.length > 0) event.attendees = attendees.map(function(e) { return { email: e }; });
+  var res = await fetch('https://www.googleapis.com/calendar/v3/calendars/primary/events', {
+    method: 'POST',
+    headers: { 'Authorization': 'Bearer ' + googleAccessToken, 'Content-Type': 'application/json' },
+    body: JSON.stringify(event)
+  });
+  if (!res.ok) { showToast('Failed to create event', 'error'); return null; }
+  showToast('Event created', 'success');
+  return await res.json();
+}
+
+async function calendarGetToday() {
+  var now = new Date();
+  var startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
+  var endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59).toISOString();
+  return await calendarListEvents(startOfDay, endOfDay, 50);
+}
+
+/* ============ GOOGLE SHEETS API ============ */
+async function sheetsReadSpreadsheet(spreadsheetId, range) {
+  var r = range || 'Sheet1';
+  var data = await googleApiFetch('https://sheets.googleapis.com/v4/spreadsheets/' + spreadsheetId + '/values/' + encodeURIComponent(r));
+  if (!data) return null;
+  return data.values || [];
+}
+
+async function sheetsWriteData(spreadsheetId, range, values) {
+  var r = range || 'Sheet1';
+  var res = await fetch('https://sheets.googleapis.com/v4/spreadsheets/' + spreadsheetId + '/values/' + encodeURIComponent(r) + '?valueInputOption=USER_ENTERED', {
+    method: 'PUT',
+    headers: { 'Authorization': 'Bearer ' + googleAccessToken, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ values: values })
+  });
+  if (!res.ok) { showToast('Failed to write to sheet', 'error'); return null; }
+  showToast('Data written to sheet', 'success');
+  return await res.json();
+}
+
+async function sheetsCreateSpreadsheet(title) {
+  var res = await fetch('https://sheets.googleapis.com/v4/spreadsheets', {
+    method: 'POST',
+    headers: { 'Authorization': 'Bearer ' + googleAccessToken, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ properties: { title: title } })
+  });
+  if (!res.ok) { showToast('Failed to create spreadsheet', 'error'); return null; }
+  var data = await res.json();
+  showToast('Spreadsheet created', 'success');
+  return data;
+}
+
+/* ============ GOOGLE SETUP MODAL ============ */
+function showGoogleSetupModal() {
+  var existing = GOOGLE_CLIENT_ID ? ' value="' + GOOGLE_CLIENT_ID + '"' : '';
+  var modal = document.createElement('div');
+  modal.className = 'modal-bg';
+  modal.onclick = function(e) { if (e.target === modal) modal.remove(); };
+  modal.innerHTML = '<div class="modal" style="max-width:520px;">'
+    + '<h3 style="margin:0 0 12px;">Connect Google Services</h3>'
+    + '<p style="margin-bottom:16px;font-size:13px;color:var(--text-muted);">One Google Cloud Client ID connects Gmail, Calendar, Sheets, and Drive.</p>'
+    + '<div style="background:var(--surface2);border-radius:8px;padding:12px;margin-bottom:16px;font-size:11px;line-height:1.6;">'
+    + '<strong>Setup steps:</strong><br>'
+    + '1. Go to <a href="https://console.cloud.google.com" target="_blank" style="color:var(--accent);">console.cloud.google.com</a><br>'
+    + '2. Create a project (or select existing)<br>'
+    + '3. Enable APIs: Gmail, Calendar, Sheets, Drive<br>'
+    + '4. Go to Credentials > Create OAuth 2.0 Client ID<br>'
+    + '5. Application type: <strong>Web application</strong><br>'
+    + '6. Add authorised JS origin: <strong>https://noisemediagroup.github.io</strong><br>'
+    + '7. Copy the Client ID below'
+    + '</div>'
+    + '<label style="font-size:10px;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-muted);font-weight:600;display:block;margin-bottom:4px;">Google OAuth Client ID</label>'
+    + '<input id="googleClientIdInput" type="text" placeholder="xxxxxxxxxxxx.apps.googleusercontent.com"' + existing + ' style="width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;font-size:12px;background:var(--surface);color:var(--text);font-family:\'Reddit Mono\',monospace;margin-bottom:12px;">'
+    + '<button onclick="var id=document.getElementById(\'googleClientIdInput\').value.trim();if(!id){alert(\'Enter a Client ID\');return;}saveGoogleClientId(id);this.closest(\'.modal-bg\').remove();initiateGoogleAuth();" style="width:100%;padding:10px;background:var(--accent);color:white;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;">Save & Connect</button>'
+    + '<button onclick="this.closest(\'.modal-bg\').remove()" style="width:100%;padding:8px;background:transparent;color:var(--text-muted);border:1px solid var(--border);border-radius:8px;font-size:11px;cursor:pointer;margin-top:6px;">Cancel</button>'
+    + '</div>';
+  document.body.appendChild(modal);
+}
+
+function showToast(message, type) {
+  var existing = document.querySelector('.nih-toast');
+  if (existing) existing.remove();
+  var toast = document.createElement('div');
+  toast.className = 'nih-toast';
+  toast.style.cssText = 'position:fixed;bottom:24px;right:24px;padding:12px 20px;border-radius:10px;font-size:12px;font-weight:500;z-index:9999;animation:fadeIn 0.2s;box-shadow:var(--shadow-lg);';
+  toast.style.background = type === 'error' ? '#E74C3C' : type === 'success' ? '#27AE60' : 'var(--text)';
+  toast.style.color = '#fff';
+  toast.textContent = message;
+  document.body.appendChild(toast);
+  setTimeout(function() { toast.remove(); }, 3000);
+}
 var driveTokenClient = null;
 var driveAccessToken = null;
 var autoScanInterval = null;
@@ -3111,6 +3378,82 @@ function useSuggestion(btn) {
   hubSend();
 }
 
+/* ============ INTEGRATION COMMAND HANDLER ============ */
+async function handleIntegrationCommand(text, hc) {
+  var lower = text.toLowerCase();
+
+  // Gmail commands
+  if (lower.match(/\b(read|check|show|open|view)\b.*\b(inbox|email|emails|mail|gmail)\b/i) || lower.match(/^using gmail.*read inbox/i)) {
+    if (!isGoogleConnected()) { addMsgTo(hc, 'You need to connect Google first. Click the + button > Connectors > Gmail to sign in.', false); return true; }
+    addTypingTo(hc);
+    var emails = await gmailListInbox(8);
+    removeTyping();
+    if (emails.length === 0) { addMsgTo(hc, 'Your inbox is empty.', false); return true; }
+    var emailHtml = '<strong>Your latest emails:</strong><br><br>';
+    emails.forEach(function(e, i) {
+      var fromName = e.from.split('<')[0].trim() || e.from;
+      emailHtml += '<div style="padding:8px 0;border-bottom:1px solid var(--border);">'
+        + '<strong>' + escHtml(e.subject) + '</strong><br>'
+        + '<span style="font-size:11px;color:var(--text-muted);">' + escHtml(fromName) + ' · ' + escHtml(e.date) + '</span><br>'
+        + '<span style="font-size:12px;">' + escHtml(e.snippet) + '</span>'
+        + '</div>';
+    });
+    addMsgTo(hc, emailHtml, false);
+    return true;
+  }
+
+  if (lower.match(/\b(search|find)\b.*\b(email|emails|mail|gmail)\b/i) || lower.match(/^using gmail.*search/i)) {
+    if (!isGoogleConnected()) { addMsgTo(hc, 'Connect Google first via + > Connectors > Gmail.', false); return true; }
+    var searchQuery = text.replace(/^.*?(search|find)\s*(emails?|mail|gmail)\s*(for|about|from|with)?\s*/i, '').trim();
+    if (!searchQuery) { addMsgTo(hc, 'What would you like to search for? Try: "search emails from Joe" or "search emails about Davines".', false); return true; }
+    addTypingTo(hc);
+    var results = await gmailSearchEmails(searchQuery, 5);
+    removeTyping();
+    if (results.length === 0) { addMsgTo(hc, 'No emails found matching "' + escHtml(searchQuery) + '".', false); return true; }
+    var html = '<strong>Emails matching "' + escHtml(searchQuery) + '":</strong><br><br>';
+    results.forEach(function(e) {
+      html += '<div style="padding:8px 0;border-bottom:1px solid var(--border);">'
+        + '<strong>' + escHtml(e.subject) + '</strong><br>'
+        + '<span style="font-size:11px;color:var(--text-muted);">' + escHtml(e.from.split('<')[0].trim()) + '</span><br>'
+        + '<span style="font-size:12px;">' + escHtml(e.snippet) + '</span>'
+        + '</div>';
+    });
+    addMsgTo(hc, html, false);
+    return true;
+  }
+
+  // Calendar commands
+  if (lower.match(/\b(what('s| is)|show|view|check)\b.*\b(calendar|schedule|today|diary|meetings?|events?)\b/i) || lower.match(/^using google calendar.*view today/i)) {
+    if (!isGoogleConnected()) { addMsgTo(hc, 'Connect Google first via + > Connectors > Google Calendar.', false); return true; }
+    addTypingTo(hc);
+    var events = lower.match(/\b(this week|next week|week)\b/i) ? await calendarListEvents() : await calendarGetToday();
+    removeTyping();
+    if (events.length === 0) { addMsgTo(hc, 'No events scheduled ' + (lower.match(/week/i) ? 'this week' : 'today') + '.', false); return true; }
+    var calHtml = '<strong>' + (lower.match(/week/i) ? 'This week' : 'Today') + '\'s schedule:</strong><br><br>';
+    events.forEach(function(ev) {
+      var start = new Date(ev.start);
+      var time = start.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+      var day = start.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
+      calHtml += '<div style="padding:6px 0;border-bottom:1px solid var(--border);">'
+        + '<strong>' + escHtml(ev.summary) + '</strong><br>'
+        + '<span style="font-size:11px;color:var(--text-muted);">' + day + ' at ' + time + (ev.location ? ' · ' + escHtml(ev.location) : '') + '</span>'
+        + (ev.attendees.length > 0 ? '<br><span style="font-size:11px;color:var(--text-muted);">With: ' + ev.attendees.slice(0, 3).join(', ') + '</span>' : '')
+        + '</div>';
+    });
+    addMsgTo(hc, calHtml, false);
+    return true;
+  }
+
+  // Sheets commands
+  if (lower.match(/^using google sheets/i)) {
+    if (!isGoogleConnected()) { addMsgTo(hc, 'Connect Google first via + > Connectors > Google Sheets.', false); return true; }
+    addMsgTo(hc, 'Google Sheets is connected. You can ask me to read a spreadsheet by providing the Spreadsheet ID, or create a new one.', false);
+    return true;
+  }
+
+  return false;
+}
+
 /* Hub chat (primary surface) */
 document.getElementById('wI').addEventListener('keypress', function(e) { if (e.key==='Enter') hubSend(); });
 async function hubSend() {
@@ -3208,6 +3551,14 @@ async function hubSend() {
   }
 
   addMsgTo(hc, text, true);
+
+  // === INTEGRATION COMMANDS ===
+  // Handle real Google API actions when user types integration commands
+  var integrationHandled = await handleIntegrationCommand(text, hc);
+  if (integrationHandled) {
+    if (currentUser) saveCurrentThread();
+    return;
+  }
 
   // === AUTO-DETECT AGENT MODE ===
   // If the message sounds like a brief/task, switch to Co-Work tab and use autonomous agent mode
@@ -4894,13 +5245,35 @@ function showSettings() {
   var bg = document.createElement('div');
   bg.className = 'modal-bg';
   bg.onclick = function(e) { if (e.target === bg) bg.remove(); };
-  bg.innerHTML = '<div class="modal"><h3>AI Settings</h3>' +
-    '<p>Connect a Claude API key to enable fully conversational AI. Without it, the bot uses a built-in keyword engine (limited).</p>' +
+  var googleStatus = isGoogleConnected()
+    ? '<span style="color:var(--green);font-size:11px;">Connected</span>'
+    : '<span style="color:var(--text-muted);font-size:11px;">Not connected</span>';
+  var googleBtn = isGoogleConnected()
+    ? '<button onclick="disconnectGoogle();this.closest(\'.modal-bg\').remove();showSettings();" style="padding:6px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;font-size:11px;cursor:pointer;">Disconnect</button>'
+    : '<button onclick="this.closest(\'.modal-bg\').remove();initiateGoogleAuth();" style="padding:6px 12px;background:var(--accent);color:white;border:none;border-radius:6px;font-size:11px;cursor:pointer;">Connect Google</button>';
+  var googleIdVal = GOOGLE_CLIENT_ID || '';
+
+  bg.innerHTML = '<div class="modal" style="max-width:520px;"><h3>Settings</h3>' +
+    '<div style="margin-bottom:16px;">' +
+    '<div style="font-size:10px;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-muted);font-weight:600;margin-bottom:8px;">AI Engine</div>' +
+    '<p style="font-size:12px;">Claude API key for conversational AI.</p>' +
     '<input type="password" id="apiKeyInput" placeholder="sk-ant-api03-..." value="' + (AI_KEY || '') + '">' +
-    '<p style="font-size:11px;color:var(--text-muted)">Your key stays in this browser session only — it\'s never stored or sent anywhere except Anthropic\'s API.</p>' +
+    '</div>' +
+    '<div style="border-top:1px solid var(--border);padding-top:16px;margin-bottom:16px;">' +
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">' +
+    '<div style="font-size:10px;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-muted);font-weight:600;">Google Services</div>' +
+    googleStatus +
+    '</div>' +
+    '<p style="font-size:12px;margin-bottom:8px;">Gmail, Calendar, Sheets, Slides, Drive — all connected with one sign-in.</p>' +
+    '<div style="margin-bottom:8px;">' +
+    '<label style="font-size:10px;color:var(--text-muted);display:block;margin-bottom:4px;">OAuth Client ID</label>' +
+    '<input type="text" id="googleClientIdSettings" placeholder="xxxxxxxxxxxx.apps.googleusercontent.com" value="' + googleIdVal + '" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;font-size:11px;background:var(--surface);color:var(--text);font-family:\'Reddit Mono\',monospace;">' +
+    '</div>' +
+    '<div style="display:flex;gap:8px;">' + googleBtn + '</div>' +
+    '</div>' +
     '<div class="modal-btns">' +
     '<button class="btn-cancel" onclick="this.closest(\'.modal-bg\').remove()">Cancel</button>' +
-    '<button class="btn-save" onclick="saveApiKey()">Save</button>' +
+    '<button class="btn-save" onclick="saveSettings()">Save</button>' +
     '</div></div>';
   document.body.appendChild(bg);
 }
@@ -4910,8 +5283,22 @@ function saveApiKey() {
   AI_KEY = key;
   conversationHistory = [];
   document.querySelector('.modal-bg').remove();
-  // Update status indicator
   updateAiBadge();
+}
+
+function saveSettings() {
+  // Save AI key
+  var key = document.getElementById('apiKeyInput').value.trim();
+  AI_KEY = key;
+  conversationHistory = [];
+  // Save Google Client ID
+  var gid = document.getElementById('googleClientIdSettings');
+  if (gid && gid.value.trim()) {
+    saveGoogleClientId(gid.value.trim());
+  }
+  document.querySelector('.modal-bg').remove();
+  updateAiBadge();
+  showToast('Settings saved', 'success');
 }
 
 function updateAiBadge() {
@@ -5540,112 +5927,138 @@ function setIntegrationStatus(name, status) {
 
 var integrationConfigs = {
   'gmail': {
-    name: 'Gmail',
-    icon: '',
+    name: 'Gmail', google: true,
     desc: 'Read, draft and send emails directly from the Hub.',
-    fields: ['Google OAuth Client ID', 'Authorised Email Address'],
     actions: ['Read inbox', 'Draft email', 'Send email', 'Search emails']
   },
   'google-sheets': {
-    name: 'Google Sheets',
-    icon: '',
+    name: 'Google Sheets', google: true,
     desc: 'Read, edit and create spreadsheets. Import data for analysis.',
-    fields: ['Google OAuth Client ID', 'Default Spreadsheet ID (optional)'],
     actions: ['Open spreadsheet', 'Create new sheet', 'Import data', 'Export to sheet']
   },
   'google-docs': {
-    name: 'Google Docs',
-    icon: '',
+    name: 'Google Docs', google: true,
     desc: 'Read, create and edit documents. Export Hub outputs to Docs.',
-    fields: ['Google OAuth Client ID'],
-    actions: ['Open document', 'Create new doc', 'Export to Docs', 'Import from Docs']
-  },
-  'adobe-photoshop': {
-    name: 'Adobe Photoshop',
-    icon: '',
-    desc: 'Send assets to Photoshop, generate briefs with specs, and manage creative files.',
-    fields: ['Adobe Creative Cloud API Key', 'Workspace Folder Path'],
-    actions: ['Open in Photoshop', 'Generate asset brief', 'Resize assets', 'Export formats']
+    actions: ['Open document', 'Create new doc', 'Export to Docs']
   },
   'google-calendar': {
-    name: 'Google Calendar',
-    icon: '',
-    desc: 'View schedule, create events, and set reminders for campaigns and deadlines.',
-    fields: ['Google OAuth Client ID', 'Default Calendar ID (optional)'],
-    actions: ['View today', 'Create event', 'Set reminder', 'Check availability']
+    name: 'Google Calendar', google: true,
+    desc: 'View schedule, create events, and manage deadlines.',
+    actions: ['View today', 'Create event', 'This week', 'Check availability']
+  },
+  'google-slides': {
+    name: 'Google Slides', google: true,
+    desc: 'Create and edit presentations. Export Hub decks to Slides.',
+    actions: ['Open presentation', 'Create new deck', 'Export to Slides']
   },
   'slack': {
     name: 'Slack',
-    icon: '',
-    desc: 'Send messages, share Hub outputs and get notifications in Slack channels.',
-    fields: ['Slack Bot Token', 'Default Channel'],
-    actions: ['Send message', 'Share to channel', 'Search messages', 'Get notifications']
+    desc: 'Send messages, share Hub outputs and get notifications in Slack.',
+    fields: ['Slack Webhook URL'],
+    actions: ['Send message', 'Share to channel']
   },
   'pdf': {
-    name: 'PDF',
-    icon: '',
+    name: 'PDF', builtin: true,
     desc: 'Generate, read and edit PDFs. Export any Hub document as PDF.',
-    fields: [],
-    actions: ['Export as PDF', 'Read PDF', 'Merge PDFs', 'Extract text'],
-    builtin: true
-  },
-  'granola': {
-    name: 'Granola',
-    icon: '',
-    desc: 'Sync meeting notes and transcripts from Granola into the Hub.',
-    fields: ['Granola API Key', 'Workspace ID'],
-    actions: ['Import notes', 'Sync meetings', 'Search transcripts', 'Link to client']
+    actions: ['Export as PDF', 'Read PDF', 'Extract text']
   }
 };
 
 function connectIntegration(name) {
-  if (name === 'google-drive') { toggleDrivePanel(); return; }
   var cfg = integrationConfigs[name];
   if (!cfg) return;
+
+  // Google services use unified OAuth
+  if (cfg.google) {
+    if (isGoogleConnected()) {
+      showConnectedModal(name, cfg);
+    } else {
+      initiateGoogleAuth(function() {
+        showConnectedModal(name, cfg);
+      });
+    }
+    return;
+  }
+
+  // Non-Google services
   var status = getIntegrationStatus(name);
   var isConnected = status && status.connected;
+
+  if (cfg.builtin) {
+    showConnectedModal(name, cfg);
+    return;
+  }
+
+  // Slack and other field-based connectors
+  if (!isConnected) {
+    showFieldConnectModal(name, cfg);
+  } else {
+    showConnectedModal(name, cfg);
+  }
+}
+
+function showConnectedModal(name, cfg) {
+  var isGoogle = cfg.google;
+  var isConnected = isGoogle ? isGoogleConnected() : (cfg.builtin || (getIntegrationStatus(name) && getIntegrationStatus(name).connected));
+
   var modal = document.createElement('div');
   modal.className = 'modal-bg';
   modal.onclick = function(e) { if (e.target === modal) modal.remove(); };
 
-  var fieldsHtml = '';
-  if (!isConnected && cfg.fields && cfg.fields.length > 0) {
-    fieldsHtml = cfg.fields.map(function(f, i) {
-      var savedVal = status && status.fields && status.fields[i] ? status.fields[i] : '';
-      return '<div style="margin-bottom:8px;">'
-        + '<label style="font-size:10px;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-muted);font-weight:600;display:block;margin-bottom:4px;">' + f + '</label>'
-        + '<input class="int-field" type="text" placeholder="Enter ' + f.toLowerCase() + '" value="' + savedVal + '" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;font-size:12px;background:var(--surface);color:var(--text);font-family:\'Reddit Mono\',monospace;">'
-        + '</div>';
-    }).join('');
-  }
-
   var actionsHtml = cfg.actions.map(function(a) {
-    var disabled = !isConnected && !cfg.builtin ? ' opacity:0.5;pointer-events:none;' : '';
-    return '<button onclick="runIntegrationAction(\'' + name + '\',\'' + a + '\');this.closest(\'.modal-bg\').remove();" style="padding:8px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;font-size:11px;cursor:pointer;font-family:\'Reddit Mono\',monospace;' + disabled + '">' + a + '</button>';
+    var disabled = !isConnected ? ' opacity:0.5;pointer-events:none;' : '';
+    return '<button onclick="runIntegrationAction(\'' + name + '\',\'' + a.replace(/'/g, "\\'") + '\');this.closest(\'.modal-bg\').remove();" style="padding:8px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;font-size:11px;cursor:pointer;font-family:\'Reddit Mono\',monospace;' + disabled + '">' + a + '</button>';
   }).join('');
 
-  var statusDot = isConnected ? '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#4CAF50;margin-right:6px;"></span>Connected'
-    : cfg.builtin ? '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#4CAF50;margin-right:6px;"></span>Built-in'
+  var statusDot = isConnected
+    ? '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#4CAF50;margin-right:6px;"></span>Connected'
     : '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#ccc;margin-right:6px;"></span>Not connected';
 
-  var connectBtn = '';
-  if (!isConnected && !cfg.builtin) {
-    connectBtn = '<button id="intConnectBtn" onclick="saveIntegration(\'' + name + '\')" style="width:100%;padding:10px;background:var(--accent);color:white;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;margin-top:8px;">Connect ' + cfg.name + '</button>';
-  } else if (isConnected) {
-    connectBtn = '<button onclick="disconnectIntegration(\'' + name + '\');this.closest(\'.modal-bg\').remove();" style="width:100%;padding:10px;background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:8px;font-size:12px;cursor:pointer;margin-top:8px;">Disconnect</button>';
-  }
+  var disconnectBtn = isConnected && isGoogle
+    ? '<button onclick="disconnectGoogle();this.closest(\'.modal-bg\').remove();" style="width:100%;padding:10px;background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:8px;font-size:12px;cursor:pointer;margin-top:8px;">Disconnect Google</button>'
+    : isConnected && !cfg.builtin
+    ? '<button onclick="disconnectIntegration(\'' + name + '\');this.closest(\'.modal-bg\').remove();" style="width:100%;padding:10px;background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:8px;font-size:12px;cursor:pointer;margin-top:8px;">Disconnect</button>'
+    : '';
+
+  var connectBtn = !isConnected
+    ? '<button onclick="this.closest(\'.modal-bg\').remove();connectIntegration(\'' + name + '\');" style="width:100%;padding:10px;background:var(--accent);color:white;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;margin-top:8px;">Connect ' + cfg.name + '</button>'
+    : '';
 
   modal.innerHTML = '<div class="modal" style="max-width:480px;">'
     + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">'
     + '<h3 style="margin:0;">' + cfg.name + '</h3>'
     + '<span style="font-size:11px;display:flex;align-items:center;">' + statusDot + '</span>'
     + '</div>'
-    + '<p style="margin-bottom:16px;">' + cfg.desc + '</p>'
-    + (fieldsHtml ? '<div style="margin-bottom:12px;">' + fieldsHtml + '</div>' : '')
-    + '<div style="margin-bottom:12px;"><div style="font-size:10px;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-muted);font-weight:600;margin-bottom:8px;">Actions</div>'
+    + '<p style="margin-bottom:16px;font-size:13px;">' + cfg.desc + '</p>'
+    + (isGoogle && isConnected ? '<div style="background:var(--green-bg);color:var(--green);padding:8px 12px;border-radius:6px;font-size:11px;margin-bottom:12px;">Signed in via Google OAuth. All Google services share this connection.</div>' : '')
+    + '<div style="margin-bottom:12px;"><div style="font-size:10px;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-muted);font-weight:600;margin-bottom:8px;">Quick actions</div>'
     + '<div style="display:flex;flex-wrap:wrap;gap:6px;">' + actionsHtml + '</div></div>'
-    + connectBtn
+    + connectBtn + disconnectBtn
     + '<button onclick="this.closest(\'.modal-bg\').remove()" style="width:100%;padding:8px;background:transparent;color:var(--text-muted);border:1px solid var(--border);border-radius:8px;font-size:11px;cursor:pointer;margin-top:6px;">Close</button>'
+    + '</div>';
+  document.body.appendChild(modal);
+}
+
+function showFieldConnectModal(name, cfg) {
+  var status = getIntegrationStatus(name);
+  var modal = document.createElement('div');
+  modal.className = 'modal-bg';
+  modal.onclick = function(e) { if (e.target === modal) modal.remove(); };
+
+  var fieldsHtml = (cfg.fields || []).map(function(f, i) {
+    var savedVal = status && status.fields && status.fields[i] ? status.fields[i] : '';
+    return '<div style="margin-bottom:8px;">'
+      + '<label style="font-size:10px;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-muted);font-weight:600;display:block;margin-bottom:4px;">' + f + '</label>'
+      + '<input class="int-field" type="text" placeholder="Enter ' + f.toLowerCase() + '" value="' + savedVal + '" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;font-size:12px;background:var(--surface);color:var(--text);font-family:\'Reddit Mono\',monospace;">'
+      + '</div>';
+  }).join('');
+
+  modal.innerHTML = '<div class="modal" style="max-width:480px;">'
+    + '<h3 style="margin:0 0 12px;">' + cfg.name + '</h3>'
+    + '<p style="margin-bottom:16px;font-size:13px;">' + cfg.desc + '</p>'
+    + '<div style="margin-bottom:12px;">' + fieldsHtml + '</div>'
+    + '<button onclick="saveIntegration(\'' + name + '\')" style="width:100%;padding:10px;background:var(--accent);color:white;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;">Connect ' + cfg.name + '</button>'
+    + '<button onclick="this.closest(\'.modal-bg\').remove()" style="width:100%;padding:8px;background:transparent;color:var(--text-muted);border:1px solid var(--border);border-radius:8px;font-size:11px;cursor:pointer;margin-top:6px;">Cancel</button>'
     + '</div>';
   document.body.appendChild(modal);
 }
@@ -5660,12 +6073,13 @@ function saveIntegration(name) {
   }
   setIntegrationStatus(name, { connected: true, fields: fields, connectedAt: new Date().toISOString() });
   if (modal) modal.remove();
-  connectIntegration(name); // reopen to show connected state
+  showToast(cfg.name + ' connected', 'success');
 }
 
 function disconnectIntegration(name) {
   if (!currentUser) return;
   localStorage.removeItem('nih_int_' + currentUser.name + '_' + name);
+  showToast('Disconnected', 'success');
 }
 
 function runIntegrationAction(name, action) {

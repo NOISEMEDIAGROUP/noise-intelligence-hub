@@ -5232,17 +5232,11 @@ function renderClientList() {
         + '</div>'
         + '</div>';
     }).join('');
-    var roleBadges = '<div class="client-role-badges">'
-      + '<span class="role-badge" data-role="client" onclick="event.stopPropagation();openClientRole(\'' + c.n.replace(/'/g, "\\'") + '\',\'Client\')">Client</span>'
-      + '<span class="role-badge" data-role="creator" onclick="event.stopPropagation();openClientRole(\'' + c.n.replace(/'/g, "\\'") + '\',\'Creator\')">Creator</span>'
-      + '<span class="role-badge" data-role="editor" onclick="event.stopPropagation();openClientRole(\'' + c.n.replace(/'/g, "\\'") + '\',\'Editor\')">Editor</span>'
-      + '</div>';
     return '<div class="client-item" id="client-' + c.id + '">'
       + '<div class="client-header" onclick="toggleClient(\'' + c.id + '\')">'
       + '<span class="client-name">' + c.n + '</span>'
       + '<span class="client-arrow">&#9656;</span>'
       + '</div>'
-      + roleBadges
       + '<div class="client-subs">'
       + foldersHtml
       + '<div class="client-sub-add" onclick="addClientFolder(\'' + c.n.replace(/'/g, "\\'") + '\');">+ Add folder</div>'

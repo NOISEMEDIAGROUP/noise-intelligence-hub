@@ -351,9 +351,9 @@
 
   /* Hub chat area */
   .p1-main { flex: 1; display: flex; flex-direction: column; padding: 0; overflow: hidden; min-height: 0; }
-  .hub-chat-area { flex: 1; display: flex; flex-direction: column; max-width: 700px; width: 100%; margin: 0 auto; padding: 0 24px; min-height: 0; overflow-y: auto; }
-  .hub-msgs { overflow-y: auto; display: flex; flex-direction: column; gap: 16px; padding: 24px 0; scroll-behavior: smooth; min-height: 0; }
-  .hub-msgs:empty { display: none; }
+  .hub-chat-area { flex: 1; display: flex; flex-direction: column; max-width: 800px; width: 100%; margin: 0 auto; padding: 0 24px; min-height: 0; overflow-y: auto; }
+  .hub-msgs { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; padding: 24px 0; scroll-behavior: smooth; min-height: 0; }
+  .hub-msgs:empty { display: none; flex: 0; }
   .hub-suggestions {
     display: flex; flex-wrap: wrap; gap: 8px; padding: 0 0 12px;
     justify-content: center;
@@ -369,7 +369,7 @@
     color: var(--accent); transform: translateY(-1px);
   }
   .hub-suggestions.hidden { display: none; }
-  .hub-input-bar { padding: 16px 0; position: relative; flex-shrink: 0; margin-top: auto; }
+  .hub-input-bar { padding: 12px 0 16px; position: relative; flex-shrink: 0; margin-top: auto; }
   .hub-input-bar .wi { width: 100%; padding: 15px 56px 15px 20px; }
   .hub-input-bar .wi-btn { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); margin-top: -4px; }
 
@@ -720,7 +720,7 @@
   }
 
   /* Skills panel (2-column master-detail layout) */
-  .skills-panel { display: flex; gap: 0; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; background: var(--surface); flex: 0 0 auto; max-height: 280px; }
+  .skills-panel { display: flex; gap: 0; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; background: var(--surface); flex: 0 0 auto; max-height: 240px; }
   .skills-list { width: 180px; border-right: 1px solid var(--border); overflow-y: auto; flex-shrink: 0; }
   .skill-list-item { padding: 10px 14px; font-size: 12px; font-weight: 600; font-family: 'Reddit Mono', monospace; cursor: pointer; border-bottom: 1px solid var(--border); transition: background 0.15s; text-transform: uppercase; letter-spacing: 0.3px; }
   .skill-list-item:hover { background: var(--surface2); }
@@ -949,7 +949,7 @@
       </div>
 
       <!-- Integration boxes -->
-      <div class="integration-bar" id="integrationBar">
+      <div class="integration-bar" id="integrationBar" style="display:none;">
         <div class="int-box" onclick="connectIntegration('gmail')">Gmail</div>
         <div class="int-box" onclick="connectIntegration('google-sheets')">Google Sheets</div>
         <div class="int-box" onclick="connectIntegration('google-docs')">Google Docs</div>
@@ -995,7 +995,7 @@
     </div>
 
     <!-- Integration boxes -->
-    <div class="integration-bar" id="integrationBar2">
+    <div class="integration-bar" id="integrationBar2" style="display:none;">
       <div class="int-box" onclick="connectIntegration('gmail')">Gmail</div>
       <div class="int-box" onclick="connectIntegration('google-sheets')">Google Sheets</div>
       <div class="int-box" onclick="connectIntegration('google-docs')">Google Docs</div>
@@ -1573,6 +1573,7 @@ function switchThread(threadId) {
   currentThreadId = th.id;
   var hc = document.getElementById('hubChat');
   hc.innerHTML = th.html || '';
+  updateHomeView();
   hc.scrollTop = hc.scrollHeight;
   renderThreadBar();
 }
@@ -1589,6 +1590,7 @@ function startNewThread(label, client) {
     ? 'Starting a new thread for <strong>' + client + '</strong>. What do you need?'
     : 'New thread started. What are you working on?';
   addMsgTo(hc, greeting, false);
+  updateHomeView();
   renderThreadBar();
 }
 
@@ -1809,6 +1811,7 @@ function selectUser(u) {
   conversationHistory = [];
   var hubChatEl = document.getElementById('hubChat');
   hubChatEl.innerHTML = '';
+  updateHomeView();
   document.getElementById('chat').innerHTML = '';
   document.getElementById('docC').style.display = 'none';
   document.getElementById('docE').style.display = '';
@@ -1826,6 +1829,7 @@ function selectUser(u) {
   if (firstThread.html) {
     hubChatEl.innerHTML = firstThread.html;
     hubChatEl.scrollTop = hubChatEl.scrollHeight;
+    updateHomeView();
   }
   // Don't show greeting on home screen — keep it clean per wireframe
   renderSidebar();
@@ -2091,24 +2095,16 @@ function showDriveSetupGuide() {
 }
 
 function toggleDrivePanel() {
-  var modal = document.createElement('div');
-  modal.className = 'modal-bg';
-  modal.onclick = function(e) { if (e.target === modal) modal.remove(); };
-  var savedId = localStorage.getItem('nih_drive_client_id') || '';
-  modal.innerHTML = '<div class="modal" style="max-width:480px;">'
-    + '<h3 style="margin-bottom:16px;">Connectors</h3>'
-    + '<div style="font-size:13px;color:var(--text-muted);line-height:1.6;">'
-    + '<p style="margin-bottom:12px;">Connect external services to enhance the Intelligence Hub:</p>'
-    + '<div style="display:flex;flex-direction:column;gap:8px;">'
-    + '<div style="padding:12px;background:var(--surface2);border-radius:8px;display:flex;justify-content:space-between;align-items:center;"><div><strong>Google Drive</strong><br><span style="font-size:11px;">Sync documents and files</span></div><button onclick="connectGoogleDrive();this.closest(\'.modal-bg\').remove();" style="padding:6px 14px;background:var(--accent);color:white;border:none;border-radius:6px;font-size:11px;cursor:pointer;">Connect</button></div>'
-    + '<div style="padding:12px;background:var(--surface2);border-radius:8px;display:flex;justify-content:space-between;align-items:center;"><div><strong>Gmail</strong><br><span style="font-size:11px;">Send and manage emails</span></div><button onclick="connectIntegration(\'gmail\');this.closest(\'.modal-bg\').remove();" style="padding:6px 14px;background:var(--accent);color:white;border:none;border-radius:6px;font-size:11px;cursor:pointer;">Connect</button></div>'
-    + '<div style="padding:12px;background:var(--surface2);border-radius:8px;display:flex;justify-content:space-between;align-items:center;"><div><strong>Slack</strong><br><span style="font-size:11px;">Team messaging integration</span></div><button onclick="connectIntegration(\'slack\');this.closest(\'.modal-bg\').remove();" style="padding:6px 14px;background:var(--accent);color:white;border:none;border-radius:6px;font-size:11px;cursor:pointer;">Connect</button></div>'
-    + '<div style="padding:12px;background:var(--surface2);border-radius:8px;display:flex;justify-content:space-between;align-items:center;"><div><strong>Google Calendar</strong><br><span style="font-size:11px;">Schedule and events</span></div><button onclick="connectIntegration(\'google-calendar\');this.closest(\'.modal-bg\').remove();" style="padding:6px 14px;background:var(--accent);color:white;border:none;border-radius:6px;font-size:11px;cursor:pointer;">Connect</button></div>'
-    + '</div>'
-    + '</div>'
-    + '<button onclick="this.closest(\'.modal-bg\').remove()" style="margin-top:16px;padding:8px 20px;background:var(--accent);color:white;border:none;border-radius:8px;font-size:12px;cursor:pointer;">Close</button>'
-    + '</div>';
-  document.body.appendChild(modal);
+  var intBar = document.getElementById('integrationBar');
+  if (intBar) {
+    var isHidden = intBar.style.display === 'none' || intBar.style.display === '';
+    intBar.style.display = isHidden ? 'flex' : 'none';
+  }
+  var intBar2 = document.getElementById('integrationBar2');
+  if (intBar2) {
+    var isHidden = intBar2.style.display === 'none' || intBar2.style.display === '';
+    intBar2.style.display = isHidden ? 'flex' : 'none';
+  }
 }
 
 function renderMemoryList(el, filter) {
@@ -2453,6 +2449,7 @@ async function hubSend() {
     currentMode = 'cowork';
     await coworkAgent(text, hc);
     currentMode = 'chat';
+    updateHomeView();
     return;
   }
 
@@ -2460,6 +2457,7 @@ async function hubSend() {
   var resp = await processMsg(text);
   removeTyping();
   addMsgTo(hc, resp.chat, false);
+  updateHomeView();
 
   // Save chat to localStorage after every message
   if (currentUser) saveCurrentThread();
@@ -2775,7 +2773,7 @@ async function coworkAgent(task, hc) {
           // Update card with completion summary
           var doneDiv = document.createElement('div');
           doneDiv.className = 'task-card-done';
-          doneDiv.textContent = '✓ COMPLETE — ' + (docReq.summary || docReq.doc_type + ' created for ' + dcn);
+          doneDiv.textContent = 'COMPLETE — ' + (docReq.summary || docReq.doc_type + ' created for ' + dcn);
           planCard.appendChild(doneDiv);
         }
       } catch(e) {}
@@ -2798,15 +2796,22 @@ async function coworkAgent(task, hc) {
     showDoc(finalDoc);
     addMsgTo(hc, 'Done — your deliverable is in the document panel. Review, edit, and export when ready.', false);
   } else {
-    // No doc generated, show a summary
-    var summaryReply = contextSoFar.split('\n').filter(function(l) { return l.trim(); }).pop() || 'Task complete.';
+    // No doc generated, show a clean summary
+    var lastStep = steps[steps.length - 1] || 'Task';
+    var summaryLines = contextSoFar.split('\n').filter(function(l) { return l.trim() && !l.startsWith('Step '); });
+    var summaryReply = summaryLines.length > 0 ? summaryLines[summaryLines.length - 1] : 'I\'ve completed the task: ' + lastStep;
+    // Clean up the reply
+    summaryReply = summaryReply.replace(/^Completed:\s*/i, '').trim();
+    if (!summaryReply || summaryReply === 'null' || summaryReply === 'undefined') {
+      summaryReply = 'I\'ve completed the task. Let me know if you need any changes.';
+    }
     if (!planCard.querySelector('.task-card-done')) {
       var doneDiv = document.createElement('div');
       doneDiv.className = 'task-card-done';
-      doneDiv.textContent = '✓ COMPLETE';
+      doneDiv.textContent = 'COMPLETE';
       planCard.appendChild(doneDiv);
     }
-    addMsgTo(hc, summaryReply.replace(/^Step \d+:\s*/, ''), false);
+    addMsgTo(hc, summaryReply, false);
   }
 
   if (currentUser) saveCurrentThread();
@@ -4085,6 +4090,17 @@ function updateAiBadge() {
 updateAiBadge();
 
 /* ============ NEW: TAB SWITCHING (Chat / Co-Work) ============ */
+function updateHomeView() {
+  var hc = document.getElementById('hubChat');
+  var skillsPanel = document.querySelector('.skills-panel');
+  var intBar = document.getElementById('integrationBar');
+  var hasMessages = hc && hc.children.length > 0;
+
+  if (skillsPanel) {
+    skillsPanel.style.display = hasMessages ? 'none' : 'flex';
+  }
+}
+
 function switchTab(tab) {
   document.querySelectorAll('.header-tab').forEach(t => t.classList.remove('active'));
   document.querySelector('.header-tab[data-tab="' + tab + '"]').classList.add('active');

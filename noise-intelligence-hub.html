@@ -4631,8 +4631,9 @@ function toggleSearchPanel() {
 
       // Search clients
       clients.forEach(function(c) {
-        if (c.name.toLowerCase().includes(query)) {
-          matches.push({ type: 'client', name: c.name });
+        var clientName = c.n || c.name || '';
+        if (clientName.toLowerCase().includes(query)) {
+          matches.push({ type: 'client', name: clientName });
         }
       });
 
@@ -4669,7 +4670,7 @@ function toggleSearchPanel() {
     + '<h3>Search</h3>'
     + '<p>Search chats, threads, and projects.</p>'
     + '<div style="display:flex;gap:6px;margin-bottom:16px;">'
-    + '<input id="searchInput" type="text" placeholder="Search..." style="flex:1;" onkeyup="document.getElementById(\'searchResultsDiv\').innerHTML=handleSearchFunc();">'
+    + '<input id="searchInput" type="text" placeholder="Search..." style="flex:1;">'
     + '</div>'
     + '<div id="searchResultsDiv" style="max-height:300px;overflow-y:auto;display:flex;flex-direction:column;gap:6px;">'
     + '<div style="font-size:12px;color:var(--text-muted);padding:12px;">Start typing to search...</div>'
@@ -4686,8 +4687,9 @@ function toggleSearchPanel() {
     }
     var matches = [];
     clients.forEach(function(c) {
-      if (c.name && c.name.toLowerCase().includes(query)) {
-        matches.push({ type: 'client', name: c.name });
+      var clientName = c.n || c.name || '';
+      if (clientName.toLowerCase().includes(query)) {
+        matches.push({ type: 'client', name: clientName });
       }
     });
     threads.forEach(function(t) {

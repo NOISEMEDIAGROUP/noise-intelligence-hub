@@ -788,6 +788,7 @@
     max-height: 400px; overflow-y: auto;
   }
   .plus-menu-item-parent:hover > .plus-menu-sub { display: block; }
+  .plus-menu-sub.open { display: block; }
   .plus-menu-sub .plus-menu-item { font-size: 12px; padding: 9px 14px; }
 
   /* Sidebar action buttons */
@@ -1286,7 +1287,7 @@
           <div class="plus-menu-item" onclick="triggerFileUpload(); hidePlusMenu();">Add files or photos</div>
           <div class="plus-menu-divider"></div>
           <div class="plus-menu-item-parent">
-            <div class="plus-menu-item">Skills</div>
+            <div class="plus-menu-item" onclick="toggleSubMenu(this); event.stopPropagation();">Skills</div>
             <div class="plus-menu-sub">
               <div class="plus-menu-item" onclick="startSkillChat('social','Help with social media'); hidePlusMenu();">Social</div>
               <div class="plus-menu-item" onclick="startSkillChat('strategy','Help with strategy'); hidePlusMenu();">Strategy</div>
@@ -1302,7 +1303,7 @@
             </div>
           </div>
           <div class="plus-menu-item-parent">
-            <div class="plus-menu-item">Connectors</div>
+            <div class="plus-menu-item" onclick="toggleSubMenu(this); event.stopPropagation();">Connectors</div>
             <div class="plus-menu-sub">
               <div class="plus-menu-item" onclick="connectIntegration('gmail'); hidePlusMenu();">Gmail</div>
               <div class="plus-menu-item" onclick="connectIntegration('google-sheets'); hidePlusMenu();">Google Sheets</div>
@@ -1371,7 +1372,7 @@
           <div class="plus-menu-item" onclick="triggerFileUpload(); hidePlusMenu2();">Add files or photos</div>
           <div class="plus-menu-divider"></div>
           <div class="plus-menu-item-parent">
-            <div class="plus-menu-item">Skills</div>
+            <div class="plus-menu-item" onclick="toggleSubMenu(this); event.stopPropagation();">Skills</div>
             <div class="plus-menu-sub">
               <div class="plus-menu-item" onclick="startSkillChat('social','Help with social media'); hidePlusMenu2();">Social</div>
               <div class="plus-menu-item" onclick="startSkillChat('strategy','Help with strategy'); hidePlusMenu2();">Strategy</div>
@@ -1387,7 +1388,7 @@
             </div>
           </div>
           <div class="plus-menu-item-parent">
-            <div class="plus-menu-item">Connectors</div>
+            <div class="plus-menu-item" onclick="toggleSubMenu(this); event.stopPropagation();">Connectors</div>
             <div class="plus-menu-sub">
               <div class="plus-menu-item" onclick="connectIntegration('gmail'); hidePlusMenu2();">Gmail</div>
               <div class="plus-menu-item" onclick="connectIntegration('google-sheets'); hidePlusMenu2();">Google Sheets</div>
@@ -2862,16 +2863,46 @@ function showDriveSetupGuide() {
 }
 
 function toggleDrivePanel() {
-  var intBar = document.getElementById('integrationBar');
-  if (intBar) {
-    var isHidden = intBar.style.display === 'none' || intBar.style.display === '';
-    intBar.style.display = isHidden ? 'flex' : 'none';
-  }
-  var intBar2 = document.getElementById('integrationBar2');
-  if (intBar2) {
-    var isHidden = intBar2.style.display === 'none' || intBar2.style.display === '';
-    intBar2.style.display = isHidden ? 'flex' : 'none';
-  }
+  var connectors = [
+    { name: 'Gmail', icon: '📧', key: 'gmail' },
+    { name: 'Google Sheets', icon: '📊', key: 'google-sheets' },
+    { name: 'Google Docs', icon: '📄', key: 'google-docs' },
+    { name: 'Adobe Photoshop', icon: '🎨', key: 'adobe-photoshop' },
+    { name: 'Google Calendar', icon: '📅', key: 'google-calendar' },
+    { name: 'Slack', icon: '💬', key: 'slack' },
+    { name: 'PDF', icon: '📕', key: 'pdf' },
+    { name: 'Granola', icon: '🎙️', key: 'granola' },
+    { name: 'Google Drive', icon: '📁', key: 'google-drive' }
+  ];
+  var modal = document.createElement('div');
+  modal.className = 'modal-bg';
+  modal.onclick = function(e) { if (e.target === modal) modal.remove(); };
+  var connectorsHtml = connectors.map(function(c) {
+    var status = getIntegrationStatus(c.key);
+    var isConnected = status && status.connected;
+    var statusStyle = isConnected ? 'background:#2D8A4E;color:white;' : 'background:var(--surface2);color:var(--text-muted);';
+    var statusText = isConnected ? 'Connected' : 'Connect';
+    return '<div onclick="this.closest(\\'.modal-bg\\').remove(); connectIntegration(\\'' + c.key + '\\');" style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--surface2);border-radius:8px;border:1px solid var(--border);cursor:pointer;">'
+      + '<div style="font-size:20px;">' + c.icon + '</div>'
+      + '<div style="flex:1;"><div style="font-weight:600;font-size:13px;font-family:Montserrat,sans-serif;">' + c.name + '</div></div>'
+      + '<button style="padding:4px 12px;border-radius:6px;border:none;font-size:10px;font-weight:600;font-family:Reddit Mono,monospace;text-transform:uppercase;letter-spacing:0.3px;cursor:pointer;' + statusStyle + '">' + statusText + '</button>'
+      + '</div>';
+  }).join('');
+  modal.innerHTML = '<div class="modal" style="max-width:520px;">'
+    + '<h3>Connectors</h3>'
+    + '<p>Connect external tools and services to the Intelligence Hub.</p>'
+    + '<div style="display:flex;flex-direction:column;gap:8px;max-height:360px;overflow-y:auto;">' + connectorsHtml + '</div>'
+    + '<div class="modal-btns"><button class="btn-cancel" onclick="this.closest(\\'.modal-bg\\').remove()">Close</button></div>'
+    + '</div>';
+  document.body.appendChild(modal);
+}
+
+function toggleSubMenu(el) {
+  var sub = el.parentElement.querySelector('.plus-menu-sub');
+  if (!sub) return;
+  var allSubs = document.querySelectorAll('.plus-menu-sub');
+  allSubs.forEach(function(s) { if (s !== sub) s.classList.remove('open'); });
+  sub.classList.toggle('open');
 }
 
 function renderMemoryList(el, filter) {

@@ -602,7 +602,7 @@
     display: flex; gap: 8px; align-items: flex-start; font-size: 12px;
   }
   .task-step::before {
-    content: '→'; color: var(--accent); font-weight: 600; flex-shrink: 0;
+    content: 'âÂÂ'; color: var(--accent); font-weight: 600; flex-shrink: 0;
   }
   .pulse {
     width: 8px; height: 8px; border-radius: 50%; background: var(--accent);
@@ -780,7 +780,7 @@
   }
   .plus-menu-divider { height: 1px; background: var(--border); margin: 4px 10px; }
   .plus-menu-item-parent { position: relative; }
-  .plus-menu-item-parent > .plus-menu-item::after { content: '›'; margin-left: auto; font-size: 16px; color: var(--text-muted); }
+  .plus-menu-item-parent > .plus-menu-item::after { content: 'âº'; margin-left: auto; font-size: 16px; color: var(--text-muted); }
   .plus-menu-sub {
     display: none; position: absolute; left: 100%; bottom: 0;
     background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
@@ -1259,14 +1259,7 @@
       <!-- Chat messages -->
       <div class="thread-bar" id="threadBar"></div>
       <div class="hub-msgs" id="hubChat"></div>
-      <div class="hub-suggestions" id="hubSuggestions">
-        <button class="hub-sug-btn" onclick="useSuggestion(this)">What's the full Altra campaign breakdown?</button>
-        <button class="hub-sug-btn" onclick="useSuggestion(this)">Create a pitch deck for a new client</button>
-        <button class="hub-sug-btn" onclick="useSuggestion(this)">Summarise our top 5 clients by assets</button>
-        <button class="hub-sug-btn" onclick="useSuggestion(this)">Write a performance report for Altra</button>
-        <button class="hub-sug-btn" onclick="useSuggestion(this)">What audience performed best on Altra?</button>
-        <button class="hub-sug-btn" onclick="useSuggestion(this)">Draft an intro email for Amano Hotels</button>
-      </div>
+      <div class="hub-suggestions" id="hubSuggestions" class="hidden"></div>
 
       <!-- Input bar at BOTTOM -->
       <div class="hub-input-bar">
@@ -1415,7 +1408,7 @@
         <button class="dt-btn" onclick="openInGoogleDocs()" style="background:#4285F4;color:white;border-color:#4285F4;" title="Open in Google Docs">Docs</button>
         <button class="dt-btn" onclick="openInGoogleSlides()" style="background:#F4B400;color:white;border-color:#F4B400;" title="Open in Google Slides">Slides</button>
         <button class="dt-btn" onclick="openInGoogleSheets()" style="background:#0F9D58;color:white;border-color:#0F9D58;" title="Open in Google Sheets">Sheets</button>
-        <button class="dt-btn" onclick="closeDocPanel()" title="Close" style="font-size:16px;padding:2px 6px;">Ã</button>
+        <button class="dt-btn" onclick="closeDocPanel()" title="Close" style="font-size:16px;padding:2px 6px;">ÃÂ</button>
       </div>
     </div>
     <div class="edit-toolbar" id="p1EditToolbar">
@@ -1428,7 +1421,7 @@
       <div class="tb-sep"></div>
       <input type="color" id="p1TbColor" value="#1B1B1B" onchange="execFmt('foreColor', this.value)" title="Text Colour">
       <button onclick="insertEditTable()" title="Insert Table">Table</button>
-      <button onclick="execFmt('insertUnorderedList')" title="Bullet List">• List</button>
+      <button onclick="execFmt('insertUnorderedList')" title="Bullet List">â¢ List</button>
     </div>
     <div class="p2-dc" id="p1DocContainer">
       <div class="doc-paper" id="p1DocC" contenteditable="false"></div>
@@ -1443,47 +1436,47 @@
     <div class="rs-list">
       <div class="rs-grid">
         <div class="rs-app" onclick="connectIntegration('gmail')">
-          <div class="rs-app-icon">→ï¸</div>
+          <div class="rs-app-icon">âÂÂÃ¯Â¸Â</div>
           <div class="rs-app-name">Gmail</div>
           <span class="rs-app-status connect">Connect</span>
         </div>
         <div class="rs-app" onclick="connectIntegration('google-sheets')">
-          <div class="rs-app-icon">ð</div>
+          <div class="rs-app-icon">Ã°ÂÂÂ</div>
           <div class="rs-app-name">Google Sheets</div>
           <span class="rs-app-status connect">Connect</span>
         </div>
         <div class="rs-app" onclick="connectIntegration('google-docs')">
-          <div class="rs-app-icon">ð</div>
+          <div class="rs-app-icon">Ã°ÂÂÂ</div>
           <div class="rs-app-name">Google Docs</div>
           <span class="rs-app-status connect">Connect</span>
         </div>
         <div class="rs-app" onclick="connectIntegration('adobe-photoshop')">
-          <div class="rs-app-icon">ð¨</div>
+          <div class="rs-app-icon">Ã°ÂÂÂ¨</div>
           <div class="rs-app-name">Adobe Photoshop</div>
           <span class="rs-app-status connect">Connect</span>
         </div>
         <div class="rs-app" onclick="connectIntegration('google-calendar')">
-          <div class="rs-app-icon">ð</div>
+          <div class="rs-app-icon">Ã°ÂÂÂ</div>
           <div class="rs-app-name">Google Calendar</div>
           <span class="rs-app-status connect">Connect</span>
         </div>
         <div class="rs-app" onclick="connectIntegration('slack')">
-          <div class="rs-app-icon">ð¬</div>
+          <div class="rs-app-icon">Ã°ÂÂÂ¬</div>
           <div class="rs-app-name">Slack</div>
           <span class="rs-app-status connect">Connect</span>
         </div>
         <div class="rs-app" onclick="connectIntegration('pdf')">
-          <div class="rs-app-icon">ð</div>
+          <div class="rs-app-icon">Ã°ÂÂÂ</div>
           <div class="rs-app-name">PDF</div>
           <span class="rs-app-status connected">Active</span>
         </div>
         <div class="rs-app" onclick="connectIntegration('granola')">
-          <div class="rs-app-icon">ðï¸</div>
+          <div class="rs-app-icon">Ã°ÂÂÂÃ¯Â¸Â</div>
           <div class="rs-app-name">Granola</div>
           <span class="rs-app-status connect">Connect</span>
         </div>
         <div class="rs-app" onclick="connectIntegration('google-drive')">
-          <div class="rs-app-icon">ð</div>
+          <div class="rs-app-icon">Ã°ÂÂÂ</div>
           <div class="rs-app-name">Google Drive</div>
           <span class="rs-app-status connect" id="rsDriveStatus">Connect</span>
         </div>
@@ -1581,7 +1574,7 @@
         <div class="de" id="docE">
           <div class="de-i">&#128196;</div>
           <h3>Document Preview</h3>
-          <p>Ask me to generate a brief, cost allocation, report, or any document — it'll appear here for you to edit and export.</p>
+          <p>Ask me to generate a brief, cost allocation, report, or any document â it'll appear here for you to edit and export.</p>
         </div>
         <div id="docC" style="display:none"></div>
       </div>
@@ -1610,15 +1603,15 @@ const TEAM = [
 
 /* ============ CLIENT DATA ============ */
 const CL = [
-  { id:"barbri", n:"BARBRI", s:"r", cat:"Legal Education / SQE Prep", sum:"SQE1 & SQE2 prep courses. BARBRI Barometer 2024: 127 respondents, 82% struggle with talent, 73% adopted SQE, 63% expect paralegals to replace trainees. 4 products, 15+ campaigns, 200+ assets.", a:200, c:15, knowledge:"BARBRI provides SQE prep. Flagship: BARBRI Barometer 2024 (127 respondents — 84 senior decision-makers, 43 paralegals, SME firms <250 employees). KEY STATS: 82% struggle attracting talent, 76% salary mismatch, 48% retention issues, 48% Gen Z expectations. Remote working 28%. WHY SMEs WIN: close-knit community 42%, flexibility 35%, autonomy 36%, growth 27%, tech 38%. SQE: 73% adopted. Barriers: lack of info 44%, timing 31%. PARALEGALS: 63% replacing trainee role, 54% more legal tech, 52% more complex tasks. Only 44% have skills frameworks. Top skills: client mgmt 98%, resilience 98%, biz dev 96%. APPRENTICESHIPS: 35% using, 46% not. GEN Z: 72% won't join if values don't match, 50% push on climate. Video: SQE1 international download ads, overseas prospectus." },
-  { id:"boodle", n:"Boodle", s:"r", cat:"FinTech / Group Payments", sum:"Group payment app. Brand: Blue #27A3FF, Red #F15858. 95 files total (1,370.21 MB) Dec 2019-Oct 2020. Holiday marketing (Xmas x5, Easter, New Year, Bank Holiday), vegan product line (12 files), interactive (quiz, snake x8, word search, spin bottle, this or that), recipe videos, hero/brand videos (4K 3840x2160), store content, animated flavour content.", a:95, c:15, knowledge:"Boodle is a fintech group payment app. TOTAL FILES: 95 files, 1,370.21 MB. BRAND: Blue #27A3FF, Red #F15858 (confirmed from Boodle Colours.pdf). PRODUCTION TIMELINE: Dec 2019-Oct 2020, weekly/seasonal cadence. FILE TYPES: 89 MP4 video files, 11 design files (PSD, AI). CAMPAIGN BREAKDOWN: Holiday Marketing — Christmas (5 variations), Easter, New Year, Bank Holiday. Vegan Product Line (12 files). Social Engagement/Interactive — Quiz (6 variations), Snake Game (8 levels), Word Search, Spin the Bottle, This or That polls. Recipe Videos — Hot dogs, compote, brownies, marshmallow, toffee apple. Hero/Brand Videos — 4K 3840x2160 format (65-99MB), social optimized (5-15MB). Store content, animated flavour content. DESIGN ASSETS: Xmas-Social-Posts.ai (243MB master), Find 4 Flavours Stories.psd (73MB), Static-Swipe-Post.psd (50MB). ARCHIVE: ProRes (MOV format), Hero Content — Boodle Hero 1min Export (66MB, Aug 2020) + subtitled version (69MB, Oct 2020). Wide Format — Boodle Version 2 Wide.mp4 (99MB, Jan 2020). CAMPAIGNS: General awareness (feed+story), Bills messaging (feed+story), Flying brand campaign (feed+story, 2 amendment rounds), Referral mechanics (feed+story), Nando's partnership (feed+story), Rule of Six social (feed+story, Oct 2020), Drinking Outdoors (Aug 2020), Dogs content (Aug 2020 + amends), Toffee Apple GIF (Aug 2020 + amends), New Year (feed+story, Dec 2020). NAMING CONVENTION: Boodle[Campaign]_[Type]_[Amends]. All content dual-format (feed+story) with systematic 2 amendment rounds per deliverable. VIDEO SPECS: Primary codec H.264. Formats: 1080x1920 (9:16 vertical for story), 1080x1080 (1:1 square for feed), 1920x1080 (16:9), 3840x2160 (4K UHD). Duration: 2 sec to 30+ min. ProRes archive available (2 MOV files). Brand personality: Financial efficiency, community, accessibility, group-focused functionality." },
-  { id:"altra", n:"Altra Skin", s:"r", cat:"Luxury Fragrance", sum:"Premium natural fragrance (Profuture luxury). 5 scents: ALTRASKIN, GHOSTFLOWER, DUALIST, JASMIN XXX, STONE COLD HEART. Total FBIG spend: Â£19,543. March: 600% revenue growth (Â£30→Â£210), 7 purchases, 28 checkouts (+2700% MoM). May: ad recall +125%, engagement +89.8%. 3D ORBX models (grey/white) for all scents.", a:50, c:15, knowledge:"Altra (Profuture Luxury) — Premium Natural Fragrance Launch Campaign. BRAND: Profuture luxury house, genderless UK-made fragrance. Positioning: \'100% natural, 100% refillable, 100% planet conscious\' — repositioning natural fragrance as genuinely premium and sustainably luxurious. SCENTS (5-piece collection): ALTRASKIN (clean, sensual, alluring — \'your skin but better\'), GHOSTFLOWER (bohemian, smoky woods, rich resins — 65% TikTok conversions), DUALIST (fresh/dark, transformative — best YouTube VCR 29%), JASMIN XXX (unapologetic hedonism, white floral — best FBIG static), STONE COLD HEART (sensual darkness — 22% YouTube VCR). TOTAL BUDGET: Â£22,714.25 breakdown — Pre-Launch Â£8,000 (awareness + list building), Launch Â£4,000 (conversions), Post-Launch Â£1,500 (efficiency), Conversion Â£9,214.25 (purchase focus). BUDGET ALLOCATION: Consideration 45%, Acquisition 40%, Retention 10%, Referral 5%. CAMPAIGN PHASES: Tease (4-14 Jan, Â£2,300, video views), Pre-Launch (15 Jan-21 Feb, Â£5,700, awareness to sign-ups), Launch (24 Feb-31 Mar, Â£4,000, product conversions), Post-Launch (1-30 Apr, Â£1,500, brand awareness), Conversions (12-31 May, Â£9,214, purchase focus). SPEND BY PLATFORM: FBIG Â£19,543.73 total, YouTube Â£1,000.12 (paused after test), TikTok Â£145.95. Jan: Â£4,852, Feb: Â£1,054 (-78% MoM strategic shift). PLATFORM MIX: FBIG 80-85% (Consideration + Acquisition + Retargeting), TikTok 10-15% (tested pre-launch, expanded post-launch, peak ROAS 8.67), YouTube 5% (pre-launch only, 182K impressions, 113K views, 23.94% VCR). PERFORMANCE SUMMARY: Total impressions 3.2M+, video views 270K+. CPM range Â£1.92-Â£12.00, CPA range Â£5.71-Â£285.71, ROAS range 0.11-8.67, CTR 0.1%-2%, CVR 0.02%-0.7%. IG outperforming FB (36% lower CPM). MONTHLY BREAKDOWN: Jan — 852K reach, 1.67M impressions, 543K video views, 2,528 clicks. Feb — 77K reach, 5,669 clicks (+52% WoW), 1,058 leads at Â£0.46 CPL. March — 600% revenue growth (Â£30→Â£210), 7 purchases, 28 checkouts initiated (+2,700% MoM). May — ad recall +125%, engagement rate +89.8% (0.18→0.35). AUDIENCES (3-tier): Luxury (high-net-worth premium, CPM Â£8-12), Digital Native (tech-savvy online-first, CPM Â£7-8), Conscious (sustainability-focused eco-aware — best performing, CPM Â£5.62-6.20, Â£0.35 CPL). TARGETING: Social lookalikes 1-3% (engagements, purchases, visitors), pixel-based retargeting (30-day), interest-based (10+ categories: fragrances, sustainability, beauty), behavioural (engaged shoppers, online shopping), CRM/subscriber lists, dynamic retargeting (Facebook Catalog). Geographic UK only, Age 25-54. PRODUCTS: Preview Set (Â£30, redeemable towards full-size — trial/entry point), Full-size bottles (Â£130 AoV — premium upsell). CREATIVE: 50+ unique variations across motion (hero videos, blur bottles, scent mood boards), static (luxury photography), carousels (5-scent showcase), GIFs, collection ads. Video-heavy: 6-sec optimised + 8-10 min hero content. Audience-specific copy: Luxury (premium positioning), Digital Native (tech/convenience), Conscious (sustainability). 3D ASSETS: 10 ORBX models (59MB each, grey/white for all scents) + 2 STL 3D printing files. REPORTING: 14 weekly paid reports (31 Jan-9 May 2022) tracking 20+ KPIs (spend, reach, impressions, CPM, video views, CPV, clicks, CTR, LPV, CPLPV, CVR, purchases, CPA, AOV, revenue, ROAS). 4 social matrices with copy/headline/CTA variations per audience per phase. HASHTAGS: #cleanbeauty, #perfume, #naturalfragrance, #luxuryfragrance, #scent, #sustainablebeauty, #refillable, #genderless." },
+  { id:"barbri", n:"BARBRI", s:"r", cat:"Legal Education / SQE Prep", sum:"SQE1 & SQE2 prep courses. BARBRI Barometer 2024: 127 respondents, 82% struggle with talent, 73% adopted SQE, 63% expect paralegals to replace trainees. 4 products, 15+ campaigns, 200+ assets.", a:200, c:15, knowledge:"BARBRI provides SQE prep. Flagship: BARBRI Barometer 2024 (127 respondents â 84 senior decision-makers, 43 paralegals, SME firms <250 employees). KEY STATS: 82% struggle attracting talent, 76% salary mismatch, 48% retention issues, 48% Gen Z expectations. Remote working 28%. WHY SMEs WIN: close-knit community 42%, flexibility 35%, autonomy 36%, growth 27%, tech 38%. SQE: 73% adopted. Barriers: lack of info 44%, timing 31%. PARALEGALS: 63% replacing trainee role, 54% more legal tech, 52% more complex tasks. Only 44% have skills frameworks. Top skills: client mgmt 98%, resilience 98%, biz dev 96%. APPRENTICESHIPS: 35% using, 46% not. GEN Z: 72% won't join if values don't match, 50% push on climate. Video: SQE1 international download ads, overseas prospectus." },
+  { id:"boodle", n:"Boodle", s:"r", cat:"FinTech / Group Payments", sum:"Group payment app. Brand: Blue #27A3FF, Red #F15858. 95 files total (1,370.21 MB) Dec 2019-Oct 2020. Holiday marketing (Xmas x5, Easter, New Year, Bank Holiday), vegan product line (12 files), interactive (quiz, snake x8, word search, spin bottle, this or that), recipe videos, hero/brand videos (4K 3840x2160), store content, animated flavour content.", a:95, c:15, knowledge:"Boodle is a fintech group payment app. TOTAL FILES: 95 files, 1,370.21 MB. BRAND: Blue #27A3FF, Red #F15858 (confirmed from Boodle Colours.pdf). PRODUCTION TIMELINE: Dec 2019-Oct 2020, weekly/seasonal cadence. FILE TYPES: 89 MP4 video files, 11 design files (PSD, AI). CAMPAIGN BREAKDOWN: Holiday Marketing â Christmas (5 variations), Easter, New Year, Bank Holiday. Vegan Product Line (12 files). Social Engagement/Interactive â Quiz (6 variations), Snake Game (8 levels), Word Search, Spin the Bottle, This or That polls. Recipe Videos â Hot dogs, compote, brownies, marshmallow, toffee apple. Hero/Brand Videos â 4K 3840x2160 format (65-99MB), social optimized (5-15MB). Store content, animated flavour content. DESIGN ASSETS: Xmas-Social-Posts.ai (243MB master), Find 4 Flavours Stories.psd (73MB), Static-Swipe-Post.psd (50MB). ARCHIVE: ProRes (MOV format), Hero Content â Boodle Hero 1min Export (66MB, Aug 2020) + subtitled version (69MB, Oct 2020). Wide Format â Boodle Version 2 Wide.mp4 (99MB, Jan 2020). CAMPAIGNS: General awareness (feed+story), Bills messaging (feed+story), Flying brand campaign (feed+story, 2 amendment rounds), Referral mechanics (feed+story), Nando's partnership (feed+story), Rule of Six social (feed+story, Oct 2020), Drinking Outdoors (Aug 2020), Dogs content (Aug 2020 + amends), Toffee Apple GIF (Aug 2020 + amends), New Year (feed+story, Dec 2020). NAMING CONVENTION: Boodle[Campaign]_[Type]_[Amends]. All content dual-format (feed+story) with systematic 2 amendment rounds per deliverable. VIDEO SPECS: Primary codec H.264. Formats: 1080x1920 (9:16 vertical for story), 1080x1080 (1:1 square for feed), 1920x1080 (16:9), 3840x2160 (4K UHD). Duration: 2 sec to 30+ min. ProRes archive available (2 MOV files). Brand personality: Financial efficiency, community, accessibility, group-focused functionality." },
+  { id:"altra", n:"Altra Skin", s:"r", cat:"Luxury Fragrance", sum:"Premium natural fragrance (Profuture luxury). 5 scents: ALTRASKIN, GHOSTFLOWER, DUALIST, JASMIN XXX, STONE COLD HEART. Total FBIG spend: ÃÂ£19,543. March: 600% revenue growth (ÃÂ£30âÂÂÃÂ£210), 7 purchases, 28 checkouts (+2700% MoM). May: ad recall +125%, engagement +89.8%. 3D ORBX models (grey/white) for all scents.", a:50, c:15, knowledge:"Altra (Profuture Luxury) â Premium Natural Fragrance Launch Campaign. BRAND: Profuture luxury house, genderless UK-made fragrance. Positioning: \'100% natural, 100% refillable, 100% planet conscious\' â repositioning natural fragrance as genuinely premium and sustainably luxurious. SCENTS (5-piece collection): ALTRASKIN (clean, sensual, alluring â \'your skin but better\'), GHOSTFLOWER (bohemian, smoky woods, rich resins â 65% TikTok conversions), DUALIST (fresh/dark, transformative â best YouTube VCR 29%), JASMIN XXX (unapologetic hedonism, white floral â best FBIG static), STONE COLD HEART (sensual darkness â 22% YouTube VCR). TOTAL BUDGET: ÃÂ£22,714.25 breakdown â Pre-Launch ÃÂ£8,000 (awareness + list building), Launch ÃÂ£4,000 (conversions), Post-Launch ÃÂ£1,500 (efficiency), Conversion ÃÂ£9,214.25 (purchase focus). BUDGET ALLOCATION: Consideration 45%, Acquisition 40%, Retention 10%, Referral 5%. CAMPAIGN PHASES: Tease (4-14 Jan, ÃÂ£2,300, video views), Pre-Launch (15 Jan-21 Feb, ÃÂ£5,700, awareness to sign-ups), Launch (24 Feb-31 Mar, ÃÂ£4,000, product conversions), Post-Launch (1-30 Apr, ÃÂ£1,500, brand awareness), Conversions (12-31 May, ÃÂ£9,214, purchase focus). SPEND BY PLATFORM: FBIG ÃÂ£19,543.73 total, YouTube ÃÂ£1,000.12 (paused after test), TikTok ÃÂ£145.95. Jan: ÃÂ£4,852, Feb: ÃÂ£1,054 (-78% MoM strategic shift). PLATFORM MIX: FBIG 80-85% (Consideration + Acquisition + Retargeting), TikTok 10-15% (tested pre-launch, expanded post-launch, peak ROAS 8.67), YouTube 5% (pre-launch only, 182K impressions, 113K views, 23.94% VCR). PERFORMANCE SUMMARY: Total impressions 3.2M+, video views 270K+. CPM range ÃÂ£1.92-ÃÂ£12.00, CPA range ÃÂ£5.71-ÃÂ£285.71, ROAS range 0.11-8.67, CTR 0.1%-2%, CVR 0.02%-0.7%. IG outperforming FB (36% lower CPM). MONTHLY BREAKDOWN: Jan â 852K reach, 1.67M impressions, 543K video views, 2,528 clicks. Feb â 77K reach, 5,669 clicks (+52% WoW), 1,058 leads at ÃÂ£0.46 CPL. March â 600% revenue growth (ÃÂ£30âÂÂÃÂ£210), 7 purchases, 28 checkouts initiated (+2,700% MoM). May â ad recall +125%, engagement rate +89.8% (0.18âÂÂ0.35). AUDIENCES (3-tier): Luxury (high-net-worth premium, CPM ÃÂ£8-12), Digital Native (tech-savvy online-first, CPM ÃÂ£7-8), Conscious (sustainability-focused eco-aware â best performing, CPM ÃÂ£5.62-6.20, ÃÂ£0.35 CPL). TARGETING: Social lookalikes 1-3% (engagements, purchases, visitors), pixel-based retargeting (30-day), interest-based (10+ categories: fragrances, sustainability, beauty), behavioural (engaged shoppers, online shopping), CRM/subscriber lists, dynamic retargeting (Facebook Catalog). Geographic UK only, Age 25-54. PRODUCTS: Preview Set (ÃÂ£30, redeemable towards full-size â trial/entry point), Full-size bottles (ÃÂ£130 AoV â premium upsell). CREATIVE: 50+ unique variations across motion (hero videos, blur bottles, scent mood boards), static (luxury photography), carousels (5-scent showcase), GIFs, collection ads. Video-heavy: 6-sec optimised + 8-10 min hero content. Audience-specific copy: Luxury (premium positioning), Digital Native (tech/convenience), Conscious (sustainability). 3D ASSETS: 10 ORBX models (59MB each, grey/white for all scents) + 2 STL 3D printing files. REPORTING: 14 weekly paid reports (31 Jan-9 May 2022) tracking 20+ KPIs (spend, reach, impressions, CPM, video views, CPV, clicks, CTR, LPV, CPLPV, CVR, purchases, CPA, AOV, revenue, ROAS). 4 social matrices with copy/headline/CTA variations per audience per phase. HASHTAGS: #cleanbeauty, #perfume, #naturalfragrance, #luxuryfragrance, #scent, #sustainablebeauty, #refillable, #genderless." },
   { id:"culture-club", n:"Culture Club", s:"r", cat:"Music / Entertainment", sum:"9 video assets: Palladium live performance (ProRes, 688MB), Karma Chameleon, Do You Really Want To Hurt Me, Ill Tumble 4 Ya, Frantic 08.", a:9, c:0, knowledge:"Culture Club content managed by Noise. Assets: Live at the Palladium Oct 2020 (full ProRes cut), multiple music video versions of Karma Chameleon (original 1983, live 1983, remastered), Do You Really Want To Hurt Me, Ill Tumble 4 Ya, Frantic 08 (604MB). High-value archival content." },
-  { id:"brothers-cider", n:"Brothers Cider", s:"r", cat:"Drinks / FMCG", sum:"26 video/design assets, 113.35 MB total. Interactive games (quiz x6, word search, snake x8, spin the bottle, this or that x3), recipes (hot dogs, compote, parma violet brownies, marshmallow, toffee apple, Easter), seasonal (Xmas x5, New Year, Easter, April Fools, Bank Holiday), Spotify, product (store, animated flavour, Tutti, 3 Flavours).", a:26, c:15, knowledge:"Brothers is a cider/drinks brand. 26 files, 113.35 MB total, Dec 2019-Oct 2020. INTERACTIVE GAMES: Quiz series (6 variations, 2.3-8.9MB), WordSearch (2 files), Spin the Bottle (2 files), Snake game (8 levels, 244K-1.9MB), This or That polls (3 rounds, 11-12MB). RECIPE VIDEOS: Cider glazed hot dogs v2 (18MB, Jan 2020), Compote (18MB, Apr 2020), Parma Violet Brownies Story v2 (19MB, Nov 2019), Marshmallow variants (212K-12MB), Toffee Apple (246K, Aug 2020), Easter Piece v2 (16MB, Apr 2020). SEASONAL: Christmas 2019 — Xmas-Social-Posts.ai (243MB master), Xmas-Card-Brother.psd, Xmas Tree.psd, BC-Xmas-List.ai, xmas-eve-video, Fairy Lights (video+PSD+vectors), Find 4 Flavours Stories.psd (73MB), Cracker.ai + AEP files. New Year feed+story (Dec 2020, 17MB each). Easter, April Fools, Bank Holiday. MUSIC/CULTURE: Spotify reminders + amendments (Apr 2020), Playlist 1 v2 + Playlist 2 (13MB each). PRODUCT: Store v2 + v3 (11-12MB), Animated Flavour Tutti variants (4.5-7.5MB), 3 Flavours Swipe Up (16MB). ENGAGEMENT: Movie Recommendations (12MB), Calendar Countdown (3.6MB), Shake Your Phone (14MB), Video Chat + amendments, Welcome to the Family (10MB). DESIGN SOURCE: Static-Swipe-Post.psd (50MB), Cinemagraph Final.mov (190MB). AI artboard: 1080x1920px, RGB, sRGB profile. Brand personality: fun, playful, flavour-forward." },
-  { id:"thortful", n:"Thortful", s:"r", cat:"E-commerce / Greeting Cards", sum:"Mrs Thortful (Lou). 95 files — Valentine's, Mother's Day, reaction clips, photography.", a:95, c:6 },
-  { id:"davines", n:"Davines", s:"r", cat:"Beauty / Haircare", sum:"Italian haircare, 4 markets. 78 files — festive, TikTok, UGC, media plans.", a:78, c:9 },
+  { id:"brothers-cider", n:"Brothers Cider", s:"r", cat:"Drinks / FMCG", sum:"26 video/design assets, 113.35 MB total. Interactive games (quiz x6, word search, snake x8, spin the bottle, this or that x3), recipes (hot dogs, compote, parma violet brownies, marshmallow, toffee apple, Easter), seasonal (Xmas x5, New Year, Easter, April Fools, Bank Holiday), Spotify, product (store, animated flavour, Tutti, 3 Flavours).", a:26, c:15, knowledge:"Brothers is a cider/drinks brand. 26 files, 113.35 MB total, Dec 2019-Oct 2020. INTERACTIVE GAMES: Quiz series (6 variations, 2.3-8.9MB), WordSearch (2 files), Spin the Bottle (2 files), Snake game (8 levels, 244K-1.9MB), This or That polls (3 rounds, 11-12MB). RECIPE VIDEOS: Cider glazed hot dogs v2 (18MB, Jan 2020), Compote (18MB, Apr 2020), Parma Violet Brownies Story v2 (19MB, Nov 2019), Marshmallow variants (212K-12MB), Toffee Apple (246K, Aug 2020), Easter Piece v2 (16MB, Apr 2020). SEASONAL: Christmas 2019 â Xmas-Social-Posts.ai (243MB master), Xmas-Card-Brother.psd, Xmas Tree.psd, BC-Xmas-List.ai, xmas-eve-video, Fairy Lights (video+PSD+vectors), Find 4 Flavours Stories.psd (73MB), Cracker.ai + AEP files. New Year feed+story (Dec 2020, 17MB each). Easter, April Fools, Bank Holiday. MUSIC/CULTURE: Spotify reminders + amendments (Apr 2020), Playlist 1 v2 + Playlist 2 (13MB each). PRODUCT: Store v2 + v3 (11-12MB), Animated Flavour Tutti variants (4.5-7.5MB), 3 Flavours Swipe Up (16MB). ENGAGEMENT: Movie Recommendations (12MB), Calendar Countdown (3.6MB), Shake Your Phone (14MB), Video Chat + amendments, Welcome to the Family (10MB). DESIGN SOURCE: Static-Swipe-Post.psd (50MB), Cinemagraph Final.mov (190MB). AI artboard: 1080x1920px, RGB, sRGB profile. Brand personality: fun, playful, flavour-forward." },
+  { id:"thortful", n:"Thortful", s:"r", cat:"E-commerce / Greeting Cards", sum:"Mrs Thortful (Lou). 95 files â Valentine's, Mother's Day, reaction clips, photography.", a:95, c:6 },
+  { id:"davines", n:"Davines", s:"r", cat:"Beauty / Haircare", sum:"Italian haircare, 4 markets. 78 files â festive, TikTok, UGC, media plans.", a:78, c:9 },
   { id:"access-storage", n:"Access Storage", s:"r", cat:"Storage / Self-Storage", sum:"UK self-storage. 7 campaigns (summer storage, box storage, brand awareness). Monthly Noise content batches (Jan-Apr 2025), UGC video, Trustpilot social proof ads. Brand guidelines + logos. Content types: static 1x1, carousel, UGC.", a:30, c:7 },
-  { id:"amano-hotels", n:"Amano Hotels", s:"r", cat:"Hospitality / Hotels", sum:"Berlin lifestyle hotel group. 4 objectives: grow corporate event revenue, rebuild brand perception in Germany, raise room revenue (+→¬5 ADR), increase direct bookings (25% to 35%). Strategy: brand & positioning, organic, paid media, influencers, CRM, website. Covent Garden shoot active. IG audit, CI guide, brand strategy notes.", a:18, c:4 },
+  { id:"amano-hotels", n:"Amano Hotels", s:"r", cat:"Hospitality / Hotels", sum:"Berlin lifestyle hotel group. 4 objectives: grow corporate event revenue, rebuild brand perception in Germany, raise room revenue (+âÂÂ¬5 ADR), increase direct bookings (25% to 35%). Strategy: brand & positioning, organic, paid media, influencers, CRM, website. Covent Garden shoot active. IG audit, CI guide, brand strategy notes.", a:18, c:4 },
   { id:"apricot", n:"Apricot", s:"r", cat:"Beauty / Skincare", sum:"Beauty/skincare brand. Paid media (PPC PMax), organic content, influencer/creator strategy, UGC. Black Friday paid content plan, UGC content plan. Brand assets: customer personas, Tenerife shoot selects, fonts, logos. Brand brainstorm deck. Paid media strategy.", a:17, c:3 },
   { id:"aspora", n:"Aspora", s:"r", cat:"Food & Drink / FMCG", sum:"FMCG brand. Heavy OOH (Out of Home) focus with B2B content and social amplification. Activations, Diwali campaign, paid social UGC, always-on content, social shoots B2B. Event RAMs for live activations.", a:14, c:4 },
   { id:"audio-technica", n:"Audio-Technica", s:"r", cat:"Audio / Electronics", sum:"Professional audio equipment. Commercial retainer: organic assets, paid media, reporting. Live events collaboration. Brand assets, signed contract, kick off agendas.", a:10, c:3 },
@@ -1645,7 +1638,7 @@ const CL = [
   { id:"trudis", n:"Trudi's", s:"r", cat:"Food & Drink", sum:"Food/drink brand. Brand assets, kick off materials, strategy, Noise assets.", a:4, c:1 },
   { id:"winter-wonderland", n:"Winter Wonderland", s:"r", cat:"Events / Entertainment", sum:"Hyde Park Winter Wonderland. Assets, docs, Noise assets, shared collaboration folder.", a:4, c:2 },
   { id:"xigxag", n:"XigXag", s:"r", cat:"Tech / Footwear", sum:"Footwear tech. New 2026 engagement.", a:1, c:1 },
-  { id:"zapp", n:"Zapp", s:"r", cat:"Tech / Delivery", sum:"On-demand grocery delivery. OOH pitch: 3 territories (Wage War on Weekly Shop, Life On Demand, Hyper-Targeted by postcode). Target: HENRYs + time-poor urban Londoners. Insight: 63% ditched weekly shop, 1 in 3 feel life passing by. Central London burst.", a:2, c:1, knowledge:"Zapp is an on-demand grocery delivery service. Noise pitched a high-impact OOH burst in Central London. REPOSITIONING: from 'expensive, occasional, emergency top-ups' to 'your new everyday grocery shop'. 3 CREATIVE TERRITORIES: (1) WAGE WAR ON THE WEEKLY SHOP — insight: 63% of Brits ditched weekly shop for online. Strategy: attack pain points of physical grocery shopping (queues, crowds, wasted time). Makes mental switch explicit. (2) LIFE ON DEMAND — insight: 1 in 3 Brits feel life is passing by due to daily routines. Strategy: position Zapp as enabler of moments that matter. Aspirational yet practical. (3) HYPER-TARGETED — insight: 3 in 5 adults identify strongly with their neighbourhood (postcode pride). Strategy: hyper-local, hyper-relevant messaging by postcode. Example copy: Shoreditch creatives, Clapham brunchers, Canary Wharf grinders, Hackney vegans. TARGET: HENRYs (High Earners Not Rich Yet), younger urban Londoners. Example routes: Polaroid/lifestyle campaign, IKEA billboard tie-in, Lyme pharmacy network, lifestyle brand partnerships. Brand tone: in-the-know, culturally sharp. Objective: drive first trial at scale." },
+  { id:"zapp", n:"Zapp", s:"r", cat:"Tech / Delivery", sum:"On-demand grocery delivery. OOH pitch: 3 territories (Wage War on Weekly Shop, Life On Demand, Hyper-Targeted by postcode). Target: HENRYs + time-poor urban Londoners. Insight: 63% ditched weekly shop, 1 in 3 feel life passing by. Central London burst.", a:2, c:1, knowledge:"Zapp is an on-demand grocery delivery service. Noise pitched a high-impact OOH burst in Central London. REPOSITIONING: from 'expensive, occasional, emergency top-ups' to 'your new everyday grocery shop'. 3 CREATIVE TERRITORIES: (1) WAGE WAR ON THE WEEKLY SHOP â insight: 63% of Brits ditched weekly shop for online. Strategy: attack pain points of physical grocery shopping (queues, crowds, wasted time). Makes mental switch explicit. (2) LIFE ON DEMAND â insight: 1 in 3 Brits feel life is passing by due to daily routines. Strategy: position Zapp as enabler of moments that matter. Aspirational yet practical. (3) HYPER-TARGETED â insight: 3 in 5 adults identify strongly with their neighbourhood (postcode pride). Strategy: hyper-local, hyper-relevant messaging by postcode. Example copy: Shoreditch creatives, Clapham brunchers, Canary Wharf grinders, Hackney vegans. TARGET: HENRYs (High Earners Not Rich Yet), younger urban Londoners. Example routes: Polaroid/lifestyle campaign, IKEA billboard tie-in, Lyme pharmacy network, lifestyle brand partnerships. Brand tone: in-the-know, culturally sharp. Objective: drive first trial at scale." },
   { id:"zeigo", n:"Zeigo", s:"r", cat:"Energy / Sustainability", sum:"Sustainability platform. Internal docs and shared collaboration folder.", a:2, c:1 }
 ];
 
@@ -1791,7 +1784,7 @@ function deleteLearning(id) {
 function getLearningContext() {
   var learnings = getLearnings();
   if (learnings.length === 0) return '';
-  var ctx = '\n\nTEAM LEARNINGS & KNOWLEDGE (taught by team members — use this to inform your responses):\n';
+  var ctx = '\n\nTEAM LEARNINGS & KNOWLEDGE (taught by team members â use this to inform your responses):\n';
   var recent = learnings.slice(-50);
   recent.forEach(function(l) {
     ctx += '- [' + l.category + '] ' + l.content + ' (from ' + l.addedBy + ')\n';
@@ -1801,13 +1794,13 @@ function getLearningContext() {
 
 function learnFromInteraction(userMsg, botResponse, feedback, details) {
   if (feedback === 'positive') {
-    addLearning('Good response pattern: User asked "' + userMsg.substring(0, 100) + '" — response was well-received.', 'interaction', 'feedback');
+    addLearning('Good response pattern: User asked "' + userMsg.substring(0, 100) + '" â response was well-received.', 'interaction', 'feedback');
   } else if (feedback === 'negative') {
-    addLearning('Needs improvement: User asked "' + userMsg.substring(0, 100) + '" — response was not helpful. Adjust approach.', 'correction', 'feedback');
+    addLearning('Needs improvement: User asked "' + userMsg.substring(0, 100) + '" â response was not helpful. Adjust approach.', 'correction', 'feedback');
   } else if (feedback === 'rich' && details) {
     var note = '';
     if (details.ratings) {
-      note += 'Ratings — Accuracy: ' + (details.ratings.accuracy||'?') + '/5, Tone: ' + (details.ratings.tone||'?') + '/5, Completeness: ' + (details.ratings.completeness||'?') + '/5. ';
+      note += 'Ratings â Accuracy: ' + (details.ratings.accuracy||'?') + '/5, Tone: ' + (details.ratings.tone||'?') + '/5, Completeness: ' + (details.ratings.completeness||'?') + '/5. ';
     }
     if (details.correction) {
       note += 'Correction: "' + details.correction.substring(0, 300) + '". ';
@@ -1973,7 +1966,7 @@ function renderProjectTabBar() {
     var html = '';
     projects.forEach(function(p) {
       var active = p.id === currentProjectId ? ' active' : '';
-      var name = p.name.length > 14 ? p.name.substring(0, 14) + '…' : p.name;
+      var name = p.name.length > 14 ? p.name.substring(0, 14) + 'â¦' : p.name;
       html += '<div class="project-tab' + active + '" data-color="' + (p.color || 'red') + '" onclick="switchProject(\'' + p.id + '\')">'
         + '<span>' + escHtml(name) + '</span>'
         + '<button class="project-tab-close" onclick="event.stopPropagation();removeProjectTab(\'' + p.id + '\')">&times;</button>'
@@ -2573,7 +2566,7 @@ function selectUser(u) {
     hubChatEl.scrollTop = hubChatEl.scrollHeight;
     updateHomeView();
   }
-  // Don't show greeting on home screen — keep it clean per wireframe
+  // Don't show greeting on home screen â keep it clean per wireframe
   renderSidebar();
 }
 
@@ -2597,12 +2590,12 @@ function switchMode(mode) {
 
 /* ============ SIDEBAR ============ */
 function swTab(tab) {
-  // Simplified — sidebar only shows threads now
+  // Simplified â sidebar only shows threads now
   renderThreadBar();
 }
 
 function rSb(q) {
-  // Simplified — sidebar only shows threads now
+  // Simplified â sidebar only shows threads now
   renderThreadBar();
 }
 
@@ -2615,7 +2608,7 @@ function submitTeaching() {
   input.value = '';
   renderLearnings();
   var hc = document.getElementById('hubChat');
-  if (hc) addMsgTo(hc, 'Got it — I\'ve absorbed that ' + cat + ' knowledge. It\'ll inform my responses going forward.', false);
+  if (hc) addMsgTo(hc, 'Got it â I\'ve absorbed that ' + cat + ' knowledge. It\'ll inform my responses going forward.', false);
 }
 
 function renderLearnings() {
@@ -2632,7 +2625,7 @@ function renderLearnings() {
     html += '<div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px;margin-bottom:6px;font-size:11px;">'
       + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">'
       + '<span style="background:var(--accent-light);color:var(--accent);padding:2px 6px;border-radius:10px;font-size:9px;text-transform:uppercase;font-weight:600;">' + l.category + '</span>'
-      + '<span style="color:var(--text-muted);font-size:9px;">' + date + ' Â· ' + (l.addedBy || '').split(' ')[0] + '</span>'
+      + '<span style="color:var(--text-muted);font-size:9px;">' + date + ' ÃÂ· ' + (l.addedBy || '').split(' ')[0] + '</span>'
       + '</div>'
       + '<div style="color:var(--text);line-height:1.4;">' + escHtml(l.content).substring(0, 200) + (l.content.length > 200 ? '...' : '') + '</div>'
       + '<button onclick="deleteLearning(' + l.id + ');renderLearnings();" style="background:none;border:none;color:var(--text-muted);font-size:9px;cursor:pointer;padding:4px 0;margin-top:4px;">Remove</button>'
@@ -3053,7 +3046,7 @@ function addScanLog(msg) {
   var d = document.createElement('div');
   d.style.cssText = 'font-size:10px;color:var(--text-muted);padding:3px 0;border-bottom:1px solid var(--border);';
   var time = new Date().toLocaleTimeString('en-GB', {hour:'2-digit',minute:'2-digit'});
-  d.textContent = time + ' — ' + msg;
+  d.textContent = time + ' â ' + msg;
   log.prepend(d);
 }
 
@@ -3084,10 +3077,10 @@ function showDriveSetupGuide() {
     + '<div style="font-size:12px;line-height:1.7;color:var(--text);">'
     + '<p><strong>Step 1:</strong> Go to <a href="https://console.cloud.google.com" target="_blank" style="color:var(--accent);">console.cloud.google.com</a></p>'
     + '<p><strong>Step 2:</strong> Create a new project (or select existing one)</p>'
-    + '<p><strong>Step 3:</strong> Go to "APIs & Services" → "Library"</p>'
+    + '<p><strong>Step 3:</strong> Go to "APIs & Services" âÂÂ "Library"</p>'
     + '<p><strong>Step 4:</strong> Search for "Google Drive API" and enable it</p>'
-    + '<p><strong>Step 5:</strong> Go to "APIs & Services" → "Credentials"</p>'
-    + '<p><strong>Step 6:</strong> Click "Create Credentials" → "OAuth client ID"</p>'
+    + '<p><strong>Step 5:</strong> Go to "APIs & Services" âÂÂ "Credentials"</p>'
+    + '<p><strong>Step 6:</strong> Click "Create Credentials" âÂÂ "OAuth client ID"</p>'
     + '<p><strong>Step 7:</strong> Application type: "Web application"</p>'
     + '<p><strong>Step 8:</strong> Add Authorised JavaScript origins:</p>'
     + '<div style="background:var(--surface2);padding:8px;border-radius:6px;font-family:monospace;font-size:11px;margin:6px 0;">'
@@ -3098,7 +3091,7 @@ function showDriveSetupGuide() {
     + '<p><strong>Step 10:</strong> Copy the Client ID and paste it in the Drive panel below</p>'
     + '<p style="margin-top:12px;"><strong>To get a folder ID:</strong> Open the folder in Google Drive. The URL will look like:<br>'
     + '<span style="font-family:monospace;font-size:10px;">drive.google.com/drive/folders/<strong style="color:var(--accent);">1aBcDeFgHiJk...</strong></span><br>'
-    + 'Copy the highlighted part — that is your folder ID.</p>'
+    + 'Copy the highlighted part â that is your folder ID.</p>'
     + '</div>'
     + '<button onclick="this.closest(\'.modal-bg\').remove()" style="margin-top:12px;padding:8px 20px;background:var(--accent);color:white;border:none;border-radius:8px;font-size:12px;cursor:pointer;">Got it</button>'
     + '</div>';
@@ -3107,15 +3100,15 @@ function showDriveSetupGuide() {
 
 function toggleDrivePanel() {
   var connectors = [
-    { name: 'Gmail', icon: 'ð§', key: 'gmail' },
-    { name: 'Google Sheets', icon: 'ð', key: 'google-sheets' },
-    { name: 'Google Docs', icon: 'ð', key: 'google-docs' },
-    { name: 'Adobe Photoshop', icon: 'ð¨', key: 'adobe-photoshop' },
-    { name: 'Google Calendar', icon: 'ð', key: 'google-calendar' },
-    { name: 'Slack', icon: 'ð¬', key: 'slack' },
-    { name: 'PDF', icon: 'ð', key: 'pdf' },
-    { name: 'Granola', icon: 'ðï¸', key: 'granola' },
-    { name: 'Google Drive', icon: 'ð', key: 'google-drive' }
+    { name: 'Gmail', icon: 'Ã°ÂÂÂ§', key: 'gmail' },
+    { name: 'Google Sheets', icon: 'Ã°ÂÂÂ', key: 'google-sheets' },
+    { name: 'Google Docs', icon: 'Ã°ÂÂÂ', key: 'google-docs' },
+    { name: 'Adobe Photoshop', icon: 'Ã°ÂÂÂ¨', key: 'adobe-photoshop' },
+    { name: 'Google Calendar', icon: 'Ã°ÂÂÂ', key: 'google-calendar' },
+    { name: 'Slack', icon: 'Ã°ÂÂÂ¬', key: 'slack' },
+    { name: 'PDF', icon: 'Ã°ÂÂÂ', key: 'pdf' },
+    { name: 'Granola', icon: 'Ã°ÂÂÂÃ¯Â¸Â', key: 'granola' },
+    { name: 'Google Drive', icon: 'Ã°ÂÂÂ', key: 'google-drive' }
   ];
   var modal = document.createElement('div');
   modal.className = 'modal-bg';
@@ -3184,7 +3177,7 @@ function renderMemoryList(el, filter) {
       d.className = 'mem-item';
       var catColor = {'decision':'rgba(199,60,30,0.1)','process':'rgba(43,108,176,0.1)','client':'rgba(45,138,78,0.1)','general':'var(--surface2)'}[m.category] || 'var(--surface2)';
       var catText = {'decision':'#C73C1E','process':'#2B6CB0','client':'#2D8A4E','general':'var(--text-muted)'}[m.category] || 'var(--text-muted)';
-      d.innerHTML = '<div class="mem-text"><span class="mem-cat" style="background:' + catColor + ';color:' + catText + ';">' + m.category + '</span>' + m.text + '</div><div class="mem-meta">' + m.author + ' Â· ' + new Date(m.time).toLocaleDateString('en-GB',{day:'numeric',month:'short'}) + ' <span class="mem-del" onclick="deleteOrgMemory(' + i + ');rSb();">x</span></div>';
+      d.innerHTML = '<div class="mem-text"><span class="mem-cat" style="background:' + catColor + ';color:' + catText + ';">' + m.category + '</span>' + m.text + '</div><div class="mem-meta">' + m.author + ' ÃÂ· ' + new Date(m.time).toLocaleDateString('en-GB',{day:'numeric',month:'short'}) + ' <span class="mem-del" onclick="deleteOrgMemory(' + i + ');rSb();">x</span></div>';
       el.appendChild(d);
     });
   }
@@ -3226,7 +3219,7 @@ function renderSharedThreadsList(el, filter) {
     var contributorCount = th.contributors ? th.contributors.length : 1;
     var lastUpdate = th.created ? new Date(th.created).toLocaleDateString('en-GB',{day:'numeric',month:'short'}) : 'Unknown';
     var clientTag = th.client ? '<span class="thread-client" style="margin-right:6px;">' + th.client + '</span>' : '';
-    d.innerHTML = '<span class="si-name">' + th.label + '</span><br><span style="font-size:11px;color:var(--text-muted);">' + clientTag + contributorCount + ' contributors Â· ' + lastUpdate + '</span>';
+    d.innerHTML = '<span class="si-name">' + th.label + '</span><br><span style="font-size:11px;color:var(--text-muted);">' + clientTag + contributorCount + ' contributors ÃÂ· ' + lastUpdate + '</span>';
     el.appendChild(d);
   });
 }
@@ -3401,7 +3394,7 @@ async function handleIntegrationCommand(text, hc) {
       var fromName = e.from.split('<')[0].trim() || e.from;
       emailHtml += '<div style="padding:8px 0;border-bottom:1px solid var(--border);">'
         + '<strong>' + escHtml(e.subject) + '</strong><br>'
-        + '<span style="font-size:11px;color:var(--text-muted);">' + escHtml(fromName) + ' · ' + escHtml(e.date) + '</span><br>'
+        + '<span style="font-size:11px;color:var(--text-muted);">' + escHtml(fromName) + ' Â· ' + escHtml(e.date) + '</span><br>'
         + '<span style="font-size:12px;">' + escHtml(e.snippet) + '</span>'
         + '</div>';
     });
@@ -3443,7 +3436,7 @@ async function handleIntegrationCommand(text, hc) {
       var day = start.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
       calHtml += '<div style="padding:6px 0;border-bottom:1px solid var(--border);">'
         + '<strong>' + escHtml(ev.summary) + '</strong><br>'
-        + '<span style="font-size:11px;color:var(--text-muted);">' + day + ' at ' + time + (ev.location ? ' · ' + escHtml(ev.location) : '') + '</span>'
+        + '<span style="font-size:11px;color:var(--text-muted);">' + day + ' at ' + time + (ev.location ? ' Â· ' + escHtml(ev.location) : '') + '</span>'
         + (ev.attendees.length > 0 ? '<br><span style="font-size:11px;color:var(--text-muted);">With: ' + ev.attendees.slice(0, 3).join(', ') + '</span>' : '')
         + '</div>';
     });
@@ -3494,7 +3487,7 @@ async function hubSend() {
     var note = remMatch[2];
     addMemory(currentUser ? currentUser.name : '_global', note);
     addMsgTo(hc, text, true);
-    addMsgTo(hc, 'Got it — I\'ll remember that. You can see all saved memories in the Memory tab on the left.', false);
+    addMsgTo(hc, 'Got it â I\'ll remember that. You can see all saved memories in the Memory tab on the left.', false);
     saveCurrentThread();
     if (sbTab === 'memory') rSb('');
     return;
@@ -3505,7 +3498,7 @@ async function hubSend() {
     var store = loadStore();
     if (store.memories && currentUser) { store.memories[currentUser.name] = []; saveStore(store); }
     addMsgTo(hc, text, true);
-    addMsgTo(hc, 'Done — your memories have been cleared.', false);
+    addMsgTo(hc, 'Done â your memories have been cleared.', false);
     saveCurrentThread();
     if (sbTab === 'memory') rSb('');
     return;
@@ -3516,7 +3509,7 @@ async function hubSend() {
   if (shareMatch && currentThreadId) {
     addMsgTo(hc, text, true);
     shareThread(currentThreadId);
-    addMsgTo(hc, 'Done — this thread is now shared with the team.', false);
+    addMsgTo(hc, 'Done â this thread is now shared with the team.', false);
     saveCurrentThread();
     return;
   }
@@ -3606,8 +3599,8 @@ let conversationHistory = []; // for Claude API context
 var STRATEGY_KB = {
   'amano hotels': {
     strategy_2026: true,
-    brand_proposition: '"Where the City Meets" — Amano drops you into the energy of the city. A place for staying, gathering, meeting and being part of what\'s happening now.',
-    original_proposition: '"Less, and then some." — brand confidence and restraint, but now evolved because it was philosophical rather than directional.',
+    brand_proposition: '"Where the City Meets" â Amano drops you into the energy of the city. A place for staying, gathering, meeting and being part of what\'s happening now.',
+    original_proposition: '"Less, and then some." â brand confidence and restraint, but now evolved because it was philosophical rather than directional.',
     brand_pillars: 'Community (social gathering), Sense of Place (rooted in city), The Stay (dependable hotel experience), Culture (plugged into what\'s current).',
     audiences: 'Locals (rebuild cultural relevance via pop-ups/collabs/creators), Tourists (experience-led destination, not just Booking.com price play), Corporate (visible B2B events offering).',
     current_reality: 'Brand experienced differently by each audience; demand exists but value leaks at every stage. Locals dropped out of cultural conversation, tourists see it as functional, corporate awareness is low.',
@@ -3616,28 +3609,28 @@ var STRATEGY_KB = {
     influencer_strategy: 'Micro-creators 5k-100k, min 3% engagement. Primary use: event/pop-up attendance and buzz. Not staged promotion. Creator content should make people want to show up. Lifestyle creators show Amano as part of everyday Berlin life. Health/wellness influencers demonstrate balance within city life.',
     paid_media: '5 pillars: brand awareness (future guests via IG/YT/TikTok), local cultural relevance (Berlin 21-40 via IG/TikTok), direct booking intent (Google Search/Hotel Ads/Meta retargeting), repeat bookings (Meta/Display retargeting), B2B lead gen (LinkedIn/Meta/Google for event planners).',
     key_insight: 'One system, not separate campaigns. Cultural activity builds content, content fuels awareness, corporate visibility unlocks high-margin revenue, experiences drive return, CRM converts to direct bookings.',
-    business_objectives: 'Rebuild brand perception in Germany (reclaim "cool" reputation), Raise room revenue (+→¬5 ADR through added value), Increase direct bookings (25% to 35%), Grow corporate event revenue (+30% qualified leads).',
-    personas: 'The Global Connector (Creative Director/Brand Consultant type — operates between cities, uses hotel bars as neutral meeting ground, needs ambient energy without chaos and design credibility). The Scene Curator (bridge between underground and mainstream culture, deeply embedded in local scene, scanning for what\'s next).',
-    cultural_identity: 'Berlin identity defined by productive contradiction — opposites held in motion. Constraint + Freedom, Discipline + Release, Public Energy + Private Experimentation, Structure + Subversion. Creative energy comes from tension, not harmony.',
-    market_trends: 'OTAs overtaking search engines for hotel discovery. 2026 is year mobile booking revenue overtakes desktop. Quiet luxury & wellness replacing extravagance. Heritage & localism surging — travellers want "glocal" stays (global standards, local soul).',
-    event_concepts: 'BARB-EQ (Yakitori & Electronic Music series — live-fire cooking meets Berlin electronic culture), Catch + Release (ethical dining with natural wines challenging cultural norms), After The Wall (month-long cultural programme exploring Berlin underground origins).',
+    business_objectives: 'Rebuild brand perception in Germany (reclaim "cool" reputation), Raise room revenue (+âÂÂ¬5 ADR through added value), Increase direct bookings (25% to 35%), Grow corporate event revenue (+30% qualified leads).',
+    personas: 'The Global Connector (Creative Director/Brand Consultant type â operates between cities, uses hotel bars as neutral meeting ground, needs ambient energy without chaos and design credibility). The Scene Curator (bridge between underground and mainstream culture, deeply embedded in local scene, scanning for what\'s next).',
+    cultural_identity: 'Berlin identity defined by productive contradiction â opposites held in motion. Constraint + Freedom, Discipline + Release, Public Energy + Private Experimentation, Structure + Subversion. Creative energy comes from tension, not harmony.',
+    market_trends: 'OTAs overtaking search engines for hotel discovery. 2026 is year mobile booking revenue overtakes desktop. Quiet luxury & wellness replacing extravagance. Heritage & localism surging â travellers want "glocal" stays (global standards, local soul).',
+    event_concepts: 'BARB-EQ (Yakitori & Electronic Music series â live-fire cooking meets Berlin electronic culture), Catch + Release (ethical dining with natural wines challenging cultural norms), After The Wall (month-long cultural programme exploring Berlin underground origins).',
     crm_strategy: 'Currently on Bookboost. Key opportunity: daily "Tonight at AMANO" in-stay messages via WhatsApp/SMS (rooftop bar, chef dinners, cocktails). Post-stay: keep guests connected to drive repeat stays and direct bookings.'
   },
   'ge vernova': {
     strategy_2026: true,
     focus: 'Data Centre Campaign Strategy',
-    platform_idea: '"Knowledge is Power. We Sell Both." — In a world of vendors selling parts, GEV sells end-to-end solutions.',
+    platform_idea: '"Knowledge is Power. We Sell Both." â In a world of vendors selling parts, GEV sells end-to-end solutions.',
     objective: 'Develop social approach showing Data Centre solutions are world-leading. Replace complexity with simplicity.',
     challenge: 'Competitors (Schneider, ADD, Siemens) are more active and impactful on social despite GEV being dominant in market.',
     comms_narrative: 'Full-service provision connecting Consulting, Site Selection, Equipment Procurement, Operational Guidance, Optimisation. Thinking long-term, building reference architecture for the future.',
     content_types: 'Case studies (real hyperscale projects), social-first whitepaper series, thought leadership, blog posts, podcasts.',
-    audiences: 'Hyperscale operators, colocation providers, utilities, data centre developers — decision-makers seeking clarity and knowledge.',
+    audiences: 'Hyperscale operators, colocation providers, utilities, data centre developers â decision-makers seeking clarity and knowledge.',
     microsite: 'Insight Hub filterable by topic (AI, Grid, Reliability, Speed to Power), service area, and audience type.',
     key_differentiator: 'End-to-end knowledge vs competitors selling parts. GEV\'s deep expertise across consulting, equipment, grid, power conversion, and long-term services.'
   },
   'ge vernova nuclear': {
     strategy_2026: true,
-    focus: 'BWRX-300 Small Modular Reactor — Bold Messaging Campaign',
+    focus: 'BWRX-300 Small Modular Reactor â Bold Messaging Campaign',
     challenge: 'Despite leading in actual SMR deployment, BWRX-300 is not widely perceived as the most innovative or bold option. Crowded market with all vendors claiming innovation.',
     goal: 'Shift market perception from safe/understated option to bold, category-defining leader in SMR technology.',
     product_pillars: 'Design Simplicity (fewer components, patented innovation), Market Readiness (10th-gen BWR, 2,500+ reactor-years experience, first unit under construction for 2030), Licensing Adaptability (tested with multiple regulators), Supply Chain Certainty (proven suppliers, no Russian-origin uranium reliance), Construction Efficiency (modularized build, catalog components), Cost Predictability (less steel/concrete per MW).',
@@ -3660,26 +3653,26 @@ var STRATEGY_KB = {
     strategy_2025: true,
     social_objectives: '1) Make Trudi\'s Known and Loved (brand recognition as fruit brand people actively choose), 2) Champion Purpose Beyond the Fruit (give back to banana-growing communities), 3) Bring Good to the Feed (joyful, feel-good content).',
     content_pillars: 'Mission storytelling, Banana Facts (science-backed myth-busting), Banana Versus (comparative nutrition series), Feel-Good Content.',
-    brand_inspiration: 'Tony\'s Chocolonely approach — purpose-driven storytelling with clarity and engagement.',
+    brand_inspiration: 'Tony\'s Chocolonely approach â purpose-driven storytelling with clarity and engagement.',
     profile_highlights: 'Mission, Where to Buy, Banana Fun.',
     formats: 'Static posts, carousels, video/reels on Instagram.'
   },
   'altra': {
     strategy_2022: true,
     campaign_name: 'Altra x Noise Multi-Phase Fragrance Launch',
-    brand: 'Profuture Luxury — premium natural fragrance house. 5 elevated compositions: ALTRASKIN, GHOSTFLOWER, DUALIST, JASMIN XXX, STONE COLD HEART.',
+    brand: 'Profuture Luxury â premium natural fragrance house. 5 elevated compositions: ALTRASKIN, GHOSTFLOWER, DUALIST, JASMIN XXX, STONE COLD HEART.',
     positioning: '\'100% natural, 100% refillable, 100% planet conscious.\' Genderless, UK-made, sustainably luxurious. Repositioning natural fragrance as genuinely premium.',
-    audience_strategy: 'Three-tier segmentation: (1) Luxury — high-net-worth premium consumers (CPM Â£8-12), (2) Digital Native — tech-savvy online-first audience (CPM Â£7-8), (3) Conscious — sustainability-focused eco-aware consumers (best performing, CPM Â£5.62-6.20, Â£0.35 CPL).',
-    budget_model: 'Total Â£22,714.25. Allocation: Consideration 45%, Acquisition 40%, Retention 10%, Referral 5%. Pre-Launch Â£8,000 (awareness + list building), Launch Â£4,000 (conversions), Post-Launch Â£1,500 (efficiency), Conversion Â£9,214.25 (purchase focus).',
-    campaign_phases: 'Tease (4-14 Jan, Â£2,300, video views), Pre-Launch (15 Jan-21 Feb, Â£5,700, awareness to sign-ups), Launch (24 Feb-31 Mar, Â£4,000, product conversions), Post-Launch (1-30 Apr, Â£1,500, brand awareness), Conversions (12-31 May, Â£9,214, purchase focus).',
+    audience_strategy: 'Three-tier segmentation: (1) Luxury â high-net-worth premium consumers (CPM ÃÂ£8-12), (2) Digital Native â tech-savvy online-first audience (CPM ÃÂ£7-8), (3) Conscious â sustainability-focused eco-aware consumers (best performing, CPM ÃÂ£5.62-6.20, ÃÂ£0.35 CPL).',
+    budget_model: 'Total ÃÂ£22,714.25. Allocation: Consideration 45%, Acquisition 40%, Retention 10%, Referral 5%. Pre-Launch ÃÂ£8,000 (awareness + list building), Launch ÃÂ£4,000 (conversions), Post-Launch ÃÂ£1,500 (efficiency), Conversion ÃÂ£9,214.25 (purchase focus).',
+    campaign_phases: 'Tease (4-14 Jan, ÃÂ£2,300, video views), Pre-Launch (15 Jan-21 Feb, ÃÂ£5,700, awareness to sign-ups), Launch (24 Feb-31 Mar, ÃÂ£4,000, product conversions), Post-Launch (1-30 Apr, ÃÂ£1,500, brand awareness), Conversions (12-31 May, ÃÂ£9,214, purchase focus).',
     platform_strategy: 'FBIG primary (80-85%): Consideration + Acquisition + Retargeting. TikTok secondary (10-15%): tested pre-launch, expanded post-launch, best ROAS 8.67. YouTube tertiary (5%): pre-launch video views only, paused after test (182K impressions, 113K views, 23.94% VCR). Pinterest mentioned but not executed.',
     targeting: 'Social lookalikes 1-3% (engagements, purchases, visitors), pixel-based retargeting (30-day window), interest-based (10+ categories: fragrances, sustainability, beauty), behavioural (engaged shoppers, online shopping), CRM/subscriber lists, dynamic retargeting (Facebook Catalog). Geographic: UK only, Age: 25-54.',
-    performance_summary: 'Total impressions 3.2M+, video views 270K+. Jan: 852K reach, 1.67M impressions, 543K video views, 2,528 clicks. Feb: 77K reach, 5,669 clicks (+52% WoW), 1,058 leads at Â£0.46 CPL. March: 600% revenue growth (Â£30→Â£210), 7 purchases, 28 checkouts (+2,700% MoM). May: ad recall +125%, engagement +89.8%. IG consistently outperforming FB (36% lower CPM). TikTok peak ROAS 8.67.',
+    performance_summary: 'Total impressions 3.2M+, video views 270K+. Jan: 852K reach, 1.67M impressions, 543K video views, 2,528 clicks. Feb: 77K reach, 5,669 clicks (+52% WoW), 1,058 leads at ÃÂ£0.46 CPL. March: 600% revenue growth (ÃÂ£30âÂÂÃÂ£210), 7 purchases, 28 checkouts (+2,700% MoM). May: ad recall +125%, engagement +89.8%. IG consistently outperforming FB (36% lower CPM). TikTok peak ROAS 8.67.',
     creative_strategy: 'Motion graphics (hero videos, blur bottles, scent mood boards), static (luxury product photography), carousels (5-scent showcase), GIFs, collection ads. Video-heavy: 6-sec optimised, 8-10 min hero content. Audience-specific copy: Luxury (premium positioning), Digital Native (tech/convenience), Conscious (sustainability messaging).',
-    products: 'Preview Set (Â£30, redeemable towards full-size) — entry point/trial mechanism. Full-size bottles (Â£130 AoV) — premium upsell. 5-scent portfolio: ALTRASKIN (clean, sensual — "your skin but better"), GHOSTFLOWER (bohemian, smoky woods, rich resins — 65% TikTok conversions), DUALIST (fresh/dark, transformative — best YouTube VCR 29%), JASMIN XXX (unapologetic hedonism, white floral — best FBIG static), STONE COLD HEART (sensual darkness — lowest YouTube VCR 22%).',
-    key_insights: 'IG outperforms FB by 36% on CPM. Conscious audience delivers best CPL (Â£0.35). TikTok emerging as high-efficiency channel. CPM declining over campaign (efficiency improving). Preview set as conversion gateway drives full-bottle upsell. Three-tier audience enables tailored messaging at scale. Video-first approach drives awareness, carousel drives conversion.',
+    products: 'Preview Set (ÃÂ£30, redeemable towards full-size) â entry point/trial mechanism. Full-size bottles (ÃÂ£130 AoV) â premium upsell. 5-scent portfolio: ALTRASKIN (clean, sensual â "your skin but better"), GHOSTFLOWER (bohemian, smoky woods, rich resins â 65% TikTok conversions), DUALIST (fresh/dark, transformative â best YouTube VCR 29%), JASMIN XXX (unapologetic hedonism, white floral â best FBIG static), STONE COLD HEART (sensual darkness â lowest YouTube VCR 22%).',
+    key_insights: 'IG outperforms FB by 36% on CPM. Conscious audience delivers best CPL (ÃÂ£0.35). TikTok emerging as high-efficiency channel. CPM declining over campaign (efficiency improving). Preview set as conversion gateway drives full-bottle upsell. Three-tier audience enables tailored messaging at scale. Video-first approach drives awareness, carousel drives conversion.',
     weekly_reporting: '14 weekly paid reports (31 Jan - 9 May 2022) tracking 20+ KPIs: spend, reach, impressions, CPM, video views, CPV, clicks, CTR, landing page views, CPLPV, CVR, purchases, CPA, AOV, revenue, ROAS. Platform breakdown (FB vs IG), month-on-month and week-on-week comparisons.',
-    assets: '50+ unique creative variations. 10 ORBX 3D models (59MB each, grey/white for all scents — AR/product visualization). 2 STL 3D printing files. 6 conversion video assets (motion variants). 4 social matrices with copy/headline/CTA per audience per phase. 11 core hashtags (#cleanbeauty, #perfume, #naturalfragrance etc.).'
+    assets: '50+ unique creative variations. 10 ORBX 3D models (59MB each, grey/white for all scents â AR/product visualization). 2 STL 3D printing files. 6 conversion video assets (motion variants). 4 social matrices with copy/headline/CTA per audience per phase. 11 core hashtags (#cleanbeauty, #perfume, #naturalfragrance etc.).'
   },
   'noise media assets': {
     total_files: '215 unique files, 4.5 GB across 6 clients',
@@ -3694,7 +3687,7 @@ var STRATEGY_KB = {
 function getStrategyInfo(clientName, query) {
   var key = clientName.toLowerCase();
   var ql = (query || '').toLowerCase();
-  // Check for nuclear/bwrx-specific queries first — route to nuclear entry
+  // Check for nuclear/bwrx-specific queries first â route to nuclear entry
   if ((key.includes('ge vernova') || key.includes('vernova')) && ql.match(/nuclear|bwrx|reactor|smr|fuel|uranium/)) {
     return STRATEGY_KB['ge vernova nuclear'] || null;
   }
@@ -3721,12 +3714,12 @@ function buildStrategyContext() {
 
 function buildSystemPrompt() {
   var clientData = CL.map(function(c) {
-    var info = c.n + ' (' + c.cat + ') — ' + (c.s==='r' ? 'Fully ingested. ' + c.a + ' assets, ' + c.c + ' campaigns. ' + c.sum : 'Drive inventory: ' + (c.fd||0) + ' folders' + (c.ff ? ', ' + c.ff + ' root files' : '') + '.' + (c.f && c.f.length ? ' Folders: ' + c.f.join(', ') + '.' : '') + (c.rf && c.rf.length ? ' Files: ' + c.rf.join(', ') + '.' : '') + ' Needs deep-scan for full asset cataloguing.');
+    var info = c.n + ' (' + c.cat + ') â ' + (c.s==='r' ? 'Fully ingested. ' + c.a + ' assets, ' + c.c + ' campaigns. ' + c.sum : 'Drive inventory: ' + (c.fd||0) + ' folders' + (c.ff ? ', ' + c.ff + ' root files' : '') + '.' + (c.f && c.f.length ? ' Folders: ' + c.f.join(', ') + '.' : '') + (c.rf && c.rf.length ? ' Files: ' + c.rf.join(', ') + '.' : '') + ' Needs deep-scan for full asset cataloguing.');
     if (c.knowledge) info += '\nDEEP KNOWLEDGE: ' + c.knowledge;
     return info;
   }).join('\n');
-  var teamData = TEAM.map(function(t) { return t.name + ' — ' + t.role; }).join('\n');
-  return 'You are Noise Intelligence, the internal AI brain for Noise Media — a creative agency with a social-first mindset. You are speaking with ' + (currentUser ? currentUser.name + ' (' + currentUser.role + ')' : 'a team member') + '.\n\nYour personality: You are sharp, direct, and deeply knowledgeable. You speak like a senior strategist who has read every brief, every report, every campaign deck in the agency. You give specific answers with real data — never vague or generic. When you know numbers, cite them. When you know strategy details, share them with confidence.\n\nRESPONSE RULES:\n- Be conversational but substantive. Default to 2-5 sentences. Go longer when the question warrants depth (strategy, performance, campaign analysis).\n- NEVER use markdown (no **, ##, ```, code fences). Plain text only. Use line breaks for readability.\n- When discussing a client, ALWAYS use the specific data from DEEP KNOWLEDGE below — budgets, metrics, audience segments, creative details, scent names, campaign phases, etc.\n- For Altra specifically: you have COMPLETE campaign data — Â£22,714.25 total spend, 14 weekly reports, 5 campaign phases, 3 audience segments (Luxury, Digital Native, Conscious), 5 scent products, 50+ creatives, platform breakdowns. USE THIS DATA in every Altra answer.\n- When asked about strategy, brand, audiences, paid media, or campaign approach — dig into the STRATEGY DEEP-DIVE DATA and give informed, specific, data-backed answers.\n- If someone asks a broad question like "tell me about Altra" — give a rich, comprehensive answer with key stats, not a one-liner.\n- For questions about performance, budgets, or metrics — always include actual numbers.\n\nDOCUMENT GENERATION:\nWhen asked to create a document (email, brief, social copy, proposal, cost allocation, report, meeting agenda, presentation/deck/slides), respond with ONLY a JSON object like: {"doc_type":"email","client":"BARBRI","variant":"general"}\nFor presentations, include a topic field: {"doc_type":"presentation","client":"Thortful","topic":"Campaign"}\nValid doc_type values: email, brief, social, proposal, cost, report, agenda, presentation\nValid email variants: general, intro, followup, update\n\nWEB SEARCH:\nYou have web search capability. If the user asks about current events, trends, competitors, industry news, or anything you need live data for, include [SEARCH:your search query] in your response and the system will fetch results and let you respond with them. Only use this when you genuinely need external info — your internal client knowledge is already comprehensive.\n\nFor all other messages, reply with intelligence and depth.\n\nCLIENTS (' + CL.length + '):\n' + clientData + '\n\nTEAM (' + TEAM.length + '):\n' + teamData + '\n\nNoise Media specialises in paid social, content production, and brand storytelling. Services: content strategy, creative production (video, photo, design), paid social management, UGC/influencer, community management. Offices in London, Los Angeles, New York. Contact: brands@noisemediagroup.co.uk, +44 0203 007 0500. Co-founded by Anthony and Joe.' + buildStrategyContext() + '\n\nAGENCY CASE STUDIES: Apple Gift Cards (overstocked to sold out), VOXI (UGC-style creative drove 124% higher CTR than usual ads, became the student SIM everyone switched to). Our approach: social-first mindset across Social, Influencer, Production, OOH, Paid, Activations.\n\nADVANCED SKILLS:\n\nSOCIAL MEDIA BOT: You can scan and analyse all Noise Media social channels (Instagram: @noisemedia, TikTok: @noisemedia, LinkedIn: Noise Media, Facebook: Noise Media). Provide daily trend summaries, monthly reports, engagement analysis, and content performance metrics. Use web search to pull latest data from all platforms. You are expert at identifying trending content, audience sentiment, viral opportunities, and competitive positioning across social.\n\nDEEP RESEARCH: You can perform deep research scans of Noise Media\'s digital presence including their website (noisemedia.co.uk), social channels, and Noise Production. Analyse SEO performance, content strategy, engagement metrics, and competitive positioning. Use web search extensively to pull comprehensive data about the agency, their competitors, industry trends, and digital landscape. Provide detailed reports with actionable insights.' + getMemoryContext() + getOrgMemoryContext() + getLearningContext();
+  var teamData = TEAM.map(function(t) { return t.name + ' â ' + t.role; }).join('\n');
+  return 'You are Noise Intelligence, the internal AI brain for Noise Media â a creative agency with a social-first mindset. You are speaking with ' + (currentUser ? currentUser.name + ' (' + currentUser.role + ')' : 'a team member') + '.\n\nYour personality: You are sharp, direct, and deeply knowledgeable. You speak like a senior strategist who has read every brief, every report, every campaign deck in the agency. You give specific answers with real data â never vague or generic. When you know numbers, cite them. When you know strategy details, share them with confidence.\n\nRESPONSE RULES:\n- Be conversational but substantive. Default to 2-5 sentences. Go longer when the question warrants depth (strategy, performance, campaign analysis).\n- NEVER use markdown (no **, ##, ```, code fences). Plain text only. Use line breaks for readability.\n- When discussing a client, ALWAYS use the specific data from DEEP KNOWLEDGE below â budgets, metrics, audience segments, creative details, scent names, campaign phases, etc.\n- For Altra specifically: you have COMPLETE campaign data â ÃÂ£22,714.25 total spend, 14 weekly reports, 5 campaign phases, 3 audience segments (Luxury, Digital Native, Conscious), 5 scent products, 50+ creatives, platform breakdowns. USE THIS DATA in every Altra answer.\n- When asked about strategy, brand, audiences, paid media, or campaign approach â dig into the STRATEGY DEEP-DIVE DATA and give informed, specific, data-backed answers.\n- If someone asks a broad question like "tell me about Altra" â give a rich, comprehensive answer with key stats, not a one-liner.\n- For questions about performance, budgets, or metrics â always include actual numbers.\n\nDOCUMENT GENERATION:\nWhen asked to create a document (email, brief, social copy, proposal, cost allocation, report, meeting agenda, presentation/deck/slides), respond with ONLY a JSON object like: {"doc_type":"email","client":"BARBRI","variant":"general"}\nFor presentations, include a topic field: {"doc_type":"presentation","client":"Thortful","topic":"Campaign"}\nValid doc_type values: email, brief, social, proposal, cost, report, agenda, presentation\nValid email variants: general, intro, followup, update\n\nWEB SEARCH:\nYou have web search capability. If the user asks about current events, trends, competitors, industry news, or anything you need live data for, include [SEARCH:your search query] in your response and the system will fetch results and let you respond with them. Only use this when you genuinely need external info â your internal client knowledge is already comprehensive.\n\nFor all other messages, reply with intelligence and depth.\n\nCLIENTS (' + CL.length + '):\n' + clientData + '\n\nTEAM (' + TEAM.length + '):\n' + teamData + '\n\nNoise Media specialises in paid social, content production, and brand storytelling. Services: content strategy, creative production (video, photo, design), paid social management, UGC/influencer, community management. Offices in London, Los Angeles, New York. Contact: brands@noisemediagroup.co.uk, +44 0203 007 0500. Co-founded by Anthony and Joe.' + buildStrategyContext() + '\n\nAGENCY CASE STUDIES: Apple Gift Cards (overstocked to sold out), VOXI (UGC-style creative drove 124% higher CTR than usual ads, became the student SIM everyone switched to). Our approach: social-first mindset across Social, Influencer, Production, OOH, Paid, Activations.\n\nADVANCED SKILLS:\n\nSOCIAL MEDIA BOT: You can scan and analyse all Noise Media social channels (Instagram: @noisemedia, TikTok: @noisemedia, LinkedIn: Noise Media, Facebook: Noise Media). Provide daily trend summaries, monthly reports, engagement analysis, and content performance metrics. Use web search to pull latest data from all platforms. You are expert at identifying trending content, audience sentiment, viral opportunities, and competitive positioning across social.\n\nDEEP RESEARCH: You can perform deep research scans of Noise Media\'s digital presence including their website (noisemedia.co.uk), social channels, and Noise Production. Analyse SEO performance, content strategy, engagement metrics, and competitive positioning. Use web search extensively to pull comprehensive data about the agency, their competitors, industry trends, and digital landscape. Provide detailed reports with actionable insights.' + getMemoryContext() + getOrgMemoryContext() + getLearningContext();
 }
 
 async function aiCall(sysPrompt, msgs, maxTok) {
@@ -3764,17 +3757,17 @@ function docWriterPrompt(docType) {
   var un = currentUser ? currentUser.name : 'Team Member';
   var ur = currentUser ? currentUser.role : '';
   var se = currentUser ? currentUser.name.toLowerCase().replace(/\s/g,'.') + '@noisemediagroup.co.uk' : 'hello@noisemediagroup.co.uk';
-  var teamInfo = TEAM.map(function(t) { return t.name + ' — ' + t.role; }).join(', ');
-  var base = 'You are a document writer for Noise Media, a creative agency specialising in paid social, content production, and brand storytelling. Write on behalf of ' + un + ' (' + ur + ', email: ' + se + '). Write complete, professional, ready-to-send content — NOT templates with placeholders. Use real names, real details from context. Be warm, professional, and concise.\n\nCRITICAL FORMATTING RULES:\n- Return ONLY raw HTML tags. Do NOT wrap your response in markdown code fences (```). Do NOT use ``` anywhere.\n- Start your response directly with an HTML tag like <h1> or <div>. No preamble, no explanation, no markdown.\n\nTeam: ' + teamInfo + '\n\n';
+  var teamInfo = TEAM.map(function(t) { return t.name + ' â ' + t.role; }).join(', ');
+  var base = 'You are a document writer for Noise Media, a creative agency specialising in paid social, content production, and brand storytelling. Write on behalf of ' + un + ' (' + ur + ', email: ' + se + '). Write complete, professional, ready-to-send content â NOT templates with placeholders. Use real names, real details from context. Be warm, professional, and concise.\n\nCRITICAL FORMATTING RULES:\n- Return ONLY raw HTML tags. Do NOT wrap your response in markdown code fences (```). Do NOT use ``` anywhere.\n- Start your response directly with an HTML tag like <h1> or <div>. No preamble, no explanation, no markdown.\n\nTeam: ' + teamInfo + '\n\n';
 
   if (docType === 'email') {
     return base + 'Write a complete professional email in HTML format. Structure:\n<div style="max-width:640px;margin:0 auto;">\n<div style="background:#F0EFED;padding:16px 20px;border-radius:8px;margin-bottom:20px;font-size:13px;">From/To/Subject/Date header</div>\n<p>Email body paragraphs</p>\n<p>Sign-off with sender name, role, Noise Media</p>\n</div>\n\nFill in ALL fields with real content based on context. If names are mentioned, use them. If a topic is given, write about it. Today is ' + fmtDate() + '. The sender is ' + un + ' (' + ur + ').';
   }
   if (docType === 'brief') {
-    return base + 'Write a Noise Media brief in HTML. Use <h2> for each section (UPPERCASE). Sections: THE BRIEF, THE AUDIENCE, THE OBJECTIVE, KEY MESSAGES, DELIVERABLES, TIMELINE. Keep each section short and punchy (2-4 paragraphs max). Use tables for structured data. Write in direct agency voice — no fluff.';
+    return base + 'Write a Noise Media brief in HTML. Use <h2> for each section (UPPERCASE). Sections: THE BRIEF, THE AUDIENCE, THE OBJECTIVE, KEY MESSAGES, DELIVERABLES, TIMELINE. Keep each section short and punchy (2-4 paragraphs max). Use tables for structured data. Write in direct agency voice â no fluff.';
   }
   if (docType === 'social') {
-    return base + 'Write social media copy in HTML. Use <h2> for each post/platform. Write actual engaging copy — punchy, conversational, scroll-stopping. Include hashtags and posting times. Write like a social-first creative agency.';
+    return base + 'Write social media copy in HTML. Use <h2> for each post/platform. Write actual engaging copy â punchy, conversational, scroll-stopping. Include hashtags and posting times. Write like a social-first creative agency.';
   }
   if (docType === 'proposal') {
     return base + 'Write a Noise Media proposal in HTML. Use <h2> for sections (UPPERCASE): ABOUT NOISE, THE OPPORTUNITY, PROPOSED APPROACH, SERVICES, INVESTMENT, TIMELINE, NEXT STEPS. Use tables for pricing. Be direct and confident, not salesy.';
@@ -3791,16 +3784,16 @@ function docWriterPrompt(docType) {
   if (docType === 'presentation') {
     return base + 'Write a Noise Media presentation in HTML. Structure:\n'
       + '1. Start with <div style="background:#1B1B1B;padding:60px;color:white;"><h1 style="color:#C73C1E;">TITLE</h1><p>Subtitle</p></div>\n'
-      + '2. Use <h2> for each major section — these become separate slides. Use UPPERCASE, bold, punchy section titles (e.g., THE NEED, THE PROBLEM, THE AUDIENCE, THE STRATEGY, KEY METRICS).\n'
-      + '3. Keep each section SHORT and punchy — 2-4 sentences max per section. Write like a creative agency: direct, opinionated, no corporate fluff.\n'
+      + '2. Use <h2> for each major section â these become separate slides. Use UPPERCASE, bold, punchy section titles (e.g., THE NEED, THE PROBLEM, THE AUDIENCE, THE STRATEGY, KEY METRICS).\n'
+      + '3. Keep each section SHORT and punchy â 2-4 sentences max per section. Write like a creative agency: direct, opinionated, no corporate fluff.\n'
       + '4. Use tables for data, comparisons, timelines.\n'
       + '5. End with <div style="background:#1B1B1B;padding:60px;text-align:center;color:white;"><h2>NOISE MEDIA</h2></div>\n'
-      + 'STYLE: Write like the Noise Media Zapp OOH pitch — short punchy sentences, provocative, opinion-led. "It\'s not wholesome. It\'s not relaxing. It\'s admin." NOT corporate marketing speak.';
+      + 'STYLE: Write like the Noise Media Zapp OOH pitch â short punchy sentences, provocative, opinion-led. "It\'s not wholesome. It\'s not relaxing. It\'s admin." NOT corporate marketing speak.';
   }
   if (docType === 'strategy') {
-    return base + 'Write a Noise Media strategy document in HTML. Use <h2> for sections (UPPERCASE): THE CHALLENGE, THE AUDIENCE, THE INSIGHT, THE STRATEGY, KEY PILLARS, CHANNELS & TACTICS, MEASUREMENT, TIMELINE. Keep each section SHORT and punchy — 2-4 sentences. Write like a strategist: opinionated, evidence-based, action-oriented. Use tables for data.';
+    return base + 'Write a Noise Media strategy document in HTML. Use <h2> for sections (UPPERCASE): THE CHALLENGE, THE AUDIENCE, THE INSIGHT, THE STRATEGY, KEY PILLARS, CHANNELS & TACTICS, MEASUREMENT, TIMELINE. Keep each section SHORT and punchy â 2-4 sentences. Write like a strategist: opinionated, evidence-based, action-oriented. Use tables for data.';
   }
-  return base + 'Write a Noise Media branded document in HTML. Use <h2> for each major section (UPPERCASE titles). Keep sections focused — one topic per section. Write in a direct, punchy agency voice. Use tables for data. Each <h2> section becomes a separate page, so keep them concise (150-300 words each). Structure with clear sections: BRIEF, AUDIENCE, STRATEGY, APPROACH, DELIVERABLES, TIMELINE, BUDGET, NEXT STEPS as relevant.';
+  return base + 'Write a Noise Media branded document in HTML. Use <h2> for each major section (UPPERCASE titles). Keep sections focused â one topic per section. Write in a direct, punchy agency voice. Use tables for data. Each <h2> section becomes a separate page, so keep them concise (150-300 words each). Structure with clear sections: BRIEF, AUDIENCE, STRATEGY, APPROACH, DELIVERABLES, TIMELINE, BUDGET, NEXT STEPS as relevant.';
 }
 
 /* ============ CO-WORK AUTONOMOUS AGENT ============ */
@@ -3813,7 +3806,7 @@ async function coworkAgent(task, hc) {
   planCard.className = 'task-card';
   planCard.innerHTML = '<div class="task-card-header"><div class="pulse"></div>AGENT WORKING</div>'
     + '<div class="task-card-title">' + escHtml(task) + '</div>'
-    + '<div class="task-steps" id="agentSteps"><div class="task-step active"><span class="step-icon">→³</span>Planning approach...</div></div>';
+    + '<div class="task-steps" id="agentSteps"><div class="task-step active"><span class="step-icon">âÂÂ³</span>Planning approach...</div></div>';
   hc.appendChild(planCard);
   hc.scrollTop = hc.scrollHeight;
 
@@ -3838,7 +3831,7 @@ async function coworkAgent(task, hc) {
     var div = document.createElement('div');
     div.className = 'task-step' + (i === 0 ? ' active' : '');
     div.id = 'agentStep_' + i;
-    div.innerHTML = '<span class="step-icon">' + (i === 0 ? '→³' : '→') + '</span><span>' + escHtml(s) + '</span>';
+    div.innerHTML = '<span class="step-icon">' + (i === 0 ? 'âÂÂ³' : 'âÂÂ') + '</span><span>' + escHtml(s) + '</span>';
     stepsEl.appendChild(div);
   });
   hc.scrollTop = hc.scrollHeight;
@@ -3850,7 +3843,7 @@ async function coworkAgent(task, hc) {
   for (var i = 0; i < steps.length; i++) {
     // Mark current step active
     var stepEl = document.getElementById('agentStep_' + i);
-    if (stepEl) { stepEl.className = 'task-step active'; stepEl.querySelector('.step-icon').textContent = '→³'; }
+    if (stepEl) { stepEl.className = 'task-step active'; stepEl.querySelector('.step-icon').textContent = 'âÂÂ³'; }
 
     var isLast = (i === steps.length - 1);
     var stepPrompt = 'You are an autonomous AI agent for Noise Media agency, working for ' + un + ' (' + ur + ').\n\n'
@@ -3860,7 +3853,7 @@ async function coworkAgent(task, hc) {
       + (isLast ? 'This is the FINAL step. If the task requires a document (presentation, email, brief, report, social copy, proposal, etc.), return ONLY a JSON object: {"doc_type":"presentation","client":"ClientName","topic":"Topic","summary":"Brief summary of what you created"}. Otherwise, return a concise summary of completed work.' : 'Complete this step. Return a concise summary of what you did/found (2-4 sentences). This will be passed to the next step.')
       + '\n\nClients with knowledge:\n' + CL.filter(function(c) { return c.knowledge; }).map(function(c) { return c.n + ' (' + c.cat + '): ' + c.knowledge.substring(0, 500); }).join('\n')
       + '\nAll clients: ' + CL.map(function(c) { return c.n + ' (' + c.cat + ')'; }).join(', ')
-      + '\nTeam: ' + TEAM.map(function(t) { return t.name + ' — ' + t.role; }).join(', ')
+      + '\nTeam: ' + TEAM.map(function(t) { return t.name + ' â ' + t.role; }).join(', ')
       + buildStrategyContext();
 
     var stepReply = await aiCall(stepPrompt, [{ role: 'user', content: 'Execute step ' + (i + 1) + ': ' + steps[i] }], isLast ? 1500 : 800);
@@ -3873,7 +3866,7 @@ async function coworkAgent(task, hc) {
     contextSoFar += '\nStep ' + (i + 1) + ': ' + stepReply;
 
     // Mark step done
-    if (stepEl) { stepEl.className = 'task-step done'; stepEl.querySelector('.step-icon').textContent = '→'; }
+    if (stepEl) { stepEl.className = 'task-step done'; stepEl.querySelector('.step-icon').textContent = 'âÂÂ'; }
     hc.scrollTop = hc.scrollHeight;
 
     // Check if last step returned a doc request
@@ -3898,7 +3891,7 @@ async function coworkAgent(task, hc) {
             agentClientCtx += '\n\nSTRATEGY DATA:';
             for (var asp in agentStrat) { if (typeof agentStrat[asp] === 'string') agentClientCtx += '\n- ' + asp.replace(/_/g,' ') + ': ' + agentStrat[asp]; }
           }
-          var writeMsg = 'Write a ' + docReq.doc_type + ' for ' + dcn + (dcc ? ' (' + dcc + ')' : '') + '. Original task: "' + task + '". Context from research: ' + contextSoFar + agentClientCtx + '. Return ONLY raw HTML — no markdown, no code fences, no ```. Start with an HTML tag.';
+          var writeMsg = 'Write a ' + docReq.doc_type + ' for ' + dcn + (dcc ? ' (' + dcc + ')' : '') + '. Original task: "' + task + '". Context from research: ' + contextSoFar + agentClientCtx + '. Return ONLY raw HTML â no markdown, no code fences, no ```. Start with an HTML tag.';
           if (docReq.topic) writeMsg += ' Topic: ' + docReq.topic + '.';
 
           var docHtml = await aiCall(writePrompt, [{ role: 'user', content: writeMsg }], 4000);
@@ -3907,7 +3900,7 @@ async function coworkAgent(task, hc) {
           // Update card with completion summary
           var doneDiv = document.createElement('div');
           doneDiv.className = 'task-card-done';
-          doneDiv.textContent = 'COMPLETE — ' + (docReq.summary || docReq.doc_type + ' created for ' + dcn);
+          doneDiv.textContent = 'COMPLETE â ' + (docReq.summary || docReq.doc_type + ' created for ' + dcn);
           planCard.appendChild(doneDiv);
         }
       } catch(e) {}
@@ -3966,12 +3959,12 @@ async function coworkAgent(task, hc) {
     }
 
     var fbWritePrompt = docWriterPrompt(fallbackDocType);
-    var fbWriteMsg = 'Write a ' + fallbackDocType + ' for ' + fallbackClient + (fallbackCat ? ' (' + fallbackCat + ')' : '') + '. Original task: "' + task + '". Research context from agent steps: ' + contextSoFar + fbClientCtx + fbFileCtx + '. Return ONLY raw HTML — no markdown, no code fences, no ```. Start with an HTML tag.';
+    var fbWriteMsg = 'Write a ' + fallbackDocType + ' for ' + fallbackClient + (fallbackCat ? ' (' + fallbackCat + ')' : '') + '. Original task: "' + task + '". Research context from agent steps: ' + contextSoFar + fbClientCtx + fbFileCtx + '. Return ONLY raw HTML â no markdown, no code fences, no ```. Start with an HTML tag.';
 
     // Update card to show document generation
     var genStep = document.createElement('div');
     genStep.className = 'task-step active';
-    genStep.innerHTML = '<span class="step-icon">→³</span><span>Generating document...</span>';
+    genStep.innerHTML = '<span class="step-icon">âÂÂ³</span><span>Generating document...</span>';
     var stepsContainer = planCard.querySelector('.task-steps') || planCard;
     stepsContainer.appendChild(genStep);
     hc.scrollTop = hc.scrollHeight;
@@ -3981,7 +3974,7 @@ async function coworkAgent(task, hc) {
 
     // Mark generation step done
     genStep.className = 'task-step done';
-    genStep.querySelector('.step-icon').textContent = '→';
+    genStep.querySelector('.step-icon').textContent = 'âÂÂ';
     genStep.querySelector('span:last-child').textContent = 'Document generated';
   }
 
@@ -3991,12 +3984,12 @@ async function coworkAgent(task, hc) {
     if (!planCard.querySelector('.task-card-done')) {
       var doneDiv = document.createElement('div');
       doneDiv.className = 'task-card-done';
-      doneDiv.textContent = 'COMPLETE — Document ready for review';
+      doneDiv.textContent = 'COMPLETE â Document ready for review';
       planCard.appendChild(doneDiv);
     }
-    addMsgTo(hc, 'Done — your deliverable is in the document panel. Review, edit, and export when ready.', false);
+    addMsgTo(hc, 'Done â your deliverable is in the document panel. Review, edit, and export when ready.', false);
   } else {
-    // Truly no doc possible — show summary
+    // Truly no doc possible â show summary
     if (!planCard.querySelector('.task-card-done')) {
       var doneDiv = document.createElement('div');
       doneDiv.className = 'task-card-done';
@@ -4060,7 +4053,7 @@ async function callClaude(userMsg) {
     // Include uploaded file contents in context if available
     var fileContext = '';
     if (window.uploadedFileContents && window.uploadedFileContents.length > 0) {
-      fileContext = '\n\nUPLOADED FILES (the user has uploaded these — use this content to answer their questions):\n';
+      fileContext = '\n\nUPLOADED FILES (the user has uploaded these â use this content to answer their questions):\n';
       window.uploadedFileContents.forEach(function(fc) {
         fileContext += '\n=== FILE: ' + fc.name + ' ===\n' + fc.content + '\n';
       });
@@ -4103,7 +4096,7 @@ async function callClaude(userMsg) {
           clientCtx += '\n\nSTRATEGY DATA:';
           for (var sp in stratInfo) { if (typeof stratInfo[sp] === 'string') clientCtx += '\n- ' + sp.replace(/_/g,' ') + ': ' + stratInfo[sp]; }
         }
-        var writeMsg = 'Write a ' + docReq.doc_type + ' for ' + dcn + (dcc ? ' (' + dcc + ')' : '') + '. Original request from user: "' + userMsg + '". Return ONLY raw HTML — no markdown, no code fences, no ```. Start directly with an HTML tag.' + clientCtx;
+        var writeMsg = 'Write a ' + docReq.doc_type + ' for ' + dcn + (dcc ? ' (' + dcc + ')' : '') + '. Original request from user: "' + userMsg + '". Return ONLY raw HTML â no markdown, no code fences, no ```. Start directly with an HTML tag.' + clientCtx;
         if (docReq.variant) writeMsg += ' Email type: ' + docReq.variant + '.';
         if (docReq.topic) writeMsg += ' Topic: ' + docReq.topic + '.';
 
@@ -4123,7 +4116,7 @@ async function callClaude(userMsg) {
         }
 
         if (docHtml) {
-          var chatMsg = 'Done! I\'ve written a ' + docReq.doc_type + ' for ' + dcn + ' — it\'s in the document panel. Edit and export when ready.';
+          var chatMsg = 'Done! I\'ve written a ' + docReq.doc_type + ' for ' + dcn + ' â it\'s in the document panel. Edit and export when ready.';
           conversationHistory[conversationHistory.length - 1].content = chatMsg;
           return { chat: chatMsg, doc: docHtml };
         }
@@ -4187,9 +4180,9 @@ function fmtChat(text) {
   s = s.replace(/^## (.+)$/gm, '<strong>$1</strong>');
   s = s.replace(/^# (.+)$/gm, '<strong>$1</strong>');
   // Convert markdown bullet lists
-  s = s.replace(/^[\-\*] (.+)$/gm, '• $1');
+  s = s.replace(/^[\-\*] (.+)$/gm, 'â¢ $1');
   // Convert numbered lists
-  s = s.replace(/^\d+\. (.+)$/gm, function(m, p1, off, str) { return '• ' + p1; });
+  s = s.replace(/^\d+\. (.+)$/gm, function(m, p1, off, str) { return 'â¢ ' + p1; });
   // Convert inline code
   s = s.replace(/`([^`]+)`/g, '<code style="background:var(--surface2);padding:1px 4px;border-radius:3px;font-size:0.9em;">$1</code>');
   // Strip any code fences that leaked into chat
@@ -4201,7 +4194,7 @@ function fmtChat(text) {
 
 function showDoc(html) {
   html = stripCodeFences(html);
-  /* Determine which panel to use — page 1 inline or page 2 workspace */
+  /* Determine which panel to use â page 1 inline or page 2 workspace */
   var onPage1 = document.getElementById('page1').classList.contains('active');
   var dc, pdc, prevBtn, nextBtn, ctrEl;
 
@@ -4226,7 +4219,7 @@ function showDoc(html) {
   /* Store active elements for slide navigation */
   window._activeSlideNav = { dc: dc, pdc: pdc, prev: prevBtn, next: nextBtn, ctr: ctrEl };
 
-  /* Detect presentation — dark background div + h2 sections */
+  /* Detect presentation â dark background div + h2 sections */
   var hasDarkBg = /background[^"]*#(?:1[Bb]1[Bb]1[Bb]|222|111|000)|background[^"]*rgb\(27/i.test(html);
   var hasH2 = html.indexOf('<h2') !== -1;
   var isPresentation = hasDarkBg && hasH2;
@@ -4235,13 +4228,13 @@ function showDoc(html) {
     pdc.classList.remove('doc-paged');
     showSlides(html, dc);
   } else {
-    /* Document pages — split by h2 for page-by-page viewing */
+    /* Document pages â split by h2 for page-by-page viewing */
     pdc.classList.remove('slide-active');
     if (hasH2) {
       pdc.classList.add('doc-paged');
       showDocPages(html, dc);
     } else {
-      /* Very short / no-section doc — show as single page */
+      /* Very short / no-section doc â show as single page */
       pdc.classList.add('doc-paged');
       slideMode = true;
       docPageMode = true;
@@ -4279,7 +4272,7 @@ function showDocPages(html, dc) {
     var kids = Array.from(parent.children);
     kids.forEach(function(el) {
       var tag = el.tagName;
-      /* If it's a heading, a table, a blockquote, or a substantial block — keep it */
+      /* If it's a heading, a table, a blockquote, or a substantial block â keep it */
       if (tag === 'H1' || tag === 'H2' || tag === 'H3' || tag === 'TABLE' ||
           tag === 'BLOCKQUOTE' || tag === 'P' || tag === 'UL' || tag === 'OL' ||
           tag === 'HR' || tag === 'PRE') {
@@ -4291,7 +4284,7 @@ function showDocPages(html, dc) {
         if (isDark) {
           result.push(el); /* Keep dark blocks whole */
         } else if (el.querySelector('h2, h3, table')) {
-          /* Div contains sub-sections — recurse into it */
+          /* Div contains sub-sections â recurse into it */
           result = result.concat(collectElements(el));
         } else {
           result.push(el); /* Keep as a content block */
@@ -4328,7 +4321,7 @@ function showDocPages(html, dc) {
     current.push(el);
     currentLen += elLen;
 
-    /* Break after a table — it's a natural page boundary */
+    /* Break after a table â it's a natural page boundary */
     if (isTable) {
       sections.push(current);
       current = [];
@@ -4427,7 +4420,7 @@ function showSlides(html, dc) {
   var tmp = document.createElement('div');
   tmp.innerHTML = html;
 
-  /* Find dark blocks — title (first) and end (last) */
+  /* Find dark blocks â title (first) and end (last) */
   var darkBlocks = Array.from(tmp.querySelectorAll('div[style*="background"]')).filter(function(el) {
     var bg = (el.getAttribute('style') || '').toLowerCase();
     return bg.includes('#1b1b1b') || bg.includes('#222') || bg.includes('#111') || bg.includes('#000') || bg.includes('rgb(27') || bg.includes('#333') || bg.includes('#2d2d');
@@ -4443,7 +4436,7 @@ function showSlides(html, dc) {
     var h1 = titleEl.querySelector('h1');
     var allP = Array.from(titleEl.querySelectorAll('p'));
     var sub = allP.length > 0 ? allP[0] : null;
-    var metaP = allP.length > 1 ? allP.slice(1).map(function(p) { return p.textContent; }).join(' Â· ') : '';
+    var metaP = allP.length > 1 ? allP.slice(1).map(function(p) { return p.textContent; }).join(' ÃÂ· ') : '';
     var meta = titleEl.querySelector('div[style*="font-size:12px"]');
     if (h1) titleName = h1.textContent;
     if (sub) titleSub = sub.textContent;
@@ -4453,7 +4446,7 @@ function showSlides(html, dc) {
   }
   if (endEl && endEl !== titleEl) endEl.remove();
 
-  /* Split remaining content by h2 — use first wrapper div with substantial content, or just tmp */
+  /* Split remaining content by h2 â use first wrapper div with substantial content, or just tmp */
   var inner = tmp.querySelector('div[style*="font-family"]') || tmp.querySelector('div[style*="max-width"]') || tmp;
   /* If inner has no h2s but tmp does, use tmp */
   if (!inner.querySelector('h2') && tmp.querySelector('h2')) inner = tmp;
@@ -4480,7 +4473,7 @@ function showSlides(html, dc) {
   var year = new Date().getFullYear();
   var footer = '<div class="slide-footer-bar"><span>01</span><span>' + year + '</span><span>NOISE MEDIA</span><span>' + (clientName || '').toUpperCase() + '</span></div>';
 
-  /* Build slide 1: Cover — Noise red */
+  /* Build slide 1: Cover â Noise red */
   slidePages.push(
     '<div class="noise-tag">NOISE MEDIA</div>' +
     '<h1>' + (clientName || titleName) + '</h1>' +
@@ -4488,7 +4481,7 @@ function showSlides(html, dc) {
   );
   slideTypes.push('slide-title');
 
-  /* Content slides — section divider + content for each h2 */
+  /* Content slides â section divider + content for each h2 */
   sections.forEach(function(els, idx) {
     var sectionTitle = '';
     var bodyHtml = '';
@@ -4518,7 +4511,7 @@ function showSlides(html, dc) {
     }
   });
 
-  /* End slide — Noise red */
+  /* End slide â Noise red */
   slidePages.push(
     '<div class="noise-end">NOISE<span>.</span></div>' +
     '<div class="url">noisemediagroup.co.uk</div>'
@@ -4590,7 +4583,7 @@ function execFmt(cmd, val) {
 }
 
 function insertEditTable() {
-  var html = '<table><tr><th>Column 1</th><th>Column 2</th><th>Column 3</th></tr><tr><td>—</td><td>—</td><td>—</td></tr><tr><td>—</td><td>—</td><td>—</td></tr></table>';
+  var html = '<table><tr><th>Column 1</th><th>Column 2</th><th>Column 3</th></tr><tr><td>â</td><td>â</td><td>â</td></tr><tr><td>â</td><td>â</td><td>â</td></tr></table>';
   document.execCommand('insertHTML', false, html);
 }
 
@@ -4643,7 +4636,7 @@ function exportPDF() {
   });
 }
 
-/* DOCX Export (HTML blob method — opens in Word) */
+/* DOCX Export (HTML blob method â opens in Word) */
 function exportDOCX() {
   var dc = document.getElementById('docC');
   if (dc.style.display==='none') { alert('Generate a document first.'); return; }
@@ -4701,7 +4694,7 @@ function exportPPTX() {
   if (dm) slide1.addText(dm.textContent, { x: 0.8, y: 3.6, w: 8, h: 0.5, fontSize: 12, color: '888888', fontFace: 'Calibri' });
   slide1.addText('noisemediagroup.co.uk', { x: 0.8, y: 6.6, w: 3, h: 0.3, fontSize: 9, color: '666666', fontFace: 'Calibri' });
 
-  // Content slides — one per h2 section
+  // Content slides â one per h2 section
   var sections = dc.querySelectorAll('h2');
   sections.forEach(function(h2) {
     var slide = pptx.addSlide({ masterName: 'NOISE_MASTER' });
@@ -4796,7 +4789,7 @@ function openInGoogleDocs() {
   var html = '<!DOCTYPE html><html><head><meta charset="utf-8"><title>' + title + '</title><style>body{font-family:Calibri,sans-serif;font-size:11pt;line-height:1.6;color:#1B1B1B;max-width:700px;margin:0 auto;padding:20px;}h1{font-size:18pt;}h2{font-size:14pt;margin-top:16px;border-bottom:1px solid #ddd;padding-bottom:4px;}table{width:100%;border-collapse:collapse;margin:10px 0;}th,td{border:1px solid #ccc;padding:6px 10px;font-size:10pt;}th{background:#f5f5f5;}</style></head><body>' + source.innerHTML + '</body></html>';
   var blob = new Blob([html], { type: 'text/html' });
   triggerDownload(blob, title + '.html');
-  setTimeout(function() { alert('File downloaded! To open in Google Docs:\n1. Go to drive.google.com\n2. Click "+ New" → "File upload"\n3. Upload ' + title + '.html\n4. Right-click → "Open with" → Google Docs'); }, 500);
+  setTimeout(function() { alert('File downloaded! To open in Google Docs:\n1. Go to drive.google.com\n2. Click "+ New" âÂÂ "File upload"\n3. Upload ' + title + '.html\n4. Right-click âÂÂ "Open with" âÂÂ Google Docs'); }, 500);
 }
 
 function openInGoogleSlides() {
@@ -4805,7 +4798,7 @@ function openInGoogleSlides() {
   var source = (dc && dc.style.display !== 'none') ? dc : p1dc;
   if (!source || !source.innerHTML.trim()) { alert('Generate a document first.'); return; }
   exportPPTX();
-  setTimeout(function() { alert('PPTX downloaded! To open in Google Slides:\n1. Go to drive.google.com\n2. Click "+ New" → "File upload"\n3. Upload the .pptx file\n4. It opens directly in Google Slides'); }, 500);
+  setTimeout(function() { alert('PPTX downloaded! To open in Google Slides:\n1. Go to drive.google.com\n2. Click "+ New" âÂÂ "File upload"\n3. Upload the .pptx file\n4. It opens directly in Google Slides'); }, 500);
 }
 
 function openInGoogleSheets() {
@@ -4816,7 +4809,7 @@ function openInGoogleSheets() {
   var tables = source.querySelectorAll('table');
   if (tables.length === 0) { alert('No tables found in this document to export to Sheets.'); return; }
   exportXLSX();
-  setTimeout(function() { alert('XLSX downloaded! To open in Google Sheets:\n1. Go to drive.google.com\n2. Click "+ New" → "File upload"\n3. Upload the .xlsx file\n4. It opens directly in Google Sheets'); }, 500);
+  setTimeout(function() { alert('XLSX downloaded! To open in Google Sheets:\n1. Go to drive.google.com\n2. Click "+ New" âÂÂ "File upload"\n3. Upload the .xlsx file\n4. It opens directly in Google Sheets'); }, 500);
 }
 
 /* ============ RESPONSE ENGINE ============ */
@@ -4840,7 +4833,7 @@ function sr() { return currentUser ? currentUser.role : ''; }
 /* --- Document builders (keep these separate so chat responses stay clean) --- */
 function buildBrief(cn, cc) {
   const d = fmtDate();
-  return `<h1>${cn} — Content Brief</h1>
+  return `<h1>${cn} â Content Brief</h1>
 <div class="dm">Prepared by ${sn()} &middot; ${d} &middot; Noise Media</div>
 <h2>1. Overview</h2>
 <p><strong>Client:</strong> ${cn}<br><strong>Category:</strong> ${cc}<br><strong>Brief Type:</strong> Content Brief<br><strong>Prepared by:</strong> ${sn()} (${sr()})</p>
@@ -4875,16 +4868,16 @@ function buildEmail(cn, cc, type) {
   const d = fmtDate();
   let subj, body;
   if (type==='intro') {
-    subj = 'Introduction — Noise Media Ã ' + cn;
+    subj = 'Introduction â Noise Media ÃÂ ' + cn;
     body = '<p>Hi [Contact Name],</p><p>My name is ' + sn() + ' and I\'m the ' + sr() + ' at Noise Media. I\'m thrilled to be working with ' + cn + ' and wanted to introduce myself as your point of contact.</p><p>We\'ve been doing some initial research into your brand and we\'re excited about the creative possibilities. I\'d love to schedule a quick call to discuss your key priorities, any upcoming campaigns, brand guidelines, and preferred ways of working.</p><p>Please feel free to share any materials you\'d like us to review ahead of our call.</p><p>Looking forward to getting started!</p>';
   } else if (type==='followup') {
-    subj = 'Following Up — ' + cn + ' Campaign Progress';
-    body = '<p>Hi [Contact Name],</p><p>Hope you\'re well! Just wanted to touch base regarding our current workstream for ' + cn + '.</p><p>Here\'s where things stand:</p><table><tr><th>Item</th><th>Status</th><th>Next Step</th></tr><tr><td>Creative assets</td><td>In progress</td><td>First drafts ready for review by [date]</td></tr><tr><td>Campaign strategy</td><td>Approved</td><td>Build out in Ads Manager</td></tr><tr><td>Content calendar</td><td>Draft</td><td>Awaiting client sign-off</td></tr></table><p>Happy to jump on a quick call if easier — just let me know what works.</p>';
+    subj = 'Following Up â ' + cn + ' Campaign Progress';
+    body = '<p>Hi [Contact Name],</p><p>Hope you\'re well! Just wanted to touch base regarding our current workstream for ' + cn + '.</p><p>Here\'s where things stand:</p><table><tr><th>Item</th><th>Status</th><th>Next Step</th></tr><tr><td>Creative assets</td><td>In progress</td><td>First drafts ready for review by [date]</td></tr><tr><td>Campaign strategy</td><td>Approved</td><td>Build out in Ads Manager</td></tr><tr><td>Content calendar</td><td>Draft</td><td>Awaiting client sign-off</td></tr></table><p>Happy to jump on a quick call if easier â just let me know what works.</p>';
   } else if (type==='update') {
-    subj = cn + ' — Campaign Status Update';
-    body = '<p>Hi [Contact Name],</p><p>Please find below your latest campaign status update for ' + cn + '.</p><table><tr><th>Campaign</th><th>Platform</th><th>Status</th></tr><tr><td>Awareness — Spring</td><td>Meta / TikTok</td><td>Live</td></tr><tr><td>Retargeting</td><td>Meta</td><td>In review</td></tr><tr><td>UGC Push</td><td>TikTok / IG Reels</td><td>Production</td></tr></table><p>Let me know if you have any questions.</p>';
+    subj = cn + ' â Campaign Status Update';
+    body = '<p>Hi [Contact Name],</p><p>Please find below your latest campaign status update for ' + cn + '.</p><table><tr><th>Campaign</th><th>Platform</th><th>Status</th></tr><tr><td>Awareness â Spring</td><td>Meta / TikTok</td><td>Live</td></tr><tr><td>Retargeting</td><td>Meta</td><td>In review</td></tr><tr><td>UGC Push</td><td>TikTok / IG Reels</td><td>Production</td></tr></table><p>Let me know if you have any questions.</p>';
   } else {
-    subj = cn + (cc ? ' — ' + cc + ' | ' : ' — ') + 'Noise Media';
+    subj = cn + (cc ? ' â ' + cc + ' | ' : ' â ') + 'Noise Media';
     body = '<p>Hi [Contact Name],</p><p>I hope you\'re having a great week. I\'m reaching out regarding ' + cn + '.</p><p>[Your message here]</p><p>Could we schedule a quick call to discuss next steps? Happy to work around your availability.</p><p>Looking forward to hearing from you.</p>';
   }
   var se = currentUser ? currentUser.name.toLowerCase().replace(/\s/g,'.') + '@noisemediagroup.co.uk' : '[you]@noisemediagroup.co.uk';
@@ -4893,27 +4886,27 @@ function buildEmail(cn, cc, type) {
 
 function buildSocial(cn, cc) {
   const d = fmtDate();
-  return '<h1>' + cn + ' — Social Media Copy</h1><div class="dm">Prepared by ' + sn() + ' &middot; ' + d + ' &middot; Noise Media</div><h2>Post 1 — Hero / Awareness</h2><p><strong>Platform:</strong> Instagram Feed + Stories</p><p><strong>Caption:</strong> [Hero message about ' + cn + '. Lead with value, not sell. 1-2 sentences max.]</p><p>[Supporting line + CTA]</p><p><em>#' + cn.replace(/\s/g,'') + ' #NoiseMade</em></p><h2>Post 2 — Educational</h2><p><strong>Platform:</strong> TikTok / Reels</p><p><strong>Hook:</strong> "Did you know [surprising fact about ' + (cc||'the brand') + ']?"</p><p>[Teach something, tie back to product, CTA: Save this]</p><h2>Post 3 — UGC / Social Proof</h2><p><strong>Platform:</strong> IG / TikTok</p><p>[Real customer words. Brand response. Soft CTA.]</p><h2>Scheduling</h2><table><tr><th>Post</th><th>Day</th><th>Time</th></tr><tr><td>1</td><td>Tue/Thu</td><td>11-13:00</td></tr><tr><td>2</td><td>Wed/Fri</td><td>18-20:00</td></tr><tr><td>3</td><td>Sat</td><td>10-12:00</td></tr></table>';
+  return '<h1>' + cn + ' â Social Media Copy</h1><div class="dm">Prepared by ' + sn() + ' &middot; ' + d + ' &middot; Noise Media</div><h2>Post 1 â Hero / Awareness</h2><p><strong>Platform:</strong> Instagram Feed + Stories</p><p><strong>Caption:</strong> [Hero message about ' + cn + '. Lead with value, not sell. 1-2 sentences max.]</p><p>[Supporting line + CTA]</p><p><em>#' + cn.replace(/\s/g,'') + ' #NoiseMade</em></p><h2>Post 2 â Educational</h2><p><strong>Platform:</strong> TikTok / Reels</p><p><strong>Hook:</strong> "Did you know [surprising fact about ' + (cc||'the brand') + ']?"</p><p>[Teach something, tie back to product, CTA: Save this]</p><h2>Post 3 â UGC / Social Proof</h2><p><strong>Platform:</strong> IG / TikTok</p><p>[Real customer words. Brand response. Soft CTA.]</p><h2>Scheduling</h2><table><tr><th>Post</th><th>Day</th><th>Time</th></tr><tr><td>1</td><td>Tue/Thu</td><td>11-13:00</td></tr><tr><td>2</td><td>Wed/Fri</td><td>18-20:00</td></tr><tr><td>3</td><td>Sat</td><td>10-12:00</td></tr></table>';
 }
 
 function buildProposal(cn) {
   const d = fmtDate();
-  return '<h1>Proposal — Noise Media Ã ' + cn + '</h1><div class="dm">Prepared by ' + sn() + ' &middot; ' + d + '</div><h2>1. About Noise Media</h2><p>Creative agency specialising in paid social, content production, and brand storytelling.</p><h2>2. Your Needs</h2><p>[To be completed after discovery call]</p><h2>3. Services</h2><table><tr><th>Service</th><th>Description</th></tr><tr><td>Content Strategy</td><td>Audience research, platform strategy, content pillars</td></tr><tr><td>Creative Production</td><td>Video, photography, design</td></tr><tr><td>Paid Social</td><td>Campaign setup, optimisation, reporting</td></tr><tr><td>UGC / Influencer</td><td>Creator sourcing, briefing, content rights</td></tr></table><h2>4. Investment</h2><table><tr><th>Package</th><th>Scope</th><th>Monthly</th></tr><tr><td>Starter</td><td>Strategy + 8 posts + reporting</td><td>Â£2,500</td></tr><tr><td>Growth</td><td>+ paid media mgmt + 16 posts</td><td>Â£5,000</td></tr><tr><td>Full Service</td><td>All services + video + UGC</td><td>Â£8,500+</td></tr></table><p><em>Media spend additional. Prices ex. VAT.</em></p><h2>5. Next Steps</h2><ol><li>Discovery call</li><li>Tailored scope & timeline</li><li>Contract & onboarding</li><li>Kick-off</li></ol>';
+  return '<h1>Proposal â Noise Media ÃÂ ' + cn + '</h1><div class="dm">Prepared by ' + sn() + ' &middot; ' + d + '</div><h2>1. About Noise Media</h2><p>Creative agency specialising in paid social, content production, and brand storytelling.</p><h2>2. Your Needs</h2><p>[To be completed after discovery call]</p><h2>3. Services</h2><table><tr><th>Service</th><th>Description</th></tr><tr><td>Content Strategy</td><td>Audience research, platform strategy, content pillars</td></tr><tr><td>Creative Production</td><td>Video, photography, design</td></tr><tr><td>Paid Social</td><td>Campaign setup, optimisation, reporting</td></tr><tr><td>UGC / Influencer</td><td>Creator sourcing, briefing, content rights</td></tr></table><h2>4. Investment</h2><table><tr><th>Package</th><th>Scope</th><th>Monthly</th></tr><tr><td>Starter</td><td>Strategy + 8 posts + reporting</td><td>ÃÂ£2,500</td></tr><tr><td>Growth</td><td>+ paid media mgmt + 16 posts</td><td>ÃÂ£5,000</td></tr><tr><td>Full Service</td><td>All services + video + UGC</td><td>ÃÂ£8,500+</td></tr></table><p><em>Media spend additional. Prices ex. VAT.</em></p><h2>5. Next Steps</h2><ol><li>Discovery call</li><li>Tailored scope & timeline</li><li>Contract & onboarding</li><li>Kick-off</li></ol>';
 }
 
 function buildCost(cn) {
   const d = fmtDate();
-  return '<h1>' + cn + ' — Cost Allocation</h1><div class="dm">Prepared by ' + sn() + ' &middot; ' + d + '</div><h2>Cost Breakdown</h2><table><tr><th>Line Item</th><th>Cost</th></tr><tr><td>Strategy & Planning</td><td>Â£1,200</td></tr><tr><td>Creative Production</td><td>Â£2,500</td></tr><tr><td>UGC Management</td><td>Â£800</td></tr><tr><td>Paid Media Mgmt</td><td>Â£1,500</td></tr><tr><td>Media Spend</td><td>TBC</td></tr></table><h3>Total Agency Fee: Â£6,000 + media</h3><h2>Team Hours</h2><table><tr><th>Person</th><th>Role</th><th>Hours</th><th>Rate</th></tr><tr><td>Sam</td><td>Operations</td><td>4</td><td>Â£150/hr</td></tr><tr><td>Mike</td><td>Production</td><td>8</td><td>Â£125/hr</td></tr><tr><td>Adam/Luke</td><td>Motion</td><td>16</td><td>Â£100/hr</td></tr><tr><td>Dan</td><td>Paid Media</td><td>12</td><td>Â£100/hr</td></tr><tr><td>Louise</td><td>Account</td><td>6</td><td>Â£100/hr</td></tr></table>';
+  return '<h1>' + cn + ' â Cost Allocation</h1><div class="dm">Prepared by ' + sn() + ' &middot; ' + d + '</div><h2>Cost Breakdown</h2><table><tr><th>Line Item</th><th>Cost</th></tr><tr><td>Strategy & Planning</td><td>ÃÂ£1,200</td></tr><tr><td>Creative Production</td><td>ÃÂ£2,500</td></tr><tr><td>UGC Management</td><td>ÃÂ£800</td></tr><tr><td>Paid Media Mgmt</td><td>ÃÂ£1,500</td></tr><tr><td>Media Spend</td><td>TBC</td></tr></table><h3>Total Agency Fee: ÃÂ£6,000 + media</h3><h2>Team Hours</h2><table><tr><th>Person</th><th>Role</th><th>Hours</th><th>Rate</th></tr><tr><td>Sam</td><td>Operations</td><td>4</td><td>ÃÂ£150/hr</td></tr><tr><td>Mike</td><td>Production</td><td>8</td><td>ÃÂ£125/hr</td></tr><tr><td>Adam/Luke</td><td>Motion</td><td>16</td><td>ÃÂ£100/hr</td></tr><tr><td>Dan</td><td>Paid Media</td><td>12</td><td>ÃÂ£100/hr</td></tr><tr><td>Louise</td><td>Account</td><td>6</td><td>ÃÂ£100/hr</td></tr></table>';
 }
 
 function buildReport(cn) {
   const d = fmtDate();
-  return '<h1>' + cn + ' — Performance Report</h1><div class="dm">Prepared by ' + sn() + ' &middot; ' + d + '</div><h2>Key Metrics</h2><table><tr><th>Metric</th><th>This Period</th><th>Previous</th><th>Change</th></tr><tr><td>Impressions</td><td>—</td><td>—</td><td>—</td></tr><tr><td>Reach</td><td>—</td><td>—</td><td>—</td></tr><tr><td>Engagement Rate</td><td>—</td><td>—</td><td>—</td></tr><tr><td>Link Clicks</td><td>—</td><td>—</td><td>—</td></tr><tr><td>CPC</td><td>—</td><td>—</td><td>—</td></tr></table><h2>Top Creative</h2><p>[Insert top 3 creatives with performance data]</p><h2>Recommendations</h2><ul><li>Scale top-performing ad sets</li><li>Test new creative formats</li><li>Review audience targeting</li></ul>';
+  return '<h1>' + cn + ' â Performance Report</h1><div class="dm">Prepared by ' + sn() + ' &middot; ' + d + '</div><h2>Key Metrics</h2><table><tr><th>Metric</th><th>This Period</th><th>Previous</th><th>Change</th></tr><tr><td>Impressions</td><td>â</td><td>â</td><td>â</td></tr><tr><td>Reach</td><td>â</td><td>â</td><td>â</td></tr><tr><td>Engagement Rate</td><td>â</td><td>â</td><td>â</td></tr><tr><td>Link Clicks</td><td>â</td><td>â</td><td>â</td></tr><tr><td>CPC</td><td>â</td><td>â</td><td>â</td></tr></table><h2>Top Creative</h2><p>[Insert top 3 creatives with performance data]</p><h2>Recommendations</h2><ul><li>Scale top-performing ad sets</li><li>Test new creative formats</li><li>Review audience targeting</li></ul>';
 }
 
 function buildAgenda(cn) {
   const d = fmtDate();
-  return '<h1>' + cn + ' — Meeting Agenda</h1><div class="dm">' + sn() + ' &middot; ' + d + '</div><table><tr><th>Detail</th><th></th></tr><tr><td>Date</td><td>[Date & Time]</td></tr><tr><td>Attendees</td><td>' + sn() + ' (Noise), [Client]</td></tr><tr><td>Duration</td><td>30 min</td></tr></table><h2>Agenda</h2><table><tr><th>#</th><th>Topic</th><th>Owner</th><th>Time</th></tr><tr><td>1</td><td>Welcome</td><td>' + sn() + '</td><td>2 min</td></tr><tr><td>2</td><td>Campaign performance</td><td>Dan</td><td>5 min</td></tr><tr><td>3</td><td>Creative update</td><td>Beau</td><td>5 min</td></tr><tr><td>4</td><td>Content calendar</td><td>' + sn() + '</td><td>8 min</td></tr><tr><td>5</td><td>Client feedback</td><td>[Client]</td><td>5 min</td></tr><tr><td>6</td><td>Actions & next steps</td><td>All</td><td>5 min</td></tr></table><h2>Action Items</h2><table><tr><th>Action</th><th>Owner</th><th>Due</th></tr><tr><td>[To be completed]</td><td></td><td></td></tr></table>';
+  return '<h1>' + cn + ' â Meeting Agenda</h1><div class="dm">' + sn() + ' &middot; ' + d + '</div><table><tr><th>Detail</th><th></th></tr><tr><td>Date</td><td>[Date & Time]</td></tr><tr><td>Attendees</td><td>' + sn() + ' (Noise), [Client]</td></tr><tr><td>Duration</td><td>30 min</td></tr></table><h2>Agenda</h2><table><tr><th>#</th><th>Topic</th><th>Owner</th><th>Time</th></tr><tr><td>1</td><td>Welcome</td><td>' + sn() + '</td><td>2 min</td></tr><tr><td>2</td><td>Campaign performance</td><td>Dan</td><td>5 min</td></tr><tr><td>3</td><td>Creative update</td><td>Beau</td><td>5 min</td></tr><tr><td>4</td><td>Content calendar</td><td>' + sn() + '</td><td>8 min</td></tr><tr><td>5</td><td>Client feedback</td><td>[Client]</td><td>5 min</td></tr><tr><td>6</td><td>Actions & next steps</td><td>All</td><td>5 min</td></tr></table><h2>Action Items</h2><table><tr><th>Action</th><th>Owner</th><th>Due</th></tr><tr><td>[To be completed]</td><td></td><td></td></tr></table>';
 }
 
 function buildPresentation(cn, cc, topic) {
@@ -4937,7 +4930,7 @@ function buildPresentation(cn, cc, topic) {
     '<h2>1. Overview & Objectives</h2>' +
     '<p><strong>Client:</strong> ' + cn + (cc ? ' (' + cc + ')' : '') + '</p>' +
     '<p><strong>Objective:</strong> [Define the primary campaign/project objective]</p>' +
-    '<p><strong>KPIs:</strong> [Reach, Engagement Rate, Conversions, ROAS — set targets]</p>' +
+    '<p><strong>KPIs:</strong> [Reach, Engagement Rate, Conversions, ROAS â set targets]</p>' +
     '<h2>2. Strategy & Approach</h2>' +
     '<p><strong>Target Audience:</strong> [Demographics, interests, behaviours]</p>' +
     '<p><strong>Key Insight:</strong> [The consumer truth driving this campaign]</p>' +
@@ -4947,23 +4940,23 @@ function buildPresentation(cn, cc, topic) {
     '<p><strong>Tone of Voice:</strong> [Brand voice direction]</p>' +
     '<p><strong>Content Formats:</strong></p>' +
     '<table><tr><th>Format</th><th>Platform</th><th>Quantity</th></tr>' +
-    '<tr><td>Short-form Video (Reels/TikTok)</td><td>Instagram, TikTok</td><td>—</td></tr>' +
-    '<tr><td>Static Posts</td><td>Instagram, Facebook</td><td>—</td></tr>' +
-    '<tr><td>Stories</td><td>Instagram</td><td>—</td></tr>' +
-    '<tr><td>UGC Content</td><td>All platforms</td><td>—</td></tr></table>' +
+    '<tr><td>Short-form Video (Reels/TikTok)</td><td>Instagram, TikTok</td><td>â</td></tr>' +
+    '<tr><td>Static Posts</td><td>Instagram, Facebook</td><td>â</td></tr>' +
+    '<tr><td>Stories</td><td>Instagram</td><td>â</td></tr>' +
+    '<tr><td>UGC Content</td><td>All platforms</td><td>â</td></tr></table>' +
     '<h2>4. Channel Plan</h2>' +
     '<table><tr><th>Channel</th><th>Role</th><th>Budget Split</th></tr>' +
-    '<tr><td>Instagram (Organic)</td><td>Brand awareness & community</td><td>—</td></tr>' +
-    '<tr><td>Instagram (Paid)</td><td>Reach & conversions</td><td>—</td></tr>' +
-    '<tr><td>TikTok</td><td>Discovery & engagement</td><td>—</td></tr>' +
-    '<tr><td>Facebook</td><td>Retargeting & conversions</td><td>—</td></tr></table>' +
+    '<tr><td>Instagram (Organic)</td><td>Brand awareness & community</td><td>â</td></tr>' +
+    '<tr><td>Instagram (Paid)</td><td>Reach & conversions</td><td>â</td></tr>' +
+    '<tr><td>TikTok</td><td>Discovery & engagement</td><td>â</td></tr>' +
+    '<tr><td>Facebook</td><td>Retargeting & conversions</td><td>â</td></tr></table>' +
     '<h2>5. Timeline & Budget</h2>' +
     '<table><tr><th>Phase</th><th>Dates</th><th>Activity</th></tr>' +
     '<tr><td>Phase 1: Pre-launch</td><td>[Dates]</td><td>Strategy, creative production, asset prep</td></tr>' +
     '<tr><td>Phase 2: Launch</td><td>[Dates]</td><td>Content rollout, paid activation</td></tr>' +
     '<tr><td>Phase 3: Optimise</td><td>[Dates]</td><td>Performance review, creative refresh</td></tr>' +
     '<tr><td>Phase 4: Report</td><td>[Dates]</td><td>Wrap-up report, learnings</td></tr></table>' +
-    '<p><strong>Total Budget:</strong> Â£[TBC] (Agency fee + Media spend)</p>' +
+    '<p><strong>Total Budget:</strong> ÃÂ£[TBC] (Agency fee + Media spend)</p>' +
     '<h2>6. Next Steps</h2>' +
     '<table><tr><th>Action</th><th>Owner</th><th>Due</th></tr>' +
     '<tr><td>Client approval on strategy</td><td>[Client]</td><td>[Date]</td></tr>' +
@@ -4995,13 +4988,13 @@ function getResponse(q) {
   }
 
   if (ql.match(/social|caption|post.*for|instagram|tiktok|reel|content.*cal|copy.*for/))
-    return { chat: 'Social copy for <strong>' + cn + '</strong> is in the doc panel — 3 posts covering awareness, education, and UGC with scheduling suggestions.', doc: buildSocial(cn, cc) };
+    return { chat: 'Social copy for <strong>' + cn + '</strong> is in the doc panel â 3 posts covering awareness, education, and UGC with scheduling suggestions.', doc: buildSocial(cn, cc) };
 
   if (ql.match(/presentation|ppt|pptx|slide|deck|pitch.*deck/))
-    return { chat: 'Presentation for <strong>' + cn + '</strong> is ready in the document panel — full Noise-branded deck with strategy, creative, channel plan, and timeline. Edit the content, then hit .pptx to export.', doc: buildPresentation(cn, cc) };
+    return { chat: 'Presentation for <strong>' + cn + '</strong> is ready in the document panel â full Noise-branded deck with strategy, creative, channel plan, and timeline. Edit the content, then hit .pptx to export.', doc: buildPresentation(cn, cc) };
 
   if (ql.match(/proposal|pitch|scope.*work|sow/))
-    return { chat: 'Proposal for <strong>' + cn + '</strong> is ready — includes services, pricing tiers, and next steps. Edit and export to share.', doc: buildProposal(cn) };
+    return { chat: 'Proposal for <strong>' + cn + '</strong> is ready â includes services, pricing tiers, and next steps. Edit and export to share.', doc: buildProposal(cn) };
 
   if (ql.match(/agenda|meeting.*note|call.*prep|kick.?off/))
     return { chat: 'Meeting agenda for <strong>' + cn + '</strong> is in the document panel. Add the date and any specific talking points.', doc: buildAgenda(cn) };
@@ -5147,14 +5140,14 @@ function getResponse(q) {
     return { chat: 'Good ' + (new Date().getHours() < 12 ? 'morning' : new Date().getHours() < 17 ? 'afternoon' : 'evening') + ', ' + un + '! What do you need?', doc: null };
 
   if (ql.match(/how are you|you alright|you good|you ok/))
-    return { chat: 'All good here! Ready to help — what do you need?', doc: null };
+    return { chat: 'All good here! Ready to help â what do you need?', doc: null };
 
   if (ql.match(/what.*your name|who are you|what are you/))
-    return { chat: 'I\'m Noise Intelligence — the agency knowledge hub. I know all ' + CL.length + ' clients, every asset we\'ve catalogued, and the full team. Ask me anything or tell me to create a document.', doc: null };
+    return { chat: 'I\'m Noise Intelligence â the agency knowledge hub. I know all ' + CL.length + ' clients, every asset we\'ve catalogued, and the full team. Ask me anything or tell me to create a document.', doc: null };
 
   // --- Help ---
   if (ql.match(/help|what can you|what do you do|capabilities|what.*you.*know/))
-    return { chat: 'I know all ' + CL.length + ' of our clients, their ' + totalAssets + '+ catalogued assets, campaign history, and Drive folders. I also know the full team.<br><br>I\'ve got <strong>complete campaign data for Altra</strong> — Â£22,714 total spend, 14 weekly performance reports, 5 campaign phases, 3 audience segments, 50+ creatives, platform breakdowns, the lot. Ask me anything: budgets, CPMs, which audience performed best, creative strategy, scent positioning.<br><br>I\'ve also got deep strategy intel for <strong>Amano Hotels, GE Vernova (Data Centres + Nuclear/BWRX-300), Davines (EHC), Trudi\'s, and Zapp</strong>.<br><br>I can write emails, briefs, social copy, presentations, reports, proposals, cost allocations, and meeting agendas for any client — with real data baked in.', doc: null };
+    return { chat: 'I know all ' + CL.length + ' of our clients, their ' + totalAssets + '+ catalogued assets, campaign history, and Drive folders. I also know the full team.<br><br>I\'ve got <strong>complete campaign data for Altra</strong> â ÃÂ£22,714 total spend, 14 weekly performance reports, 5 campaign phases, 3 audience segments, 50+ creatives, platform breakdowns, the lot. Ask me anything: budgets, CPMs, which audience performed best, creative strategy, scent positioning.<br><br>I\'ve also got deep strategy intel for <strong>Amano Hotels, GE Vernova (Data Centres + Nuclear/BWRX-300), Davines (EHC), Trudi\'s, and Zapp</strong>.<br><br>I can write emails, briefs, social copy, presentations, reports, proposals, cost allocations, and meeting agendas for any client â with real data baked in.', doc: null };
 
   // --- Client count ---
   if (ql.match(/how many.*client|total.*client|client.*count/))
@@ -5208,20 +5201,20 @@ function getResponse(q) {
 
   // --- Specific client (ready) ---
   if (cm && cm.s==='r') {
-    var r = '<strong>' + cm.n + '</strong> — ' + cm.cat + '. ' + cm.sum + '<br><br>' + cm.a + ' assets, ' + cm.c + ' campaigns.';
+    var r = '<strong>' + cm.n + '</strong> â ' + cm.cat + '. ' + cm.sum + '<br><br>' + cm.a + ' assets, ' + cm.c + ' campaigns.';
     var cs = getStrategyInfo(cm.n);
-    if (cs) r += '<br><br>I also have their full strategy deck loaded — ask me about their brand positioning, audiences, paid media plan, partnerships, or competitive landscape.';
+    if (cs) r += '<br><br>I also have their full strategy deck loaded â ask me about their brand positioning, audiences, paid media plan, partnerships, or competitive landscape.';
     r += ' Want me to create something for them?';
     return { chat: r, doc: null };
   }
 
   // --- Specific client (inventoried) ---
   if (cm && cm.s==='i') {
-    var r = '<strong>' + cm.n + '</strong> — ' + cm.cat + '. Inventoried from Drive';
+    var r = '<strong>' + cm.n + '</strong> â ' + cm.cat + '. Inventoried from Drive';
     if (cm.f && cm.f.length) r += ' (' + cm.f.length + ' folders: ' + cm.f.join(', ') + ')';
-    r += '. Not fully ingested yet — I have the folder structure but not individual files.';
+    r += '. Not fully ingested yet â I have the folder structure but not individual files.';
     var cs = getStrategyInfo(cm.n);
-    if (cs) r += '<br><br>However, I do have their full strategy deck loaded — ask me about their brand positioning, audiences, content strategy, or competitive landscape.';
+    if (cs) r += '<br><br>However, I do have their full strategy deck loaded â ask me about their brand positioning, audiences, content strategy, or competitive landscape.';
     return { chat: r, doc: null };
   }
 
@@ -5233,13 +5226,13 @@ function getResponse(q) {
 
   // --- Vague / conversational fallbacks ---
   if (ql.match(/i need|can you|could you|i want|please|would you/))
-    return { chat: 'Of course — what do you need? If it\'s about a specific client, just mention their name and I\'ll pull up everything I know.', doc: null };
+    return { chat: 'Of course â what do you need? If it\'s about a specific client, just mention their name and I\'ll pull up everything I know.', doc: null };
 
   if (ql.match(/idea|suggest|recommend|what should/))
     return { chat: 'What client or project are you thinking about? I can pull up their assets and campaigns, or help you draft something.', doc: null };
 
   if (ql.match(/busy|deadline|stressed|rush|urgent/))
-    return { chat: 'Let\'s get it done — which client and what do you need? I can generate docs fast.', doc: null };
+    return { chat: 'Let\'s get it done â which client and what do you need? I can generate docs fast.', doc: null };
 
   // --- True fallback ---
   return { chat: 'Not sure I caught that, ' + un + '. Try mentioning a client name, or ask me something like "what assets do we have for Davines?" or "write an email to BARBRI."', doc: null };
@@ -5271,7 +5264,7 @@ function showSettings() {
     '<div style="font-size:10px;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-muted);font-weight:600;">Google Services</div>' +
     googleStatus +
     '</div>' +
-    '<p style="font-size:12px;margin-bottom:8px;">Gmail, Calendar, Sheets, Slides, Drive — all connected with one sign-in.</p>' +
+    '<p style="font-size:12px;margin-bottom:8px;">Gmail, Calendar, Sheets, Slides, Drive â all connected with one sign-in.</p>' +
     '<div style="margin-bottom:8px;">' +
     '<label style="font-size:10px;color:var(--text-muted);display:block;margin-bottom:4px;">OAuth Client ID</label>' +
     '<input type="text" id="googleClientIdSettings" placeholder="xxxxxxxxxxxx.apps.googleusercontent.com" value="' + googleIdVal + '" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;font-size:11px;background:var(--surface);color:var(--text);font-family:\'Reddit Mono\',monospace;">' +
@@ -5332,7 +5325,7 @@ function updateHomeView() {
   var intBar = document.getElementById('integrationBar');
   var hasMessages = hc && hc.children.length > 0;
 
-  // Skills panel stays hidden in chat view — clean thread only
+  // Skills panel stays hidden in chat view â clean thread only
   if (skillsPanel) {
     skillsPanel.style.display = 'none';
   }
@@ -5716,7 +5709,7 @@ function renderClientList() {
 }
 
 function openClientRole(clientName, role) {
-  var threadName = clientName + ' — ' + role;
+  var threadName = clientName + ' â ' + role;
   if (!currentUser) return;
   var threads = getUserThreads(currentUser.name);
   var existing = threads.find(function(t) { return t.label === threadName; });
@@ -5867,11 +5860,11 @@ async function handleFileUpload(files) {
       } else if (f.type.startsWith('text/') || f.name.match(/\.(txt|csv|tsv|md|json|html|xml|css|js)$/i)) {
         text = await readFileAsText(f);
       } else if (f.name.match(/\.(docx)$/i)) {
-        text = '[Word document uploaded — ' + f.name + '. Text extraction limited in browser.]';
+        text = '[Word document uploaded â ' + f.name + '. Text extraction limited in browser.]';
       } else if (f.name.match(/\.(xlsx|xls)$/i) && window.XLSX) {
         text = await extractExcelText(f);
       } else {
-        text = '[File uploaded: ' + f.name + ' (' + f.type + '). Binary file — content not readable as text.]';
+        text = '[File uploaded: ' + f.name + ' (' + f.type + '). Binary file â content not readable as text.]';
       }
     } catch(e) {
       text = '[Could not read file: ' + f.name + '. Error: ' + e.message + ']';
@@ -5897,7 +5890,7 @@ function readFileAsText(file) {
 }
 
 async function extractPdfText(file) {
-  if (!window.pdfjsLib) return '[PDF.js not loaded — cannot extract PDF text]';
+  if (!window.pdfjsLib) return '[PDF.js not loaded â cannot extract PDF text]';
   var arrayBuffer = await file.arrayBuffer();
   var pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
   var allText = '';
@@ -6206,7 +6199,7 @@ function renderSearchResults(results, query) {
   el.innerHTML = html;
 }
 
-/* LEGACY toggleSearchPanel modal — replaced above */
+/* LEGACY toggleSearchPanel modal â replaced above */
 var _legacySearchModal = function() {
   var modal = document.createElement('div');
   var searchResults = '';

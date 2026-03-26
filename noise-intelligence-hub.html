@@ -747,6 +747,39 @@
     letter-spacing: 1.2px; color: var(--text-muted);
   }
   .plus-menu-divider { height: 1px; background: var(--border); margin: 4px 10px; }
+
+  /* Sidebar action buttons */
+  .sb-action-btn {
+    display: block; width: 100%; padding: 8px 12px; margin-bottom: 4px;
+    background: transparent; border: 1px solid var(--border); border-radius: 8px;
+    font-family: 'Reddit Mono', monospace; font-size: 11px; font-weight: 600;
+    color: var(--text); cursor: pointer; text-align: left;
+    transition: all 0.15s; text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .sb-action-btn:hover { background: var(--accent-light); border-color: var(--accent); color: var(--accent); }
+  .sb-action-btn.sb-sm {
+    display: inline-block; width: auto; padding: 5px 10px;
+    font-size: 9px; margin-right: 2px; margin-bottom: 4px;
+  }
+
+  /* Integration boxes bar */
+  .integration-bar {
+    display: flex; flex-wrap: wrap; gap: 6px; padding: 0 0 10px;
+    justify-content: center;
+  }
+  .int-box {
+    padding: 6px 12px; border: 1px solid var(--border); border-radius: 6px;
+    font-size: 10px; font-weight: 600; font-family: 'Reddit Mono', monospace;
+    color: var(--text); cursor: pointer; transition: all 0.15s;
+    text-transform: uppercase; letter-spacing: 0.3px; background: var(--surface);
+  }
+  .int-box:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
+
+  .project-item {
+    padding: 12px; border: 1px solid var(--border); border-radius: 8px;
+    cursor: pointer; transition: all 0.15s;
+  }
+  .project-item:hover { border-color: var(--accent); background: var(--accent-light); }
 </style>
 </head>
 <body>
@@ -780,18 +813,29 @@
   <div class="p1-sidebar">
     <div class="p1-sb-header">
       <span class="p1-sb-logo">NOISE<span class="sb-dot">.</span></span>
-      <button class="p1-sb-new" onclick="promptNewThread()">+ New</button>
+    </div>
+    <div class="p1-sb-divider"></div>
+    <div style="padding:8px;">
+      <button class="sb-action-btn" onclick="promptNewThread()">+ New Chat</button>
+      <button class="sb-action-btn" onclick="toggleSearchPanel()">Search</button>
+      <button class="sb-action-btn" onclick="toggleProjectsPanel()">Projects</button>
     </div>
     <div class="p1-sb-divider"></div>
     <div class="p1-clients-label">CLIENTS A-Z</div>
     <div class="p1-clients-section" id="clientList"></div>
     <div class="p1-sb-divider"></div>
     <div class="p1-sb-sections">
-      <div class="sb-section-label">Conversation History</div>
+      <div class="sb-section-label">Recents</div>
       <div class="p1-list" id="sbL" style="flex:1;max-height:none;border-bottom:1px solid var(--border);"></div>
       <div class="sb-section-label">Messages</div>
-      <div class="sb-messages" id="sbMessages" style="padding:6px 8px;overflow-y:auto;max-height:160px;">
+      <div class="sb-messages" id="sbMessages" style="padding:6px 8px;overflow-y:auto;max-height:120px;">
         <div style="font-size:11px;color:var(--text-muted);padding:8px;">No messages yet.</div>
+      </div>
+      <div class="p1-sb-divider"></div>
+      <div style="padding:4px 8px 8px;">
+        <button class="sb-action-btn sb-sm" onclick="togglePluginsPanel()">Plugins</button>
+        <button class="sb-action-btn sb-sm" onclick="toggleDrivePanel()">Connectors</button>
+        <button class="sb-action-btn sb-sm" onclick="triggerFileUpload()">Add Files</button>
       </div>
     </div>
     <!-- Hidden panels for teach/drive functionality (JS still works) -->
@@ -862,27 +906,18 @@
         <button class="hub-sug-btn" onclick="useSuggestion(this)">What audience performed best on Altra?</button>
         <button class="hub-sug-btn" onclick="useSuggestion(this)">Draft an intro email for Amano Hotels</button>
       </div>
+      <div class="integration-bar" id="integrationBar">
+        <div class="int-box" onclick="connectIntegration('gmail')">Gmail</div>
+        <div class="int-box" onclick="connectIntegration('google-sheets')">Google Sheets</div>
+        <div class="int-box" onclick="connectIntegration('google-docs')">Google Docs</div>
+        <div class="int-box" onclick="connectIntegration('adobe-photoshop')">Adobe Photoshop</div>
+        <div class="int-box" onclick="connectIntegration('google-calendar')">Google Calendar</div>
+        <div class="int-box" onclick="connectIntegration('slack')">Slack</div>
+        <div class="int-box" onclick="connectIntegration('pdf')">PDF</div>
+        <div class="int-box" onclick="connectIntegration('granola')">Granola</div>
+      </div>
       <div class="hub-input-bar">
-        <div style="position:relative;display:inline-block;">
-          <button class="plus-menu-btn" onclick="togglePlusMenu()" title="Plugins, Connectors, Add Files">+</button>
-          <div class="plus-menu" id="plusMenu" style="display:none;">
-            <div class="plus-menu-header">Integrations</div>
-            <div class="plus-menu-item" onclick="connectIntegration('gmail');togglePlusMenu();">Gmail</div>
-            <div class="plus-menu-item" onclick="connectIntegration('google-sheets');togglePlusMenu();">Google Sheets</div>
-            <div class="plus-menu-item" onclick="connectIntegration('google-docs');togglePlusMenu();">Google Docs</div>
-            <div class="plus-menu-item" onclick="connectIntegration('adobe-photoshop');togglePlusMenu();">Adobe Photoshop</div>
-            <div class="plus-menu-item" onclick="connectIntegration('google-calendar');togglePlusMenu();">Google Calendar</div>
-            <div class="plus-menu-item" onclick="connectIntegration('slack');togglePlusMenu();">Slack</div>
-            <div class="plus-menu-item" onclick="connectIntegration('pdf');togglePlusMenu();">PDF</div>
-            <div class="plus-menu-item" onclick="connectIntegration('granola');togglePlusMenu();">Granola</div>
-            <div class="plus-menu-item" onclick="connectIntegration('google-drive');togglePlusMenu();">Google Drive</div>
-            <div class="plus-menu-divider"></div>
-            <div class="plus-menu-item" onclick="togglePluginsPanel();togglePlusMenu();">Plugins</div>
-            <div class="plus-menu-item" onclick="toggleDrivePanel();togglePlusMenu();">Connectors</div>
-            <div class="plus-menu-item" onclick="triggerFileUpload();togglePlusMenu();">Add Files</div>
-          </div>
-        </div>
-        <input class="wi" id="wI" type="text" placeholder="What can I help you with today?" style="padding-left:44px;">
+        <input class="wi" id="wI" type="text" placeholder="+ What can I help you with today?">
         <button class="wi-btn" onclick="hubSend()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
         </button>
@@ -1009,28 +1044,21 @@
       </div>
     </div>
     </div>
-    <div class="hub-input-bar" style="padding:12px 24px 16px;flex-shrink:0;">
-      <div style="position:relative;display:inline-block;">
-        <button class="plus-menu-btn" onclick="togglePlusMenu()" title="Plugins, Connectors, Add Files">+</button>
-        <div class="plus-menu" id="plusMenu2" style="display:none;">
-          <div class="plus-menu-header">Integrations</div>
-          <div class="plus-menu-item" onclick="connectIntegration('gmail');togglePlusMenu2();">Gmail</div>
-          <div class="plus-menu-item" onclick="connectIntegration('google-sheets');togglePlusMenu2();">Google Sheets</div>
-          <div class="plus-menu-item" onclick="connectIntegration('google-docs');togglePlusMenu2();">Google Docs</div>
-          <div class="plus-menu-item" onclick="connectIntegration('adobe-photoshop');togglePlusMenu2();">Adobe Photoshop</div>
-          <div class="plus-menu-item" onclick="connectIntegration('google-calendar');togglePlusMenu2();">Google Calendar</div>
-          <div class="plus-menu-item" onclick="connectIntegration('slack');togglePlusMenu2();">Slack</div>
-          <div class="plus-menu-item" onclick="connectIntegration('pdf');togglePlusMenu2();">PDF</div>
-          <div class="plus-menu-item" onclick="connectIntegration('granola');togglePlusMenu2();">Granola</div>
-          <div class="plus-menu-item" onclick="connectIntegration('google-drive');togglePlusMenu2();">Google Drive</div>
-          <div class="plus-menu-divider"></div>
-          <div class="plus-menu-item" onclick="togglePluginsPanel();togglePlusMenu2();">Plugins</div>
-          <div class="plus-menu-item" onclick="toggleDrivePanel();togglePlusMenu2();">Connectors</div>
-          <div class="plus-menu-item" onclick="triggerFileUpload();togglePlusMenu2();">Add Files</div>
-        </div>
+    <div style="padding:0 24px;">
+      <div class="integration-bar" id="integrationBar2">
+        <div class="int-box" onclick="connectIntegration('gmail')">Gmail</div>
+        <div class="int-box" onclick="connectIntegration('google-sheets')">Google Sheets</div>
+        <div class="int-box" onclick="connectIntegration('google-docs')">Google Docs</div>
+        <div class="int-box" onclick="connectIntegration('adobe-photoshop')">Adobe Photoshop</div>
+        <div class="int-box" onclick="connectIntegration('google-calendar')">Google Calendar</div>
+        <div class="int-box" onclick="connectIntegration('slack')">Slack</div>
+        <div class="int-box" onclick="connectIntegration('pdf')">PDF</div>
+        <div class="int-box" onclick="connectIntegration('granola')">Granola</div>
       </div>
-      <input class="wi" id="cwI" type="text" placeholder="What can I help you with today?" style="padding-left:44px;" onkeydown="if(event.key==='Enter'){document.getElementById('wI').value=this.value;this.value='';hubSend();}">
-      <button class="wi-btn" onclick="document.getElementById('wI').value=document.getElementById('cwI').value;document.getElementById('cwI').value='';hubSend();" style="position:absolute;right:32px;top:50%;transform:translateY(-50%);">
+    </div>
+    <div class="hub-input-bar" style="padding:12px 24px 16px;flex-shrink:0;">
+      <input class="wi" id="cwI" type="text" placeholder="+ What can I help you with today?" onkeydown="if(event.key==='Enter'){document.getElementById('wI').value=this.value;this.value='';hubSend();}">
+      <button class="wi-btn" onclick="document.getElementById('wI').value=document.getElementById('cwI').value;document.getElementById('cwI').value='';hubSend();">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
       </button>
     </div>
@@ -4267,6 +4295,50 @@ function connectIntegration(name) {
     + '<button class="btn-save" onclick="alert(\'OAuth flow for ' + displayName + ' coming soon. Contact admin for setup.\');this.closest(\'.modal-bg\').remove()">Connect</button>'
     + '</div></div>';
   document.body.appendChild(modal);
+}
+
+function toggleSearchPanel() {
+  var query = prompt('Search chats and projects:');
+  if (query && query.trim()) {
+    document.getElementById('wI').value = 'Search for: ' + query.trim();
+    hubSend();
+  }
+}
+
+function toggleProjectsPanel() {
+  var modal = document.createElement('div');
+  modal.className = 'modal-bg';
+  modal.onclick = function(e) { if (e.target === modal) modal.remove(); };
+  var store = loadStore();
+  var projects = store.projects || [];
+  var projectsHtml = '';
+  if (projects.length === 0) {
+    // Create default projects from client list
+    var clients = typeof CL !== 'undefined' ? CL : [];
+    clients.forEach(function(c) {
+      projectsHtml += '<div class="project-item" onclick="openProject(\'' + c.name.replace(/'/g, "\\'") + '\');this.closest(\'.modal-bg\').remove();">'
+        + '<strong>' + c.name + '</strong>'
+        + '<div style="font-size:10px;color:var(--text-muted);margin-top:2px;">Client project</div>'
+        + '</div>';
+    });
+  }
+  modal.innerHTML = '<div class="modal" style="max-width:520px;">'
+    + '<h3>Projects</h3>'
+    + '<p>Click a project to open it. Projects are shareable across the team.</p>'
+    + '<div style="display:flex;gap:6px;margin-bottom:16px;">'
+    + '<input id="projectSearch" type="text" placeholder="Search projects..." style="flex:1;">'
+    + '</div>'
+    + '<div style="max-height:300px;overflow-y:auto;display:flex;flex-direction:column;gap:6px;">'
+    + projectsHtml
+    + '</div>'
+    + '<div class="modal-btns"><button class="btn-cancel" onclick="this.closest(\'.modal-bg\').remove()">Close</button></div>'
+    + '</div>';
+  document.body.appendChild(modal);
+}
+
+function openProject(clientName) {
+  document.getElementById('wI').value = 'Open project for ' + clientName + '. Show me everything we have.';
+  hubSend();
 }
 
 </script>

@@ -621,7 +621,7 @@
   /* Right sidebar for integrations */
   .p1-right-sidebar {
     width: 240px; background: var(--surface); border-left: 1px solid var(--border);
-    display: flex; flex-direction: column; flex-shrink: 0; overflow-y: auto;
+    display: none; flex-direction: column; flex-shrink: 0; overflow-y: auto;
   }
   .p1-right-sidebar .rs-header {
     font-family: 'Reddit Mono', monospace; font-size: 9px; font-weight: 700;
@@ -706,7 +706,7 @@
     padding: 12px 14px; cursor: default; transition: all 0.2s;
   }
   .skill-card:hover { border-color: var(--accent); box-shadow: var(--shadow-sm); }
-  .skill-card-emoji { font-size: 20px; margin-bottom: 6px; }
+  .skill-card-emoji { font-size: 20px; margin-bottom: 6px; display: none; }
   .skill-card-title {
     font-size: 12px; font-weight: 700; margin-bottom: 8px;
     font-family: 'Reddit Mono', monospace; text-transform: uppercase; letter-spacing: 0.8px;
@@ -734,12 +734,19 @@
     position: absolute; bottom: calc(100% + 8px); left: 0;
     background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
     box-shadow: var(--shadow-lg); min-width: 180px; z-index: 100; overflow: hidden;
+    max-height: 320px; overflow-y: auto;
   }
   .plus-menu-item {
     padding: 10px 14px; font-size: 12px; font-weight: 500; cursor: pointer;
     transition: background 0.15s; display: flex; align-items: center; gap: 8px;
   }
   .plus-menu-item:hover { background: var(--accent-light); color: var(--accent); }
+  .plus-menu-header {
+    padding: 8px 14px 4px; font-size: 9px; font-weight: 700;
+    font-family: 'Reddit Mono', monospace; text-transform: uppercase;
+    letter-spacing: 1.2px; color: var(--text-muted);
+  }
+  .plus-menu-divider { height: 1px; background: var(--border); margin: 4px 10px; }
 </style>
 </head>
 <body>
@@ -859,9 +866,20 @@
         <div style="position:relative;display:inline-block;">
           <button class="plus-menu-btn" onclick="togglePlusMenu()" title="Plugins, Connectors, Add Files">+</button>
           <div class="plus-menu" id="plusMenu" style="display:none;">
-            <div class="plus-menu-item" onclick="togglePluginsPanel();togglePlusMenu();">🧩 Plugins</div>
-            <div class="plus-menu-item" onclick="toggleDrivePanel();togglePlusMenu();">🔗 Connectors</div>
-            <div class="plus-menu-item" onclick="triggerFileUpload();togglePlusMenu();">📎 Add Files</div>
+            <div class="plus-menu-header">Integrations</div>
+            <div class="plus-menu-item" onclick="connectIntegration('gmail');togglePlusMenu();">Gmail</div>
+            <div class="plus-menu-item" onclick="connectIntegration('google-sheets');togglePlusMenu();">Google Sheets</div>
+            <div class="plus-menu-item" onclick="connectIntegration('google-docs');togglePlusMenu();">Google Docs</div>
+            <div class="plus-menu-item" onclick="connectIntegration('adobe-photoshop');togglePlusMenu();">Adobe Photoshop</div>
+            <div class="plus-menu-item" onclick="connectIntegration('google-calendar');togglePlusMenu();">Google Calendar</div>
+            <div class="plus-menu-item" onclick="connectIntegration('slack');togglePlusMenu();">Slack</div>
+            <div class="plus-menu-item" onclick="connectIntegration('pdf');togglePlusMenu();">PDF</div>
+            <div class="plus-menu-item" onclick="connectIntegration('granola');togglePlusMenu();">Granola</div>
+            <div class="plus-menu-item" onclick="connectIntegration('google-drive');togglePlusMenu();">Google Drive</div>
+            <div class="plus-menu-divider"></div>
+            <div class="plus-menu-item" onclick="togglePluginsPanel();togglePlusMenu();">Plugins</div>
+            <div class="plus-menu-item" onclick="toggleDrivePanel();togglePlusMenu();">Connectors</div>
+            <div class="plus-menu-item" onclick="triggerFileUpload();togglePlusMenu();">Add Files</div>
           </div>
         </div>
         <input class="wi" id="wI" type="text" placeholder="What can I help you with today?" style="padding-left:44px;">
@@ -995,9 +1013,20 @@
       <div style="position:relative;display:inline-block;">
         <button class="plus-menu-btn" onclick="togglePlusMenu()" title="Plugins, Connectors, Add Files">+</button>
         <div class="plus-menu" id="plusMenu2" style="display:none;">
-          <div class="plus-menu-item" onclick="togglePluginsPanel();togglePlusMenu2();">🧩 Plugins</div>
-          <div class="plus-menu-item" onclick="toggleDrivePanel();togglePlusMenu2();">🔗 Connectors</div>
-          <div class="plus-menu-item" onclick="triggerFileUpload();togglePlusMenu2();">📎 Add Files</div>
+          <div class="plus-menu-header">Integrations</div>
+          <div class="plus-menu-item" onclick="connectIntegration('gmail');togglePlusMenu2();">Gmail</div>
+          <div class="plus-menu-item" onclick="connectIntegration('google-sheets');togglePlusMenu2();">Google Sheets</div>
+          <div class="plus-menu-item" onclick="connectIntegration('google-docs');togglePlusMenu2();">Google Docs</div>
+          <div class="plus-menu-item" onclick="connectIntegration('adobe-photoshop');togglePlusMenu2();">Adobe Photoshop</div>
+          <div class="plus-menu-item" onclick="connectIntegration('google-calendar');togglePlusMenu2();">Google Calendar</div>
+          <div class="plus-menu-item" onclick="connectIntegration('slack');togglePlusMenu2();">Slack</div>
+          <div class="plus-menu-item" onclick="connectIntegration('pdf');togglePlusMenu2();">PDF</div>
+          <div class="plus-menu-item" onclick="connectIntegration('granola');togglePlusMenu2();">Granola</div>
+          <div class="plus-menu-item" onclick="connectIntegration('google-drive');togglePlusMenu2();">Google Drive</div>
+          <div class="plus-menu-divider"></div>
+          <div class="plus-menu-item" onclick="togglePluginsPanel();togglePlusMenu2();">Plugins</div>
+          <div class="plus-menu-item" onclick="toggleDrivePanel();togglePlusMenu2();">Connectors</div>
+          <div class="plus-menu-item" onclick="triggerFileUpload();togglePlusMenu2();">Add Files</div>
         </div>
       </div>
       <input class="wi" id="cwI" type="text" placeholder="What can I help you with today?" style="padding-left:44px;" onkeydown="if(event.key==='Enter'){document.getElementById('wI').value=this.value;this.value='';hubSend();}">
@@ -1045,7 +1074,7 @@
     </div>
   </div>
   <!-- RIGHT SIDEBAR: INTEGRATIONS -->
-  <div class="p1-right-sidebar" id="rightSidebar">
+  <div class="p1-right-sidebar" id="rightSidebar" style="display:none;">
     <div class="rs-header">Integrations</div>
     <div class="rs-list">
       <div class="rs-grid">
@@ -1097,15 +1126,15 @@
       </div>
       <div class="rs-divider"></div>
       <div class="rs-section" onclick="togglePluginsPanel()">
-        <span class="rs-section-icon">🧩</span>
+        <span class="rs-section-icon"></span>
         <span class="rs-section-label">Plugins</span>
       </div>
       <div class="rs-section" onclick="toggleDrivePanel()">
-        <span class="rs-section-icon">🔗</span>
+        <span class="rs-section-icon"></span>
         <span class="rs-section-label">Connectors</span>
       </div>
       <div class="rs-section" onclick="document.getElementById('wI').focus()">
-        <span class="rs-section-icon">📎</span>
+        <span class="rs-section-icon"></span>
         <span class="rs-section-label">Add Files</span>
       </div>
     </div>
@@ -1257,12 +1286,12 @@ const CL = [
 ];
 
 const CONN = [
-  { n:"Google Docs", d:"Briefs, scripts, strategy", i:"📄" },
-  { n:"Google Sheets", d:"Media plans, trackers, budgets", i:"📊" },
-  { n:"Google Slides", d:"Decks, presentations, pitches", i:"📑" },
-  { n:"Google Drive", d:"Asset storage, file management", i:"💾" },
-  { n:"Google Chrome", d:"Web research, competitor audits", i:"🌐" },
-  { n:"Gmail", d:"Client emails, briefs, approvals", i:"✉️" }
+  { n:"Google Docs", d:"Briefs, scripts, strategy", i:"" },
+  { n:"Google Sheets", d:"Media plans, trackers, budgets", i:"" },
+  { n:"Google Slides", d:"Decks, presentations, pitches", i:"" },
+  { n:"Google Drive", d:"Asset storage, file management", i:"" },
+  { n:"Google Chrome", d:"Web research, competitor audits", i:"" },
+  { n:"Gmail", d:"Client emails, briefs, approvals", i:"" }
 ];
 
 /* ============ STATE ============ */
@@ -1645,14 +1674,14 @@ var IDEAS = [
 ];
 
 var CONNECTORS = [
-  { icon: '📊', name: 'Google Analytics', on: true },
-  { icon: '📱', name: 'Meta Business Suite', on: true },
-  { icon: '🎨', name: 'Canva', on: true },
-  { icon: '📁', name: 'Google Drive', on: true },
-  { icon: '💬', name: 'Slack', on: true },
-  { icon: '🎬', name: 'Frame.io', on: false },
-  { icon: '📋', name: 'Asana', on: true },
-  { icon: '🎯', name: 'Sprout Social', on: false },
+  { icon: '', name: 'Google Analytics', on: true },
+  { icon: '', name: 'Meta Business Suite', on: true },
+  { icon: '', name: 'Canva', on: true },
+  { icon: '', name: 'Google Drive', on: true },
+  { icon: '', name: 'Slack', on: true },
+  { icon: '', name: 'Frame.io', on: false },
+  { icon: '', name: 'Asana', on: true },
+  { icon: '', name: 'Sprout Social', on: false },
 ];
 
 var ideaFilter = 'all';
@@ -2130,7 +2159,7 @@ function renderMemoryList(el, filter) {
 function renderSharedThreadsList(el, filter) {
   var shared = getAllTeamThreads();
   if (shared.length === 0) {
-    el.innerHTML = '<div style="padding:16px;color:var(--text-muted);font-size:12px;line-height:1.6;">No shared threads yet.<br><br>Create a thread and click the 🔗 icon to share it with the team.</div>';
+    el.innerHTML = '<div style="padding:16px;color:var(--text-muted);font-size:12px;line-height:1.6;">No shared threads yet.<br><br>Create a thread and click the link icon to share it with the team.</div>';
     return;
   }
 

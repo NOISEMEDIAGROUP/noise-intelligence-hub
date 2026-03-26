@@ -383,15 +383,15 @@
   .modal input:focus { border-color: var(--accent); }
   .modal-btns { display: flex; gap: 8px; justify-content: flex-end; margin-top: 8px; }
   .modal-btns button { padding: 10px 20px; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; }
-  .modal-btns .btn-cancel { background: var(--surface2); color: var(--text); }
-  .modal-btns .btn-save { background: var(--accent); color: white; }
+  .modal-btns .btn-cancel { background: var(--surface2); color: var(--text); font-family: 'Montserrat', sans-serif; }
+  .modal-btns .btn-save, .modal-btns .btn-primary { background: var(--accent); color: white; font-family: 'Montserrat', sans-serif; }
   .ai-badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 700; font-family: 'Reddit Mono', monospace; margin-left: 6px; }
   .ai-on { background: rgba(45,138,78,0.1); color: #2D8A4E; }
   .ai-off { background: var(--surface2); color: var(--text-muted); }
   .wi {
     width: 100%; padding: 15px 56px 15px 20px;
     background: var(--surface); border: 1px solid var(--border);
-    border-radius: 14px; font-size: 14px; color: var(--text); outline: none;
+    border-radius: 14px; font-size: 14px; font-family: 'Montserrat', sans-serif; color: var(--text); outline: none;
     box-shadow: var(--shadow-md); transition: border-color 0.2s, box-shadow 0.2s;
   }
   .wi:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(199,60,30,0.08), var(--shadow-md); }
@@ -766,7 +766,7 @@
     max-height: 320px; overflow-y: auto;
   }
   .plus-menu-item {
-    padding: 10px 14px; font-size: 12px; font-weight: 500; cursor: pointer;
+    padding: 10px 14px; font-size: 12px; font-weight: 500; font-family: 'Montserrat', sans-serif; cursor: pointer;
     transition: background 0.15s; display: flex; align-items: center; gap: 8px;
   }
   .plus-menu-item:hover { background: var(--accent-light); color: var(--accent); }
@@ -988,36 +988,92 @@
       </div>
     </div>
   </div>
-  <div id="coworkView" style="display:none;flex:1;flex-direction:column;overflow:hidden;">
-    <!-- Greeting section -->
-    <div style="flex: 0 0 auto; display: flex; align-items: center; justify-content: center; padding: 60px 24px 40px;">
-      <h1 style="font-size: 48px; font-weight: 700; font-family: 'Reddit Mono', monospace; text-transform: uppercase; letter-spacing: 1px;">Hey Pixel!</h1>
-    </div>
-
-    <!-- Integration boxes -->
-    <div class="integration-bar" id="integrationBar2" style="display:none;">
-      <div class="int-box" onclick="connectIntegration('gmail')">Gmail</div>
-      <div class="int-box" onclick="connectIntegration('google-sheets')">Google Sheets</div>
-      <div class="int-box" onclick="connectIntegration('google-docs')">Google Docs</div>
-      <div class="int-box" onclick="connectIntegration('adobe-photoshop')">Adobe Photoshop</div>
-      <div class="int-box" onclick="connectIntegration('google-calendar')">Google Calendar</div>
-      <div class="int-box" onclick="connectIntegration('slack')">Slack</div>
-      <div class="int-box" onclick="connectIntegration('pdf')">PDF</div>
-      <div class="int-box" onclick="connectIntegration('granola')">Granola</div>
-    </div>
-
-    <!-- Input bar at BOTTOM -->
-    <div class="hub-input-bar" style="margin-top: auto;">
-      <button class="plus-menu-btn" id="plusMenuBtn2" onclick="togglePlusMenu2()">+</button>
-      <div class="plus-menu" id="plusMenu2" style="display:none;">
-        <div class="plus-menu-item" onclick="togglePluginsPanel(); hidePlusMenu2();">Plugins</div>
-        <div class="plus-menu-item" onclick="toggleDrivePanel(); hidePlusMenu2();">Connectors</div>
-        <div class="plus-menu-item" onclick="triggerFileUpload(); hidePlusMenu2();">Add Files</div>
+  <div id="coworkView" style="display:none;flex:1;flex-direction:row;overflow:hidden;">
+    <!-- Co-Work Sidebar (mirrors page 1) -->
+    <div class="p1-sidebar" id="cwSidebar">
+      <div class="p1-sb-header">
+        <span class="p1-sb-logo">NOISE<span class="sb-dot">.</span></span>
       </div>
-      <input class="wi" id="cwI" type="text" placeholder="What can I help you with today?" style="padding-left: 50px;" onkeydown="if(event.key==='Enter'){document.getElementById('wI').value=this.value;this.value='';hubSend();}">
-      <button class="wi-btn" onclick="document.getElementById('wI').value=document.getElementById('cwI').value;document.getElementById('cwI').value='';hubSend();">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-      </button>
+      <div class="p1-sb-divider"></div>
+      <div style="padding:8px;">
+        <button class="sb-action-btn" onclick="promptNewThread()">+ New Chat</button>
+        <button class="sb-action-btn" onclick="toggleSearchPanel()">Search</button>
+        <button class="sb-action-btn" onclick="toggleProjectsPanel()">Projects</button>
+      </div>
+      <div class="p1-sb-divider"></div>
+      <div class="p1-clients-label">CLIENTS A-Z</div>
+      <div class="p1-clients-section" id="clientList2"></div>
+      <div class="p1-sb-divider"></div>
+      <div class="p1-sb-sections">
+        <div class="sb-section-label">Recents</div>
+        <div class="p1-list" id="cwRecents" style="flex:1;max-height:none;border-bottom:1px solid var(--border);"></div>
+        <div class="sb-section-label">Messages</div>
+        <div class="sb-messages" id="cwMessages" style="padding:6px 8px;overflow-y:auto;max-height:120px;">
+          <div style="font-size:11px;color:var(--text-muted);padding:8px;">No messages yet.</div>
+        </div>
+        <div class="p1-sb-divider"></div>
+        <div style="padding:4px 8px 8px;">
+          <button class="sb-action-btn sb-sm" onclick="togglePluginsPanel()">Plugins</button>
+          <button class="sb-action-btn sb-sm" onclick="toggleDrivePanel()">Connectors</button>
+          <button class="sb-action-btn sb-sm" onclick="triggerFileUpload()">Add Files</button>
+        </div>
+      </div>
+    </div>
+    <!-- Co-Work Main Area -->
+    <div style="flex:1;display:flex;flex-direction:column;overflow:hidden;">
+      <!-- Greeting section -->
+      <div style="flex: 0 0 auto; display: flex; align-items: center; justify-content: center; padding: 60px 24px 40px;">
+        <h1 style="font-size: 48px; font-weight: 700; font-family: 'Reddit Mono', monospace; text-transform: uppercase; letter-spacing: 1px;">Hey Pixel!</h1>
+      </div>
+
+      <!-- Skills panel (mirrors page 1) -->
+      <div class="skills-panel" id="cwSkillsPanel" style="max-width:800px;width:100%;margin:0 auto;">
+        <div class="skills-list">
+          <div class="skill-list-item active" onclick="switchSkillCategory(this, 'social')">Social</div>
+          <div class="skill-list-item" onclick="switchSkillCategory(this, 'strategy')">Strategy</div>
+          <div class="skill-list-item" onclick="switchSkillCategory(this, 'creative')">Creative</div>
+          <div class="skill-list-item" onclick="switchSkillCategory(this, 'analytics')">Analytics</div>
+          <div class="skill-list-item" onclick="switchSkillCategory(this, 'production')">Production</div>
+          <div class="skill-list-item" onclick="switchSkillCategory(this, 'research')">Research</div>
+          <div class="skill-list-item" onclick="switchSkillCategory(this, 'copywriting')">Copywriting</div>
+          <div class="skill-list-item" onclick="switchSkillCategory(this, 'reporting')">Reporting</div>
+          <div class="skill-list-item" onclick="switchSkillCategory(this, 'calendar')">Calendar</div>
+          <div class="skill-list-item" onclick="switchSkillCategory(this, 'social-bot')">Social Media Bot</div>
+          <div class="skill-list-item" onclick="switchSkillCategory(this, 'deep-research')">Deep Research</div>
+        </div>
+        <div class="skills-detail" id="cwSkillsDetail">
+          <div class="skills-detail-title">Social</div>
+          <button class="skill-sub-btn" onclick="startSkillChat('social','Create a social media strategy')">Create a social strategy</button>
+          <button class="skill-sub-btn" onclick="startSkillChat('social','Write an influencer brief')">Influencer brief</button>
+          <button class="skill-sub-btn" onclick="startSkillChat('social','Research relevant hashtags')">Hashtag research</button>
+        </div>
+      </div>
+
+      <!-- Integration boxes (hidden by default) -->
+      <div class="integration-bar" id="integrationBar2" style="display:none;max-width:800px;width:100%;margin:12px auto 0;">
+        <div class="int-box" onclick="connectIntegration('gmail')">Gmail</div>
+        <div class="int-box" onclick="connectIntegration('google-sheets')">Google Sheets</div>
+        <div class="int-box" onclick="connectIntegration('google-docs')">Google Docs</div>
+        <div class="int-box" onclick="connectIntegration('adobe-photoshop')">Adobe Photoshop</div>
+        <div class="int-box" onclick="connectIntegration('google-calendar')">Google Calendar</div>
+        <div class="int-box" onclick="connectIntegration('slack')">Slack</div>
+        <div class="int-box" onclick="connectIntegration('pdf')">PDF</div>
+        <div class="int-box" onclick="connectIntegration('granola')">Granola</div>
+      </div>
+
+      <!-- Input bar at BOTTOM -->
+      <div class="hub-input-bar" style="margin-top: auto; max-width:800px;width:100%;margin-left:auto;margin-right:auto;padding:12px 24px 16px;">
+        <button class="plus-menu-btn" id="plusMenuBtn2" onclick="togglePlusMenu2()">+</button>
+        <div class="plus-menu" id="plusMenu2" style="display:none;">
+          <div class="plus-menu-item" onclick="togglePluginsPanel(); hidePlusMenu2();">Plugins</div>
+          <div class="plus-menu-item" onclick="toggleDrivePanel(); hidePlusMenu2();">Connectors</div>
+          <div class="plus-menu-item" onclick="triggerFileUpload(); hidePlusMenu2();">Add Files</div>
+        </div>
+        <input class="wi" id="cwI" type="text" placeholder="What can I help you with today?" style="padding-left: 50px;" onkeydown="if(event.key==='Enter'){document.getElementById('wI').value=this.value;this.value='';hubSend();}">
+        <button class="wi-btn" onclick="document.getElementById('wI').value=document.getElementById('cwI').value;document.getElementById('cwI').value='';hubSend();">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        </button>
+      </div>
     </div>
   </div>
   <!-- INLINE DOC PANEL (shown when document is generated) -->
@@ -1592,6 +1648,7 @@ function startNewThread(label, client) {
   addMsgTo(hc, greeting, false);
   updateHomeView();
   renderThreadBar();
+  if (typeof renderConvHistory === 'function') renderConvHistory();
 }
 
 function promptNewThread() {
@@ -4239,13 +4296,15 @@ function switchSkillCategory(el, category) {
   items.forEach(function(item) { item.classList.remove('active'); });
   el.classList.add('active');
 
-  // Update detail pane
-  var detail = document.getElementById('skillsDetail');
+  // Update detail pane (both chat and co-work panels)
   var html = '<div class="skills-detail-title">' + data.title + '</div>';
   data.skills.forEach(function(skill) {
     html += '<button class="skill-sub-btn" onclick="startSkillChat(\'' + category + '\',\'' + skill.prompt.replace(/'/g, "\\'") + '\')">' + skill.text + '</button>';
   });
-  detail.innerHTML = html;
+  var detail = document.getElementById('skillsDetail');
+  if (detail) detail.innerHTML = html;
+  var cwDetail = document.getElementById('cwSkillsDetail');
+  if (cwDetail) cwDetail.innerHTML = html;
 }
 
 /* ============ NEW: CLIENT SIDEBAR ============ */
@@ -4282,23 +4341,35 @@ function setClientFolders(clientName, folders) {
 }
 
 function renameClientFolder(clientName, oldName) {
-  var newName = prompt('Rename folder:', oldName);
-  if (!newName || !newName.trim() || newName.trim() === oldName) return;
-  var folders = getClientFolders(clientName);
-  var idx = folders.indexOf(oldName);
-  if (idx !== -1) {
-    folders[idx] = newName.trim();
-    setClientFolders(clientName, folders);
-    renderClientList();
-  }
+  var modal = document.createElement('div');
+  modal.className = 'modal-bg';
+  modal.onclick = function(e) { if (e.target === modal) modal.remove(); };
+  modal.innerHTML = '<div class="modal" style="max-width:400px;">'
+    + '<h3>Rename Folder</h3>'
+    + '<p>Enter a new name for "' + oldName + '"</p>'
+    + '<input id="renameFolderInput" type="text" value="' + oldName + '" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:6px;font-family:Montserrat,sans-serif;font-size:12px;">'
+    + '<div class="modal-btns">'
+    + '<button class="btn-cancel" onclick="this.closest(\'.modal-bg\').remove()">Cancel</button>'
+    + '<button class="btn-primary" onclick="var newName=document.getElementById(\'renameFolderInput\').value.trim();if(newName && newName!==\'' + oldName.replace(/'/g, "\\'") + '\'){var folders=getClientFolders(\'' + clientName.replace(/'/g, "\\'") + '\');var idx=folders.indexOf(\'' + oldName.replace(/'/g, "\\'") + '\');if(idx!==-1){folders[idx]=newName;setClientFolders(\'' + clientName.replace(/'/g, "\\'") + '\',folders);renderClientList();}}this.closest(\'.modal-bg\').remove();">Rename</button>'
+    + '</div></div>';
+  document.body.appendChild(modal);
+  var inp = document.getElementById('renameFolderInput');
+  inp.focus();
+  inp.select();
 }
 
 function deleteClientFolder(clientName, folderName) {
-  if (!confirm('Delete folder "' + folderName + '"?')) return;
-  var folders = getClientFolders(clientName);
-  folders = folders.filter(function(f) { return f !== folderName; });
-  setClientFolders(clientName, folders);
-  renderClientList();
+  var modal = document.createElement('div');
+  modal.className = 'modal-bg';
+  modal.onclick = function(e) { if (e.target === modal) modal.remove(); };
+  modal.innerHTML = '<div class="modal" style="max-width:400px;">'
+    + '<h3>Delete Folder</h3>'
+    + '<p>Are you sure you want to delete "' + folderName + '"?</p>'
+    + '<div class="modal-btns">'
+    + '<button class="btn-cancel" onclick="this.closest(\'.modal-bg\').remove()">Cancel</button>'
+    + '<button class="btn-primary" onclick="var folders=getClientFolders(\'' + clientName.replace(/'/g, "\\'") + '\');folders=folders.filter(function(f){return f!==\'' + folderName.replace(/'/g, "\\'") + '\';});setClientFolders(\'' + clientName.replace(/'/g, "\\'") + '\',folders);renderClientList();this.closest(\'.modal-bg\').remove();">Delete</button>'
+    + '</div></div>';
+  document.body.appendChild(modal);
 }
 
 function newClientChat(clientName) {
@@ -4327,21 +4398,27 @@ function openClientFolder(clientName, folderName) {
 }
 
 function addClientFolder(clientName) {
-  var folderName = prompt('Enter new folder name:');
-  if (!folderName || !folderName.trim()) return;
-  var folders = getClientFolders(clientName);
-  if (folders.indexOf(folderName.trim()) === -1) {
-    folders.push(folderName.trim());
-    setClientFolders(clientName, folders);
-    renderClientList();
-  }
+  var modal = document.createElement('div');
+  modal.className = 'modal-bg';
+  modal.onclick = function(e) { if (e.target === modal) modal.remove(); };
+  modal.innerHTML = '<div class="modal" style="max-width:400px;">'
+    + '<h3>New Folder</h3>'
+    + '<p>Create a new folder for ' + clientName + '</p>'
+    + '<input id="newFolderInput" type="text" placeholder="Folder name" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:6px;font-family:Montserrat,sans-serif;font-size:12px;">'
+    + '<div class="modal-btns">'
+    + '<button class="btn-cancel" onclick="this.closest(\'.modal-bg\').remove()">Cancel</button>'
+    + '<button class="btn-primary" onclick="var name=document.getElementById(\'newFolderInput\').value.trim();if(name){var folders=getClientFolders(\'' + clientName.replace(/'/g, "\\'") + '\');if(folders.indexOf(name)===-1){folders.push(name);setClientFolders(\'' + clientName.replace(/'/g, "\\'") + '\',folders);renderClientList();}}this.closest(\'.modal-bg\').remove();">Create</button>'
+    + '</div></div>';
+  document.body.appendChild(modal);
+  document.getElementById('newFolderInput').focus();
 }
 
 function renderClientList() {
   var container = document.getElementById('clientList');
+  var container2 = document.getElementById('clientList2');
   if (!container) return;
   var sorted = CL.slice().sort(function(a,b) { return a.n.localeCompare(b.n); });
-  container.innerHTML = sorted.map(function(c) {
+  var html = sorted.map(function(c) {
     var folders = getClientFolders(c.n);
     var foldersHtml = folders.map(function(f) {
       return '<div class="client-sub" style="display:flex;align-items:center;justify-content:space-between;" onmouseenter="this.querySelector(\'.folder-actions\').style.display=\'flex\';" onmouseleave="this.querySelector(\'.folder-actions\').style.display=\'none\';">'
@@ -4364,6 +4441,8 @@ function renderClientList() {
       + '</div>'
       + '</div>';
   }).join('');
+  container.innerHTML = html;
+  if (container2) container2.innerHTML = html;
 }
 
 /* ============ CALL renderClientList on user select ============ */
@@ -4400,19 +4479,40 @@ function togglePluginsPanel() {
   var modal = document.createElement('div');
   modal.className = 'modal-bg';
   modal.onclick = function(e) { if (e.target === modal) modal.remove(); };
-  modal.innerHTML = '<div class="modal" style="max-width:480px;">'
-    + '<h3 style="margin-bottom:16px;">Plugins</h3>'
-    + '<div style="font-size:13px;color:var(--text-muted);line-height:1.6;">'
-    + '<p style="margin-bottom:12px;">Plugins extend the Intelligence Hub with new capabilities. Available plugins:</p>'
-    + '<div style="display:flex;flex-direction:column;gap:8px;">'
-    + '<div style="padding:12px;background:var(--surface2);border-radius:8px;"><strong>SEO Analyser</strong> — Audit any URL for SEO performance</div>'
-    + '<div style="padding:12px;background:var(--surface2);border-radius:8px;"><strong>Competitor Tracker</strong> — Monitor competitor social activity</div>'
-    + '<div style="padding:12px;background:var(--surface2);border-radius:8px;"><strong>Hashtag Research</strong> — Find trending hashtags by niche</div>'
-    + '<div style="padding:12px;background:var(--surface2);border-radius:8px;"><strong>Brand Voice</strong> — Enforce tone of voice across outputs</div>'
+
+  var plugins = [
+    { name: 'SEO Analyser', desc: 'Audit any URL for SEO performance', status: 'active' },
+    { name: 'Competitor Tracker', desc: 'Monitor competitor social activity', status: 'active' },
+    { name: 'Hashtag Research', desc: 'Find trending hashtags by niche', status: 'active' },
+    { name: 'Brand Voice', desc: 'Enforce tone of voice across outputs', status: 'active' },
+    { name: 'Content Calendar', desc: 'Auto-schedule posts across platforms', status: 'inactive' },
+    { name: 'Analytics Dashboard', desc: 'Real-time campaign performance metrics', status: 'inactive' },
+    { name: 'Email Sequence Builder', desc: 'Draft and automate email campaigns', status: 'inactive' },
+    { name: 'Client Reporting', desc: 'Generate branded client reports', status: 'inactive' }
+  ];
+
+  var pluginsHtml = plugins.map(function(p) {
+    var statusStyle = p.status === 'active'
+      ? 'background:#2D8A4E;color:white;'
+      : 'background:var(--surface2);color:var(--text-muted);';
+    var statusText = p.status === 'active' ? 'Active' : 'Install';
+    return '<div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--surface2);border-radius:8px;border:1px solid var(--border);">'
+      + '<div style="flex:1;">'
+      + '<div style="font-weight:600;font-size:13px;font-family:Montserrat,sans-serif;">' + p.name + '</div>'
+      + '<div style="font-size:11px;color:var(--text-muted);margin-top:2px;">' + p.desc + '</div>'
+      + '</div>'
+      + '<button style="padding:4px 12px;border-radius:6px;border:none;font-size:10px;font-weight:600;font-family:Reddit Mono,monospace;text-transform:uppercase;letter-spacing:0.3px;cursor:pointer;' + statusStyle + '">' + statusText + '</button>'
+      + '</div>';
+  }).join('');
+
+  modal.innerHTML = '<div class="modal" style="max-width:520px;">'
+    + '<h3>Plugins</h3>'
+    + '<p>Extend the Intelligence Hub with new capabilities.</p>'
+    + '<div style="display:flex;flex-direction:column;gap:8px;max-height:360px;overflow-y:auto;">'
+    + pluginsHtml
     + '</div>'
-    + '<p style="margin-top:12px;font-size:11px;color:var(--text-muted);">Plugin marketplace coming soon.</p>'
-    + '</div>'
-    + '<button onclick="this.closest(\'.modal-bg\').remove()" style="margin-top:16px;padding:8px 20px;background:var(--accent);color:white;border:none;border-radius:8px;font-size:12px;cursor:pointer;">Close</button>'
+    + '<p style="margin-top:12px;font-size:11px;color:var(--text-muted);">Plugin marketplace coming soon. Toggle plugins on/off as needed.</p>'
+    + '<div class="modal-btns"><button class="btn-cancel" onclick="this.closest(\'.modal-bg\').remove()">Close</button></div>'
     + '</div>';
   document.body.appendChild(modal);
 }
@@ -4684,7 +4784,7 @@ function toggleSearchPanel() {
 
   modal.innerHTML = '<div class="modal" style="max-width:520px;">'
     + '<h3>Search</h3>'
-    + '<p>Search chats, threads, and projects.</p>'
+    + '<p>Search chats and projects.</p>'
     + '<div style="display:flex;gap:6px;margin-bottom:16px;">'
     + '<input id="searchInput" type="text" placeholder="Search..." style="flex:1;">'
     + '</div>'
@@ -4699,37 +4799,58 @@ function toggleSearchPanel() {
   var handleSearchFunc = function() {
     var query = document.getElementById('searchInput').value.trim().toLowerCase();
     if (!query) {
-      return '<div style="font-size:12px;color:var(--text-muted);padding:12px;">Start typing to search...</div>';
+      return '<div style="font-size:12px;color:var(--text-muted);padding:12px;">Start typing to search chats and projects...</div>';
     }
     var matches = [];
+    // Search clients as projects
     clients.forEach(function(c) {
       var clientName = c.n || c.name || '';
-      if (clientName.toLowerCase().includes(query)) {
-        matches.push({ type: 'client', name: clientName });
+      if (clientName.toLowerCase().includes(query) || (c.cat && c.cat.toLowerCase().includes(query))) {
+        matches.push({ type: 'project', name: clientName, cat: c.cat || '' });
       }
     });
+    // Search threads / chats
     threads.forEach(function(t) {
       if (t.label && t.label.toLowerCase().includes(query)) {
-        matches.push({ type: 'thread', name: t.label, id: t.id });
+        matches.push({ type: 'thread', name: t.label, id: t.id, client: t.client || 'General' });
+      }
+    });
+    // Search conversation history
+    var convThreads = currentUser ? JSON.parse(localStorage.getItem('nih_threads_' + currentUser.name) || '[]') : [];
+    convThreads.forEach(function(t) {
+      var tName = t.client || 'Chat';
+      if (tName.toLowerCase().includes(query) || (t.id && t.id.toLowerCase().includes(query))) {
+        var already = matches.some(function(m) { return m.id === t.id; });
+        if (!already) {
+          matches.push({ type: 'thread', name: tName, id: t.id, client: t.client || 'General' });
+        }
       }
     });
     if (matches.length === 0) {
       return '<div style="font-size:12px;color:var(--text-muted);padding:12px;">No results found.</div>';
     }
     var html = '';
-    matches.forEach(function(m) {
-      if (m.type === 'client') {
+    // Projects first
+    var projects = matches.filter(function(m) { return m.type === 'project'; });
+    var chats = matches.filter(function(m) { return m.type === 'thread'; });
+    if (projects.length > 0) {
+      html += '<div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-muted);padding:4px 0;margin-top:4px;">Projects</div>';
+      projects.forEach(function(m) {
         html += '<div class="project-item" onclick="openProject(\'' + m.name.replace(/'/g, "\\'") + '\');this.closest(\'.modal-bg\').remove();" style="cursor:pointer;">'
           + '<strong>' + m.name + '</strong>'
-          + '<div style="font-size:10px;color:var(--text-muted);margin-top:2px;">Client</div>'
+          + '<div style="font-size:10px;color:var(--text-muted);margin-top:2px;">' + m.cat + '</div>'
           + '</div>';
-      } else {
+      });
+    }
+    if (chats.length > 0) {
+      html += '<div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-muted);padding:4px 0;margin-top:8px;">Chats</div>';
+      chats.forEach(function(m) {
         html += '<div class="project-item" onclick="switchThread(\'' + m.id + '\');this.closest(\'.modal-bg\').remove();switchTab(\'chat\');" style="cursor:pointer;">'
           + '<strong>' + m.name + '</strong>'
-          + '<div style="font-size:10px;color:var(--text-muted);margin-top:2px;">Chat Thread</div>'
+          + '<div style="font-size:10px;color:var(--text-muted);margin-top:2px;">' + (m.client || 'Chat Thread') + '</div>'
           + '</div>';
-      }
-    });
+      });
+    }
     return html;
   };
   document.getElementById('searchInput').onkeyup = function() {
@@ -4742,31 +4863,43 @@ function toggleProjectsPanel() {
   var modal = document.createElement('div');
   modal.className = 'modal-bg';
   modal.onclick = function(e) { if (e.target === modal) modal.remove(); };
-  var store = loadStore();
-  var projects = store.projects || [];
-  var projectsHtml = '';
-  if (projects.length === 0) {
-    // Create default projects from client list
-    var clients = typeof CL !== 'undefined' ? CL : [];
-    clients.forEach(function(c) {
-      projectsHtml += '<div class="project-item" onclick="openProject(\'' + c.name.replace(/'/g, "\\'") + '\');this.closest(\'.modal-bg\').remove();">'
-        + '<strong>' + c.name + '</strong>'
-        + '<div style="font-size:10px;color:var(--text-muted);margin-top:2px;">Client project</div>'
+  var clients = typeof CL !== 'undefined' ? CL : [];
+
+  function buildProjectList(query) {
+    var filtered = clients;
+    if (query) {
+      filtered = clients.filter(function(c) {
+        return (c.n || '').toLowerCase().includes(query.toLowerCase());
+      });
+    }
+    if (filtered.length === 0) {
+      return '<div style="font-size:12px;color:var(--text-muted);padding:12px;">No projects found.</div>';
+    }
+    return filtered.map(function(c) {
+      var name = c.n || '';
+      return '<div class="project-item" onclick="openProject(\'' + name.replace(/'/g, "\\'") + '\');this.closest(\'.modal-bg\').remove();">'
+        + '<strong>' + name + '</strong>'
+        + '<div style="font-size:10px;color:var(--text-muted);margin-top:2px;">' + (c.cat || 'Client project') + '</div>'
         + '</div>';
-    });
+    }).join('');
   }
+
   modal.innerHTML = '<div class="modal" style="max-width:520px;">'
     + '<h3>Projects</h3>'
     + '<p>Click a project to open it. Projects are shareable across the team.</p>'
     + '<div style="display:flex;gap:6px;margin-bottom:16px;">'
     + '<input id="projectSearch" type="text" placeholder="Search projects..." style="flex:1;">'
     + '</div>'
-    + '<div style="max-height:300px;overflow-y:auto;display:flex;flex-direction:column;gap:6px;">'
-    + projectsHtml
+    + '<div id="projectListDiv" style="max-height:300px;overflow-y:auto;display:flex;flex-direction:column;gap:6px;">'
+    + buildProjectList('')
     + '</div>'
     + '<div class="modal-btns"><button class="btn-cancel" onclick="this.closest(\'.modal-bg\').remove()">Close</button></div>'
     + '</div>';
   document.body.appendChild(modal);
+  document.getElementById('projectSearch').onkeyup = function() {
+    document.getElementById('projectListDiv').innerHTML = buildProjectList(this.value.trim());
+  };
+  document.getElementById('projectSearch').focus();
 }
 
 function openProject(clientName) {

@@ -776,6 +776,16 @@
     letter-spacing: 1.2px; color: var(--text-muted);
   }
   .plus-menu-divider { height: 1px; background: var(--border); margin: 4px 10px; }
+  .plus-menu-item-parent { position: relative; }
+  .plus-menu-item-parent > .plus-menu-item::after { content: '›'; margin-left: auto; font-size: 16px; color: var(--text-muted); }
+  .plus-menu-sub {
+    display: none; position: absolute; left: 100%; bottom: 0;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    box-shadow: var(--shadow-lg); min-width: 200px; z-index: 101; overflow: hidden;
+    max-height: 400px; overflow-y: auto;
+  }
+  .plus-menu-item-parent:hover > .plus-menu-sub { display: block; }
+  .plus-menu-sub .plus-menu-item { font-size: 12px; padding: 9px 14px; }
 
   /* Sidebar action buttons */
   .sb-action-btn {
@@ -809,6 +819,238 @@
     cursor: pointer; transition: all 0.15s;
   }
   .project-item:hover { border-color: var(--accent); background: var(--accent-light); }
+
+  /* ============ PROJECT TAB BAR ============ */
+  .project-tab-bar {
+    display: flex; gap: 4px; padding: 6px 8px;
+    overflow-x: auto; overflow-y: hidden;
+    border-bottom: 1px solid var(--border);
+    scrollbar-width: thin;
+  }
+  .project-tab-bar::-webkit-scrollbar { height: 4px; }
+  .project-tab-bar::-webkit-scrollbar-track { background: transparent; }
+  .project-tab-bar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+  .project-tab {
+    display: flex; align-items: center; gap: 4px;
+    padding: 5px 8px; background: var(--surface2);
+    border: 1px solid var(--border); border-radius: 5px; border-left: 3px solid transparent;
+    font-family: 'Reddit Mono', monospace; font-size: 10px; font-weight: 600;
+    color: var(--text); white-space: nowrap; flex-shrink: 0;
+    cursor: pointer; transition: all 0.15s; text-transform: uppercase; letter-spacing: 0.3px;
+  }
+  .project-tab:hover { background: var(--surface); border-color: var(--text-muted); }
+  .project-tab.active { background: var(--surface); border-color: var(--accent); color: var(--accent); border-left-color: var(--accent); }
+  .project-tab[data-color="red"] { border-left-color: #C73C1E; }
+  .project-tab[data-color="blue"] { border-left-color: #2B6CB0; }
+  .project-tab[data-color="green"] { border-left-color: #2D8A4E; }
+  .project-tab[data-color="purple"] { border-left-color: #8B5CF6; }
+  .project-tab[data-color="amber"] { border-left-color: #D97706; }
+  .project-tab-close {
+    width: 14px; height: 14px; padding: 0; background: none; border: none;
+    color: var(--text-muted); cursor: pointer; font-size: 12px; line-height: 1;
+    display: flex; align-items: center; justify-content: center; transition: color 0.15s;
+  }
+  .project-tab-close:hover { color: var(--accent); }
+  .project-tab-add {
+    width: 26px; height: 26px; padding: 0; flex-shrink: 0;
+    background: var(--accent-light); border: 1px solid var(--border); border-radius: 5px;
+    color: var(--accent); cursor: pointer; font-size: 14px; font-weight: 600;
+    display: flex; align-items: center; justify-content: center; transition: all 0.15s;
+  }
+  .project-tab-add:hover { background: var(--accent); color: white; border-color: var(--accent); }
+
+  /* ============ SEARCH PANEL (inline sidebar) ============ */
+  .search-panel { display: none; flex-direction: column; flex: 1; overflow: hidden; }
+  .search-panel.active { display: flex; }
+  .search-panel-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 12px; border-bottom: 1px solid var(--border);
+  }
+  .search-panel-label {
+    font-family: 'Reddit Mono', monospace; font-size: 9px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-muted);
+  }
+  .search-close-btn {
+    background: none; border: none; cursor: pointer; color: var(--text-muted);
+    font-size: 16px; padding: 2px 6px; transition: color 0.15s;
+  }
+  .search-close-btn:hover { color: var(--accent); }
+  .search-input-wrap { padding: 8px 12px; position: relative; }
+  .search-input {
+    width: 100%; padding: 8px 10px 8px 30px;
+    border: 1px solid var(--border); border-radius: 8px;
+    font-family: 'Montserrat', sans-serif; font-size: 12px;
+    background: var(--surface); color: var(--text); outline: none;
+  }
+  .search-input:focus { border-color: var(--accent); }
+  .search-input-icon {
+    position: absolute; left: 20px; top: 50%; transform: translateY(-50%);
+    font-size: 12px; color: var(--text-muted); pointer-events: none;
+  }
+  .search-filters {
+    display: flex; gap: 4px; padding: 6px 12px; border-bottom: 1px solid var(--border);
+  }
+  .search-filter-chip {
+    padding: 3px 8px; border-radius: 10px; font-size: 9px; font-weight: 600;
+    font-family: 'Reddit Mono', monospace; cursor: pointer;
+    border: 1px solid var(--border); background: transparent; color: var(--text-muted);
+    transition: all 0.15s; text-transform: uppercase; letter-spacing: 0.3px;
+  }
+  .search-filter-chip:hover { border-color: var(--text-muted); color: var(--text); }
+  .search-filter-chip.active { background: var(--text); color: white; border-color: var(--text); }
+  .search-results { flex: 1; overflow-y: auto; padding: 6px 8px; }
+  .search-result-item {
+    padding: 8px 10px; border: 1px solid var(--border); border-radius: 6px;
+    background: var(--surface); cursor: pointer; transition: all 0.15s; margin-bottom: 4px;
+  }
+  .search-result-item:hover { border-color: var(--accent); background: var(--accent-light); }
+  .search-result-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 3px; }
+  .search-result-name { font-size: 11px; font-weight: 600; color: var(--text); flex: 1; }
+  .search-result-type {
+    padding: 1px 6px; border-radius: 4px; font-size: 8px; font-weight: 700;
+    font-family: 'Reddit Mono', monospace; text-transform: uppercase; letter-spacing: 0.3px;
+  }
+  .search-result-type.chat { background: rgba(199,60,30,0.1); color: var(--accent); }
+  .search-result-type.client { background: rgba(43,108,176,0.1); color: #2B6CB0; }
+  .search-result-type.project { background: rgba(139,92,246,0.1); color: #8B5CF6; }
+  .search-result-preview {
+    font-size: 10px; color: var(--text-muted); line-height: 1.3;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .search-result-preview mark { background: #FFF3CD; padding: 0 2px; border-radius: 2px; }
+
+  /* ============ PROJECTS PANEL (inline sidebar) ============ */
+  .projects-panel { display: none; flex-direction: column; flex: 1; overflow: hidden; }
+  .projects-panel.active { display: flex; }
+  .projects-panel-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 12px; border-bottom: 1px solid var(--border);
+  }
+  .projects-panel-label {
+    font-family: 'Reddit Mono', monospace; font-size: 9px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-muted);
+  }
+  .projects-panel-add {
+    background: var(--accent); color: white; border: none; border-radius: 6px;
+    padding: 4px 8px; font-size: 9px; font-weight: 700; cursor: pointer;
+    font-family: 'Reddit Mono', monospace; text-transform: uppercase; letter-spacing: 0.3px;
+  }
+  .projects-panel-add:hover { background: #a82e15; }
+  .projects-panel-close {
+    background: none; border: none; cursor: pointer; color: var(--text-muted);
+    font-size: 16px; padding: 2px 6px; transition: color 0.15s;
+  }
+  .projects-panel-close:hover { color: var(--accent); }
+  .projects-list { flex: 1; overflow-y: auto; padding: 6px 8px; }
+  .project-card {
+    padding: 10px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; border-left: 3px solid transparent;
+    cursor: pointer; transition: all 0.15s; margin-bottom: 6px; position: relative;
+  }
+  .project-card:hover { border-color: var(--accent); background: var(--accent-light); }
+  .project-card.active { border-color: var(--accent); background: var(--accent-light); }
+  .project-card[data-color="red"] { border-left-color: #C73C1E; }
+  .project-card[data-color="blue"] { border-left-color: #2B6CB0; }
+  .project-card[data-color="green"] { border-left-color: #2D8A4E; }
+  .project-card[data-color="purple"] { border-left-color: #8B5CF6; }
+  .project-card[data-color="amber"] { border-left-color: #D97706; }
+  .project-card-name { font-size: 12px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+  .project-card-meta { font-size: 9px; color: var(--text-muted); display: flex; gap: 8px; }
+  .project-card-client {
+    background: var(--green-bg); color: var(--green); padding: 1px 5px;
+    border-radius: 3px; font-size: 8px; font-weight: 600;
+  }
+  .project-card-actions {
+    display: none; gap: 2px; position: absolute; top: 6px; right: 6px;
+  }
+  .project-card:hover .project-card-actions { display: flex; }
+  .project-card-actions button {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 4px;
+    width: 22px; height: 22px; cursor: pointer; font-size: 10px;
+    color: var(--text-muted); display: flex; align-items: center; justify-content: center;
+    padding: 0; transition: all 0.15s;
+  }
+  .project-card-actions button:hover { background: var(--accent-light); color: var(--accent); border-color: var(--accent); }
+  .project-card-threads { padding: 4px 0 0 8px; }
+  .project-card-thread {
+    font-size: 10px; color: var(--text-muted); padding: 4px 8px;
+    border-radius: 4px; cursor: pointer; transition: all 0.15s; margin-bottom: 2px;
+  }
+  .project-card-thread:hover { background: var(--surface2); color: var(--text); }
+
+  /* ============ CLIENT ROLE BADGES ============ */
+  .client-role-badges { display: flex; gap: 4px; padding: 4px 12px 0; }
+  .role-badge {
+    padding: 2px 7px; border-radius: 10px; font-size: 8px; font-weight: 700;
+    font-family: 'Reddit Mono', monospace; text-transform: uppercase; letter-spacing: 0.3px;
+    cursor: pointer; border: 1px solid transparent; transition: all 0.15s;
+  }
+  .role-badge[data-role="client"] { background: rgba(43,108,176,0.1); color: #2B6CB0; border-color: rgba(43,108,176,0.2); }
+  .role-badge[data-role="creator"] { background: rgba(139,92,246,0.1); color: #8B5CF6; border-color: rgba(139,92,246,0.2); }
+  .role-badge[data-role="editor"] { background: rgba(45,138,78,0.1); color: #2D8A4E; border-color: rgba(45,138,78,0.2); }
+  .role-badge:hover { opacity: 0.8; transform: scale(1.05); }
+
+  /* ============ MOVE DROPDOWN ============ */
+  .move-dropdown {
+    position: fixed; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; box-shadow: var(--shadow-lg); z-index: 200;
+    min-width: 200px; max-width: 260px; overflow: hidden;
+  }
+  .move-dropdown-header {
+    padding: 6px 10px; font-size: 9px; font-weight: 700;
+    font-family: 'Reddit Mono', monospace; text-transform: uppercase;
+    letter-spacing: 1px; color: var(--text-muted); border-bottom: 1px solid var(--border);
+    background: var(--surface2);
+  }
+  .move-dropdown-item {
+    padding: 8px 10px; cursor: pointer; transition: background 0.15s; font-size: 11px;
+  }
+  .move-dropdown-item:hover { background: var(--accent-light); color: var(--accent); }
+  .move-dropdown-new {
+    padding: 8px 10px; cursor: pointer; color: var(--accent); font-size: 11px;
+    font-weight: 600; border-top: 1px solid var(--border); transition: background 0.15s;
+  }
+  .move-dropdown-new:hover { background: var(--accent-light); }
+
+  /* ============ THREAD ENHANCEMENTS ============ */
+  .sb-thread-date {
+    font-size: 9px; color: var(--text-muted); margin-top: 2px;
+    font-family: 'Reddit Mono', monospace;
+  }
+  .sb-thread-actions {
+    display: none; gap: 2px; position: absolute; top: 6px; right: 6px;
+  }
+  .sb-thread { position: relative; }
+  .sb-thread:hover .sb-thread-actions { display: flex; }
+  .sb-thread-action {
+    background: none; border: none; cursor: pointer; font-size: 10px;
+    padding: 2px 4px; color: var(--text-muted); border-radius: 3px; transition: all 0.15s;
+  }
+  .sb-thread-action:hover { background: var(--accent-light); color: var(--accent); }
+  .sb-thread-project-badge {
+    display: inline-block; padding: 1px 5px; border-radius: 3px;
+    font-size: 8px; font-weight: 600; font-family: 'Reddit Mono', monospace;
+    background: rgba(139,92,246,0.1); color: #8B5CF6; margin-left: 4px;
+  }
+
+  /* ============ TOAST NOTIFICATION ============ */
+  .toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+    background: #1B1B1B; color: white; padding: 10px 20px;
+    border-radius: 8px; font-size: 12px; font-weight: 500;
+    font-family: 'Montserrat', sans-serif; box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    z-index: 9999; opacity: 0; transition: opacity 0.3s;
+  }
+  .toast.show { opacity: 1; }
+
+  /* ============ COLOR PICKER ============ */
+  .color-picker { display: flex; gap: 8px; align-items: center; padding: 4px 0; }
+  .color-dot {
+    width: 20px; height: 20px; border-radius: 50%; cursor: pointer;
+    border: 2px solid transparent; transition: all 0.15s;
+  }
+  .color-dot:hover { transform: scale(1.15); }
+  .color-dot.selected { border-color: var(--text); box-shadow: 0 0 0 2px white, 0 0 0 4px var(--text); }
 </style>
 </head>
 <body>
@@ -818,8 +1060,8 @@
   <div class="logo" onclick="goPage(1)">NM<span class="dot">.</span></div>
   <span class="header-title" onclick="goPage(1)">Noise Intelligence <span id="modeIndicator" style="font-size:11px;opacity:0.6;"></span></span>
   <div class="header-tabs">
-    <button class="header-tab active" onclick="switchTab('chat')" data-tab="chat">Chat</button>
-    <button class="header-tab" onclick="switchTab('cowork')" data-tab="cowork">Co-Work</button>
+    <button class="header-tab active" onclick="switchTab('chat', true)" data-tab="chat">Chat</button>
+    <button class="header-tab" onclick="switchTab('cowork', true)" data-tab="cowork">Co-Work</button>
   </div>
   <div class="header-right">
     <button class="header-btn" onclick="showSettings()" title="Settings" style="font-size:16px;padding:6px 10px;">&#9881;</button>
@@ -849,23 +1091,60 @@
       <button class="sb-action-btn" onclick="toggleSearchPanel()">Search</button>
       <button class="sb-action-btn" onclick="toggleProjectsPanel()">Projects</button>
     </div>
+    <!-- Project Tab Bar -->
+    <div class="project-tab-bar" id="projectTabBar"></div>
     <div class="p1-sb-divider"></div>
-    <div class="p1-clients-label">CLIENTS A-Z</div>
-    <div class="p1-clients-section" id="clientList"></div>
-    <div class="p1-sb-divider"></div>
-    <div class="p1-sb-sections">
-      <div class="sb-section-label">Conversation History</div>
-      <div class="p1-list" id="sbL" style="flex:1;max-height:none;border-bottom:1px solid var(--border);"></div>
-      <div class="sb-section-label">Messages</div>
-      <div class="sb-messages" id="sbMessages" style="padding:6px 8px;overflow-y:auto;max-height:120px;">
-        <div style="font-size:11px;color:var(--text-muted);padding:8px;">No messages yet.</div>
-      </div>
+
+    <!-- DEFAULT VIEW: Clients + History -->
+    <div id="defaultSidebarView" style="display:flex;flex-direction:column;flex:1;overflow:hidden;">
+      <div class="p1-clients-label">CLIENTS A-Z</div>
+      <div class="p1-clients-section" id="clientList"></div>
       <div class="p1-sb-divider"></div>
-      <div style="padding:4px 8px 8px;">
-        <button class="sb-action-btn sb-sm" onclick="togglePluginsPanel()">Plugins</button>
-        <button class="sb-action-btn sb-sm" onclick="toggleDrivePanel()">Connectors</button>
-        <button class="sb-action-btn sb-sm" onclick="triggerFileUpload()">Add Files</button>
+      <div class="p1-sb-sections">
+        <div class="sb-section-label">Conversation History</div>
+        <div class="p1-list" id="sbL" style="flex:1;max-height:none;border-bottom:1px solid var(--border);"></div>
+        <div class="sb-section-label">Messages</div>
+        <div class="sb-messages" id="sbMessages" style="padding:6px 8px;overflow-y:auto;max-height:120px;">
+          <div style="font-size:11px;color:var(--text-muted);padding:8px;">No messages yet.</div>
+        </div>
+        <div class="p1-sb-divider"></div>
+        <div style="padding:4px 8px 8px;">
+          <button class="sb-action-btn sb-sm" onclick="togglePluginsPanel()">Plugins</button>
+          <button class="sb-action-btn sb-sm" onclick="toggleDrivePanel()">Connectors</button>
+          <button class="sb-action-btn sb-sm" onclick="triggerFileUpload()">Add Files</button>
+        </div>
       </div>
+    </div>
+
+    <!-- SEARCH PANEL (inline, hidden by default) -->
+    <div class="search-panel" id="searchPanel">
+      <div class="search-panel-header">
+        <span class="search-panel-label">Search</span>
+        <button class="search-close-btn" onclick="closeSearchPanel()">&times;</button>
+      </div>
+      <div class="search-input-wrap">
+        <span class="search-input-icon">&#128269;</span>
+        <input type="text" class="search-input" id="searchInput" placeholder="Search chats, clients, projects..." autocomplete="off" oninput="performSearch(this.value)">
+      </div>
+      <div class="search-filters">
+        <button class="search-filter-chip active" onclick="setSearchFilter('all', this)">All</button>
+        <button class="search-filter-chip" onclick="setSearchFilter('chats', this)">Chats</button>
+        <button class="search-filter-chip" onclick="setSearchFilter('clients', this)">Clients</button>
+        <button class="search-filter-chip" onclick="setSearchFilter('projects', this)">Projects</button>
+      </div>
+      <div class="search-results" id="searchResults">
+        <div style="padding:20px;text-align:center;color:var(--text-muted);font-size:11px;">Start typing to search...</div>
+      </div>
+    </div>
+
+    <!-- PROJECTS PANEL (inline, hidden by default) -->
+    <div class="projects-panel" id="projectsPanel">
+      <div class="projects-panel-header">
+        <span class="projects-panel-label">Projects</span>
+        <button class="projects-panel-add" onclick="addNewProject()">+ New</button>
+        <button class="projects-panel-close" onclick="closeProjectsPanel()">&times;</button>
+      </div>
+      <div class="projects-list" id="projectsList"></div>
     </div>
     <!-- Hidden panels for teach/drive functionality (JS still works) -->
     <div style="display:none" id="hiddenPanels">
@@ -925,41 +1204,6 @@
   <div class="p1-top-row">
   <div class="p1-main" id="chatView">
     <div class="hub-chat-area">
-      <!-- Skills & Services panel (2-column master-detail) -->
-      <div class="skills-panel">
-        <div class="skills-list">
-          <div class="skill-list-item active" onclick="switchSkillCategory(this, 'social')">Social</div>
-          <div class="skill-list-item" onclick="switchSkillCategory(this, 'strategy')">Strategy</div>
-          <div class="skill-list-item" onclick="switchSkillCategory(this, 'creative')">Creative</div>
-          <div class="skill-list-item" onclick="switchSkillCategory(this, 'analytics')">Analytics</div>
-          <div class="skill-list-item" onclick="switchSkillCategory(this, 'production')">Production</div>
-          <div class="skill-list-item" onclick="switchSkillCategory(this, 'research')">Research</div>
-          <div class="skill-list-item" onclick="switchSkillCategory(this, 'copywriting')">Copywriting</div>
-          <div class="skill-list-item" onclick="switchSkillCategory(this, 'reporting')">Reporting</div>
-          <div class="skill-list-item" onclick="switchSkillCategory(this, 'calendar')">Calendar</div>
-          <div class="skill-list-item" onclick="switchSkillCategory(this, 'social-bot')">Social Media Bot</div>
-          <div class="skill-list-item" onclick="switchSkillCategory(this, 'deep-research')">Deep Research</div>
-        </div>
-        <div class="skills-detail" id="skillsDetail">
-          <div class="skills-detail-title">Social</div>
-          <button class="skill-sub-btn" onclick="startSkillChat('social','Create a social media strategy')">Create a social strategy</button>
-          <button class="skill-sub-btn" onclick="startSkillChat('social','Write an influencer brief')">Influencer brief</button>
-          <button class="skill-sub-btn" onclick="startSkillChat('social','Research relevant hashtags')">Hashtag research</button>
-        </div>
-      </div>
-
-      <!-- Integration boxes -->
-      <div class="integration-bar" id="integrationBar" style="display:none;">
-        <div class="int-box" onclick="connectIntegration('gmail')">Gmail</div>
-        <div class="int-box" onclick="connectIntegration('google-sheets')">Google Sheets</div>
-        <div class="int-box" onclick="connectIntegration('google-docs')">Google Docs</div>
-        <div class="int-box" onclick="connectIntegration('adobe-photoshop')">Adobe Photoshop</div>
-        <div class="int-box" onclick="connectIntegration('google-calendar')">Google Calendar</div>
-        <div class="int-box" onclick="connectIntegration('slack')">Slack</div>
-        <div class="int-box" onclick="connectIntegration('pdf')">PDF</div>
-        <div class="int-box" onclick="connectIntegration('granola')">Granola</div>
-      </div>
-
       <!-- Chat messages -->
       <div class="thread-bar" id="threadBar"></div>
       <div class="hub-msgs" id="hubChat"></div>
@@ -976,9 +1220,40 @@
       <div class="hub-input-bar">
         <button class="plus-menu-btn" id="plusMenuBtn" onclick="togglePlusMenu()">+</button>
         <div class="plus-menu" id="plusMenu" style="display:none;">
-          <div class="plus-menu-item" onclick="togglePluginsPanel(); hidePlusMenu();">Plugins</div>
-          <div class="plus-menu-item" onclick="toggleDrivePanel(); hidePlusMenu();">Connectors</div>
-          <div class="plus-menu-item" onclick="triggerFileUpload(); hidePlusMenu();">Add Files</div>
+          <div class="plus-menu-item" onclick="triggerFileUpload(); hidePlusMenu();">📎 Add files or photos</div>
+          <div class="plus-menu-divider"></div>
+          <div class="plus-menu-item-parent">
+            <div class="plus-menu-item">🛠 Skills</div>
+            <div class="plus-menu-sub">
+              <div class="plus-menu-item" onclick="startSkillChat('social','Help with social media'); hidePlusMenu();">Social</div>
+              <div class="plus-menu-item" onclick="startSkillChat('strategy','Help with strategy'); hidePlusMenu();">Strategy</div>
+              <div class="plus-menu-item" onclick="startSkillChat('creative','Help with creative'); hidePlusMenu();">Creative</div>
+              <div class="plus-menu-item" onclick="startSkillChat('analytics','Help with analytics'); hidePlusMenu();">Analytics</div>
+              <div class="plus-menu-item" onclick="startSkillChat('production','Help with production'); hidePlusMenu();">Production</div>
+              <div class="plus-menu-item" onclick="startSkillChat('research','Help with research'); hidePlusMenu();">Research</div>
+              <div class="plus-menu-item" onclick="startSkillChat('copywriting','Help with copywriting'); hidePlusMenu();">Copywriting</div>
+              <div class="plus-menu-item" onclick="startSkillChat('reporting','Help with reporting'); hidePlusMenu();">Reporting</div>
+              <div class="plus-menu-item" onclick="startSkillChat('calendar','Help with calendar'); hidePlusMenu();">Calendar</div>
+              <div class="plus-menu-item" onclick="startSkillChat('social-bot','Help with social media bot'); hidePlusMenu();">Social Media Bot</div>
+              <div class="plus-menu-item" onclick="startSkillChat('deep-research','Help with deep research'); hidePlusMenu();">Deep Research</div>
+            </div>
+          </div>
+          <div class="plus-menu-item-parent">
+            <div class="plus-menu-item">🔗 Connectors</div>
+            <div class="plus-menu-sub">
+              <div class="plus-menu-item" onclick="connectIntegration('gmail'); hidePlusMenu();">Gmail</div>
+              <div class="plus-menu-item" onclick="connectIntegration('google-sheets'); hidePlusMenu();">Google Sheets</div>
+              <div class="plus-menu-item" onclick="connectIntegration('google-docs'); hidePlusMenu();">Google Docs</div>
+              <div class="plus-menu-item" onclick="connectIntegration('adobe-photoshop'); hidePlusMenu();">Adobe Photoshop</div>
+              <div class="plus-menu-item" onclick="connectIntegration('google-calendar'); hidePlusMenu();">Google Calendar</div>
+              <div class="plus-menu-item" onclick="connectIntegration('slack'); hidePlusMenu();">Slack</div>
+              <div class="plus-menu-item" onclick="connectIntegration('pdf'); hidePlusMenu();">PDF</div>
+              <div class="plus-menu-item" onclick="connectIntegration('granola'); hidePlusMenu();">Granola</div>
+            </div>
+          </div>
+          <div class="plus-menu-item-parent">
+            <div class="plus-menu-item" onclick="togglePluginsPanel(); hidePlusMenu();">🧩 Plugins</div>
+          </div>
         </div>
         <input class="wi" id="wI" type="text" placeholder="What can I help you with today?" style="padding-left: 50px;">
         <button class="wi-btn" onclick="hubSend()">
@@ -1000,6 +1275,8 @@
         <button class="sb-action-btn" onclick="toggleSearchPanel()">Search</button>
         <button class="sb-action-btn" onclick="toggleProjectsPanel()">Projects</button>
       </div>
+      <!-- Project Tab Bar (Co-Work) -->
+      <div class="project-tab-bar" id="projectTabBar2"></div>
       <div class="p1-sb-divider"></div>
       <div class="p1-clients-label">CLIENTS A-Z</div>
       <div class="p1-clients-section" id="clientList2"></div>
@@ -1026,48 +1303,46 @@
         <h1 style="font-size: 42px; font-weight: 700; font-family: 'Reddit Mono', monospace; text-transform: uppercase; letter-spacing: 1px;">Hey Pixel!</h1>
       </div>
 
-      <!-- Skills panel (mirrors page 1) -->
-      <div class="skills-panel" id="cwSkillsPanel" style="max-width:800px;width:100%;margin:0 auto 16px;flex-shrink:0;">
-        <div class="skills-list">
-          <div class="skill-list-item active" onclick="switchSkillCategory(this, 'social')">Social</div>
-          <div class="skill-list-item" onclick="switchSkillCategory(this, 'strategy')">Strategy</div>
-          <div class="skill-list-item" onclick="switchSkillCategory(this, 'creative')">Creative</div>
-          <div class="skill-list-item" onclick="switchSkillCategory(this, 'analytics')">Analytics</div>
-          <div class="skill-list-item" onclick="switchSkillCategory(this, 'production')">Production</div>
-          <div class="skill-list-item" onclick="switchSkillCategory(this, 'research')">Research</div>
-          <div class="skill-list-item" onclick="switchSkillCategory(this, 'copywriting')">Copywriting</div>
-          <div class="skill-list-item" onclick="switchSkillCategory(this, 'reporting')">Reporting</div>
-          <div class="skill-list-item" onclick="switchSkillCategory(this, 'calendar')">Calendar</div>
-          <div class="skill-list-item" onclick="switchSkillCategory(this, 'social-bot')">Social Media Bot</div>
-          <div class="skill-list-item" onclick="switchSkillCategory(this, 'deep-research')">Deep Research</div>
-        </div>
-        <div class="skills-detail" id="cwSkillsDetail">
-          <div class="skills-detail-title">Social</div>
-          <button class="skill-sub-btn" onclick="startSkillChat('social','Create a social media strategy')">Create a social strategy</button>
-          <button class="skill-sub-btn" onclick="startSkillChat('social','Write an influencer brief')">Influencer brief</button>
-          <button class="skill-sub-btn" onclick="startSkillChat('social','Research relevant hashtags')">Hashtag research</button>
-        </div>
-      </div>
-
-      <!-- Integration boxes (hidden by default) -->
-      <div class="integration-bar" id="integrationBar2" style="display:none;max-width:800px;width:100%;margin:12px auto 0;">
-        <div class="int-box" onclick="connectIntegration('gmail')">Gmail</div>
-        <div class="int-box" onclick="connectIntegration('google-sheets')">Google Sheets</div>
-        <div class="int-box" onclick="connectIntegration('google-docs')">Google Docs</div>
-        <div class="int-box" onclick="connectIntegration('adobe-photoshop')">Adobe Photoshop</div>
-        <div class="int-box" onclick="connectIntegration('google-calendar')">Google Calendar</div>
-        <div class="int-box" onclick="connectIntegration('slack')">Slack</div>
-        <div class="int-box" onclick="connectIntegration('pdf')">PDF</div>
-        <div class="int-box" onclick="connectIntegration('granola')">Granola</div>
-      </div>
+      <!-- Skills & Connectors now accessible via + menu -->
 
       <!-- Input bar at BOTTOM -->
       <div class="hub-input-bar" style="margin-top: auto; max-width:800px;width:100%;margin-left:auto;margin-right:auto;padding:12px 24px 16px;">
         <button class="plus-menu-btn" id="plusMenuBtn2" onclick="togglePlusMenu2()">+</button>
         <div class="plus-menu" id="plusMenu2" style="display:none;">
-          <div class="plus-menu-item" onclick="togglePluginsPanel(); hidePlusMenu2();">Plugins</div>
-          <div class="plus-menu-item" onclick="toggleDrivePanel(); hidePlusMenu2();">Connectors</div>
-          <div class="plus-menu-item" onclick="triggerFileUpload(); hidePlusMenu2();">Add Files</div>
+          <div class="plus-menu-item" onclick="triggerFileUpload(); hidePlusMenu2();">📎 Add files or photos</div>
+          <div class="plus-menu-divider"></div>
+          <div class="plus-menu-item-parent">
+            <div class="plus-menu-item">🛠 Skills</div>
+            <div class="plus-menu-sub">
+              <div class="plus-menu-item" onclick="startSkillChat('social','Help with social media'); hidePlusMenu2();">Social</div>
+              <div class="plus-menu-item" onclick="startSkillChat('strategy','Help with strategy'); hidePlusMenu2();">Strategy</div>
+              <div class="plus-menu-item" onclick="startSkillChat('creative','Help with creative'); hidePlusMenu2();">Creative</div>
+              <div class="plus-menu-item" onclick="startSkillChat('analytics','Help with analytics'); hidePlusMenu2();">Analytics</div>
+              <div class="plus-menu-item" onclick="startSkillChat('production','Help with production'); hidePlusMenu2();">Production</div>
+              <div class="plus-menu-item" onclick="startSkillChat('research','Help with research'); hidePlusMenu2();">Research</div>
+              <div class="plus-menu-item" onclick="startSkillChat('copywriting','Help with copywriting'); hidePlusMenu2();">Copywriting</div>
+              <div class="plus-menu-item" onclick="startSkillChat('reporting','Help with reporting'); hidePlusMenu2();">Reporting</div>
+              <div class="plus-menu-item" onclick="startSkillChat('calendar','Help with calendar'); hidePlusMenu2();">Calendar</div>
+              <div class="plus-menu-item" onclick="startSkillChat('social-bot','Help with social media bot'); hidePlusMenu2();">Social Media Bot</div>
+              <div class="plus-menu-item" onclick="startSkillChat('deep-research','Help with deep research'); hidePlusMenu2();">Deep Research</div>
+            </div>
+          </div>
+          <div class="plus-menu-item-parent">
+            <div class="plus-menu-item">🔗 Connectors</div>
+            <div class="plus-menu-sub">
+              <div class="plus-menu-item" onclick="connectIntegration('gmail'); hidePlusMenu2();">Gmail</div>
+              <div class="plus-menu-item" onclick="connectIntegration('google-sheets'); hidePlusMenu2();">Google Sheets</div>
+              <div class="plus-menu-item" onclick="connectIntegration('google-docs'); hidePlusMenu2();">Google Docs</div>
+              <div class="plus-menu-item" onclick="connectIntegration('adobe-photoshop'); hidePlusMenu2();">Adobe Photoshop</div>
+              <div class="plus-menu-item" onclick="connectIntegration('google-calendar'); hidePlusMenu2();">Google Calendar</div>
+              <div class="plus-menu-item" onclick="connectIntegration('slack'); hidePlusMenu2();">Slack</div>
+              <div class="plus-menu-item" onclick="connectIntegration('pdf'); hidePlusMenu2();">PDF</div>
+              <div class="plus-menu-item" onclick="connectIntegration('granola'); hidePlusMenu2();">Granola</div>
+            </div>
+          </div>
+          <div class="plus-menu-item-parent">
+            <div class="plus-menu-item" onclick="togglePluginsPanel(); hidePlusMenu2();">🧩 Plugins</div>
+          </div>
         </div>
         <input class="wi" id="cwI" type="text" placeholder="What can I help you with today?" style="padding-left: 50px;" onkeydown="if(event.key==='Enter'){document.getElementById('wI').value=this.value;this.value='';hubSend();}">
         <button class="wi-btn" onclick="document.getElementById('wI').value=document.getElementById('cwI').value;document.getElementById('cwI').value='';hubSend();">
@@ -1499,6 +1774,291 @@ function learnFromInteraction(userMsg, botResponse, feedback, details) {
 
 /* ============ THREAD SYSTEM ============ */
 var currentThreadId = null;
+var currentProjectId = null;
+var sidebarState = 'default';
+
+/* ============ PROJECT SYSTEM ============ */
+function getProjects(userName) {
+  var store = loadStore();
+  if (!store.projects) store.projects = {};
+  return store.projects[userName] || [];
+}
+
+function saveProjects(userName, projects) {
+  var store = loadStore();
+  if (!store.projects) store.projects = {};
+  store.projects[userName] = projects;
+  saveStore(store);
+}
+
+function createProject(userName, name, client, color) {
+  var projects = getProjects(userName);
+  var project = {
+    id: 'proj_' + Date.now(),
+    name: name,
+    client: client || null,
+    threads: [],
+    created: new Date().toISOString(),
+    shared: false,
+    sharedWith: [],
+    color: color || 'red'
+  };
+  projects.unshift(project);
+  saveProjects(userName, projects);
+  return project;
+}
+
+function deleteProjectById(userName, projectId) {
+  var projects = getProjects(userName);
+  projects = projects.filter(function(p) { return p.id !== projectId; });
+  saveProjects(userName, projects);
+}
+
+function addThreadToProject(userName, projectId, threadId) {
+  var projects = getProjects(userName);
+  var project = projects.find(function(p) { return p.id === projectId; });
+  if (project && project.threads.indexOf(threadId) === -1) {
+    project.threads.push(threadId);
+    saveProjects(userName, projects);
+  }
+}
+
+function removeThreadFromProject(userName, projectId, threadId) {
+  var projects = getProjects(userName);
+  var project = projects.find(function(p) { return p.id === projectId; });
+  if (project) {
+    project.threads = project.threads.filter(function(tid) { return tid !== threadId; });
+    saveProjects(userName, projects);
+  }
+}
+
+function getProjectForThread(userName, threadId) {
+  var projects = getProjects(userName);
+  return projects.find(function(p) { return p.threads.indexOf(threadId) !== -1; }) || null;
+}
+
+function shareProjectWithUser(userName, projectId, targetUserName) {
+  var projects = getProjects(userName);
+  var project = projects.find(function(p) { return p.id === projectId; });
+  if (project) {
+    project.shared = true;
+    if (project.sharedWith.indexOf(targetUserName) === -1) project.sharedWith.push(targetUserName);
+    saveProjects(userName, projects);
+  }
+}
+
+function renameProjectById(userName, projectId, newName) {
+  var projects = getProjects(userName);
+  var project = projects.find(function(p) { return p.id === projectId; });
+  if (project) { project.name = newName; saveProjects(userName, projects); }
+}
+
+/* ============ RELATIVE DATE HELPER ============ */
+function getRelativeDate(isoString) {
+  if (!isoString) return '';
+  var date = new Date(isoString);
+  var now = new Date();
+  var diff = now - date;
+  var mins = Math.floor(diff / 60000);
+  var hrs = Math.floor(mins / 60);
+  var days = Math.floor(hrs / 24);
+  if (mins < 1) return 'Just now';
+  if (mins < 60) return mins + 'm ago';
+  if (hrs < 24) return hrs + 'h ago';
+  if (days === 1) return 'Yesterday';
+  if (days < 7) return ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][date.getDay()];
+  var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  if (date.getFullYear() === now.getFullYear()) return months[date.getMonth()] + ' ' + date.getDate();
+  return months[date.getMonth()] + ' ' + date.getDate() + ', ' + date.getFullYear();
+}
+
+/* ============ TOAST NOTIFICATION ============ */
+function showToast(message, duration) {
+  var toast = document.createElement('div');
+  toast.className = 'toast';
+  toast.textContent = message;
+  document.body.appendChild(toast);
+  setTimeout(function() { toast.classList.add('show'); }, 10);
+  setTimeout(function() {
+    toast.classList.remove('show');
+    setTimeout(function() { toast.remove(); }, 300);
+  }, duration || 2000);
+}
+
+/* ============ SIDEBAR STATE MANAGEMENT ============ */
+function setSidebarState(state) {
+  sidebarState = state;
+  var defView = document.getElementById('defaultSidebarView');
+  var searchEl = document.getElementById('searchPanel');
+  var projEl = document.getElementById('projectsPanel');
+
+  if (state === 'default') {
+    if (defView) defView.style.display = 'flex';
+    if (searchEl) searchEl.classList.remove('active');
+    if (projEl) projEl.classList.remove('active');
+  } else if (state === 'search') {
+    if (defView) defView.style.display = 'none';
+    if (searchEl) searchEl.classList.add('active');
+    if (projEl) projEl.classList.remove('active');
+    var si = document.getElementById('searchInput');
+    if (si) { si.value = ''; si.focus(); }
+  } else if (state === 'projects') {
+    if (defView) defView.style.display = 'none';
+    if (searchEl) searchEl.classList.remove('active');
+    if (projEl) projEl.classList.add('active');
+    renderProjectsPanel();
+  }
+  // Update button active states
+  document.querySelectorAll('.sb-action-btn').forEach(function(btn) {
+    if (btn.textContent.trim() === 'Search') btn.classList.toggle('active', state === 'search');
+    if (btn.textContent.trim() === 'Projects') btn.classList.toggle('active', state === 'projects');
+  });
+}
+
+/* ============ PROJECT TAB BAR ============ */
+function renderProjectTabBar() {
+  if (!currentUser) return;
+  var projects = getProjects(currentUser.name);
+  ['projectTabBar', 'projectTabBar2'].forEach(function(containerId) {
+    var container = document.getElementById(containerId);
+    if (!container) return;
+    var html = '';
+    projects.forEach(function(p) {
+      var active = p.id === currentProjectId ? ' active' : '';
+      var name = p.name.length > 14 ? p.name.substring(0, 14) + '…' : p.name;
+      html += '<div class="project-tab' + active + '" data-color="' + (p.color || 'red') + '" onclick="switchProject(\'' + p.id + '\')">'
+        + '<span>' + escHtml(name) + '</span>'
+        + '<button class="project-tab-close" onclick="event.stopPropagation();removeProjectTab(\'' + p.id + '\')">&times;</button>'
+        + '</div>';
+    });
+    html += '<button class="project-tab-add" onclick="addNewProject()" title="New Project">+</button>';
+    container.innerHTML = html;
+  });
+}
+
+function switchProject(projectId) {
+  if (currentProjectId === projectId) {
+    currentProjectId = null; // deselect
+  } else {
+    currentProjectId = projectId;
+  }
+  renderProjectTabBar();
+  renderThreadBar();
+}
+
+function removeProjectTab(projectId) {
+  if (!currentUser) return;
+  deleteProjectById(currentUser.name, projectId);
+  if (currentProjectId === projectId) currentProjectId = null;
+  renderProjectTabBar();
+  renderThreadBar();
+  showToast('Project removed');
+}
+
+/* ============ ADD NEW PROJECT MODAL ============ */
+function addNewProject() {
+  var modal = document.createElement('div');
+  modal.className = 'modal-bg';
+  modal.onclick = function(e) { if (e.target === modal) modal.remove(); };
+
+  var clients = typeof CL !== 'undefined' ? CL : [];
+  var clientsHtml = '<option value="">-- No Client --</option>';
+  clients.forEach(function(c) { clientsHtml += '<option value="' + c.n + '">' + c.n + '</option>'; });
+
+  modal.innerHTML = '<div class="modal" style="max-width:420px;">'
+    + '<h3>New Project</h3>'
+    + '<p>Create a project to group related conversations.</p>'
+    + '<div style="margin-bottom:14px;">'
+    + '<label style="display:block;font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px;font-weight:600;">Project Name</label>'
+    + '<input id="newProjName" type="text" placeholder="e.g. Q2 Campaign, Amano Relaunch" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;font-family:Montserrat,sans-serif;font-size:12px;">'
+    + '</div>'
+    + '<div style="margin-bottom:14px;">'
+    + '<label style="display:block;font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px;font-weight:600;">Client (Optional)</label>'
+    + '<select id="newProjClient" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;font-family:Montserrat,sans-serif;font-size:12px;background:var(--surface);color:var(--text);">' + clientsHtml + '</select>'
+    + '</div>'
+    + '<div style="margin-bottom:14px;">'
+    + '<label style="display:block;font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px;font-weight:600;">Color</label>'
+    + '<div class="color-picker" id="projColorPicker">'
+    + '<div class="color-dot selected" data-color="red" style="background:#C73C1E;" onclick="selectProjColor(this)"></div>'
+    + '<div class="color-dot" data-color="blue" style="background:#2B6CB0;" onclick="selectProjColor(this)"></div>'
+    + '<div class="color-dot" data-color="green" style="background:#2D8A4E;" onclick="selectProjColor(this)"></div>'
+    + '<div class="color-dot" data-color="purple" style="background:#8B5CF6;" onclick="selectProjColor(this)"></div>'
+    + '<div class="color-dot" data-color="amber" style="background:#D97706;" onclick="selectProjColor(this)"></div>'
+    + '</div>'
+    + '</div>'
+    + '<div class="modal-btns">'
+    + '<button class="btn-cancel" onclick="this.closest(\'.modal-bg\').remove()">Cancel</button>'
+    + '<button class="btn-primary" id="createProjBtn">Create</button>'
+    + '</div>'
+    + '</div>';
+  document.body.appendChild(modal);
+  document.getElementById('newProjName').focus();
+
+  document.getElementById('createProjBtn').onclick = function() {
+    var name = document.getElementById('newProjName').value.trim();
+    if (!name) { alert('Please enter a project name'); return; }
+    var client = document.getElementById('newProjClient').value || null;
+    var colorEl = document.querySelector('#projColorPicker .color-dot.selected');
+    var color = colorEl ? colorEl.getAttribute('data-color') : 'red';
+    var proj = createProject(currentUser.name, name, client, color);
+    currentProjectId = proj.id;
+    renderProjectTabBar();
+    renderThreadBar();
+    renderProjectsPanel();
+    modal.remove();
+    showToast('Project "' + name + '" created');
+  };
+}
+
+function selectProjColor(el) {
+  el.parentElement.querySelectorAll('.color-dot').forEach(function(d) { d.classList.remove('selected'); });
+  el.classList.add('selected');
+}
+
+/* ============ SHARE PROJECT MODAL ============ */
+function shareProjectModal(projectId, ev) {
+  if (ev) ev.stopPropagation();
+  if (!currentUser) return;
+  var projects = getProjects(currentUser.name);
+  var project = projects.find(function(p) { return p.id === projectId; });
+  if (!project) return;
+
+  var modal = document.createElement('div');
+  modal.className = 'modal-bg';
+  modal.onclick = function(e) { if (e.target === modal) modal.remove(); };
+
+  var teamHtml = '';
+  TEAM.forEach(function(t) {
+    var checked = project.sharedWith && project.sharedWith.indexOf(t.name) !== -1 ? ' checked' : '';
+    teamHtml += '<label style="display:flex;align-items:center;gap:10px;padding:8px 4px;cursor:pointer;">'
+      + '<input type="checkbox" class="share-cb" value="' + escHtml(t.name) + '"' + checked + '>'
+      + '<div class="tc-av" style="background:' + t.color + ';width:28px;height:28px;font-size:9px;">' + t.init + '</div>'
+      + '<div><div style="font-size:12px;font-weight:600;">' + escHtml(t.name) + '</div><div style="font-size:10px;color:var(--text-muted);">' + escHtml(t.role) + '</div></div>'
+      + '</label>';
+  });
+
+  modal.innerHTML = '<div class="modal" style="max-width:400px;">'
+    + '<h3>Share Project</h3>'
+    + '<p>Share "' + escHtml(project.name) + '" with team members.</p>'
+    + '<div style="max-height:300px;overflow-y:auto;" id="shareTeamList">' + teamHtml + '</div>'
+    + '<div class="modal-btns">'
+    + '<button class="btn-cancel" onclick="this.closest(\'.modal-bg\').remove()">Cancel</button>'
+    + '<button class="btn-primary" id="shareConfirmBtn">Share</button>'
+    + '</div>'
+    + '</div>';
+  document.body.appendChild(modal);
+
+  document.getElementById('shareConfirmBtn').onclick = function() {
+    var cbs = document.querySelectorAll('#shareTeamList .share-cb:checked');
+    var count = 0;
+    cbs.forEach(function(cb) {
+      shareProjectWithUser(currentUser.name, projectId, cb.value);
+      count++;
+    });
+    modal.remove();
+    showToast('Project shared with ' + count + ' team member' + (count !== 1 ? 's' : ''));
+  };
+}
 
 function getUserThreads(userName) {
   var store = loadStore();
@@ -1596,6 +2156,7 @@ function saveCurrentThread() {
 
   if (th) {
     th.html = document.getElementById('hubChat').innerHTML;
+    th.lastModified = new Date().toISOString();
     saveUserThreads(currentUser.name, threads);
     return;
   }
@@ -1605,6 +2166,7 @@ function saveCurrentThread() {
   th = shared.find(function(t) { return t.id === currentThreadId; });
   if (th) {
     th.html = document.getElementById('hubChat').innerHTML;
+    th.lastModified = new Date().toISOString();
     saveSharedThreads(shared);
   }
 }
@@ -1669,27 +2231,56 @@ function promptNewThread() {
     clientsHtml += '<option value="' + c.n + '">' + c.n + '</option>';
   });
 
+  var projects = currentUser ? getProjects(currentUser.name) : [];
+  var projectsHtml = '<option value="">-- No Project --</option>';
+  projects.forEach(function(p) {
+    projectsHtml += '<option value="' + p.id + '">' + escHtml(p.name) + (p.client ? ' (' + escHtml(p.client) + ')' : '') + '</option>';
+  });
+  projectsHtml += '<option value="__new__">+ Create New Project</option>';
+
   modal.innerHTML = '<div class="modal" style="max-width:480px;">'
     + '<h3>New Chat</h3>'
-    + '<p>Create a new conversation thread.</p>'
-    + '<div style="margin-bottom:16px;">'
-    + '<label style="display:block;font-size:12px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;font-weight:600;">Chat Name</label>'
-    + '<input id="threadNameInput" type="text" placeholder="e.g. Thortful Q2 Campaign, Team 1-1s" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:6px;font-family:Montserrat,sans-serif;font-size:12px;">'
+    + '<p>Create a new conversation thread and store it in a project.</p>'
+    + '<div style="margin-bottom:14px;">'
+    + '<label style="display:block;font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px;font-weight:600;">Chat Name</label>'
+    + '<input id="threadNameInput" type="text" placeholder="e.g. Thortful Q2 Campaign, Team 1-1s" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;font-family:Montserrat,sans-serif;font-size:12px;">'
     + '</div>'
-    + '<div style="margin-bottom:16px;">'
-    + '<label style="display:block;font-size:12px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;font-weight:600;">Client (Optional)</label>'
-    + '<select id="threadClientSelect" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:6px;font-family:Montserrat,sans-serif;font-size:12px;background:var(--surface);color:var(--text);">'
+    + '<div style="margin-bottom:14px;">'
+    + '<label style="display:block;font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px;font-weight:600;">Client (Optional)</label>'
+    + '<select id="threadClientSelect" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;font-family:Montserrat,sans-serif;font-size:12px;background:var(--surface);color:var(--text);">'
     + '<option value="">-- General --</option>'
     + clientsHtml
     + '</select>'
     + '</div>'
+    + '<div style="margin-bottom:14px;">'
+    + '<label style="display:block;font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px;font-weight:600;">Project (Optional)</label>'
+    + '<select id="threadProjectSelect" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;font-family:Montserrat,sans-serif;font-size:12px;background:var(--surface);color:var(--text);">'
+    + projectsHtml
+    + '</select>'
+    + '</div>'
     + '<div class="modal-btns">'
     + '<button class="btn-cancel" onclick="this.closest(\'.modal-bg\').remove()">Cancel</button>'
-    + '<button class="btn-primary" onclick="var name=document.getElementById(\'threadNameInput\').value.trim();var client=document.getElementById(\'threadClientSelect\').value||null;if(name){startNewThread(name,client);this.closest(\'.modal-bg\').remove();}else{alert(\'Please enter a chat name\');}">Create</button>'
+    + '<button class="btn-primary" id="createThreadBtn">Create</button>'
     + '</div>'
     + '</div>';
   document.body.appendChild(modal);
   document.getElementById('threadNameInput').focus();
+
+  document.getElementById('createThreadBtn').onclick = function() {
+    var name = document.getElementById('threadNameInput').value.trim();
+    if (!name) { alert('Please enter a chat name'); return; }
+    var client = document.getElementById('threadClientSelect').value || null;
+    var projectId = document.getElementById('threadProjectSelect').value || null;
+    if (projectId === '__new__') { modal.remove(); addNewProject(); return; }
+    startNewThread(name, client);
+    if (projectId && currentThreadId) {
+      addThreadToProject(currentUser.name, projectId, currentThreadId);
+      currentProjectId = projectId;
+      renderProjectTabBar();
+    }
+    renderThreadBar();
+    modal.remove();
+  };
 }
 
 function deleteThread(threadId, ev) {
@@ -1713,16 +2304,54 @@ function renderThreadBar() {
   var el = document.getElementById('sbL');
   var threads = getUserThreads(currentUser.name);
 
+  // Filter by project if one is selected
+  if (currentProjectId) {
+    var project = getProjects(currentUser.name).find(function(p) { return p.id === currentProjectId; });
+    if (project && project.threads && project.threads.length > 0) {
+      threads = threads.filter(function(t) { return project.threads.indexOf(t.id) !== -1; });
+    }
+  }
+
+  // Sort by most recently modified
+  threads = threads.slice().sort(function(a, b) {
+    var da = new Date(a.lastModified || a.created || 0);
+    var db = new Date(b.lastModified || b.created || 0);
+    return db - da;
+  });
+
   el.innerHTML = '';
+  if (currentProjectId) {
+    var projName = '';
+    var proj = getProjects(currentUser.name).find(function(p) { return p.id === currentProjectId; });
+    if (proj) projName = proj.name;
+    var filterNote = document.createElement('div');
+    filterNote.style.cssText = 'font-size:9px;color:var(--accent);padding:4px 12px;font-weight:600;font-family:Reddit Mono,monospace;text-transform:uppercase;letter-spacing:0.5px;cursor:pointer;';
+    filterNote.innerHTML = '&#9664; ' + escHtml(projName) + ' <span style="color:var(--text-muted);font-weight:400;">(click to show all)</span>';
+    filterNote.onclick = function() { currentProjectId = null; renderProjectTabBar(); renderThreadBar(); };
+    el.appendChild(filterNote);
+  }
+
   threads.forEach(function(th) {
     var active = th.id === currentThreadId ? ' active' : '';
     var clientName = th.client || 'General';
+    var dateStr = getRelativeDate(th.lastModified || th.created);
+    var projBadge = '';
+    if (!currentProjectId) {
+      var thProj = getProjectForThread(currentUser.name, th.id);
+      if (thProj) projBadge = '<span class="sb-thread-project-badge">' + escHtml(thProj.name) + '</span>';
+    }
     var d = document.createElement('div');
     d.className = 'sb-thread' + active;
+    d.setAttribute('data-thread-id', th.id);
     d.onclick = function() { switchThread(th.id); };
-    d.innerHTML = (threads.length > 1 ? '<span class="sb-thread-del" onclick="event.stopPropagation();deleteThread(\'' + th.id + '\', event)">&times;</span>' : '')
-      + '<div class="sb-thread-client">' + clientName + '</div>'
-      + '<div class="sb-thread-label">' + th.label + '</div>';
+    d.innerHTML = '<div class="sb-thread-actions">'
+      + '<button class="sb-thread-action" onclick="event.stopPropagation();showMoveDropdown(\'' + th.id + '\',event)" title="Move to project">&#128193;</button>'
+      + '<button class="sb-thread-action" onclick="event.stopPropagation();renameThreadInline(\'' + th.id + '\')" title="Rename">&#9998;</button>'
+      + (threads.length > 1 ? '<button class="sb-thread-action" onclick="event.stopPropagation();deleteThread(\'' + th.id + '\',event)" title="Delete">&times;</button>' : '')
+      + '</div>'
+      + '<div class="sb-thread-client">' + escHtml(clientName) + projBadge + '</div>'
+      + '<div class="sb-thread-label">' + escHtml(th.label) + '</div>'
+      + '<div class="sb-thread-date">' + dateStr + '</div>';
     el.appendChild(d);
   });
 }
@@ -1824,6 +2453,8 @@ function renderSidebar() {
   renderIdeas();
   renderConnectors();
   renderLearnings();
+  renderProjectTabBar();
+  renderClientList();
 }
 
 function toggleTeachPanel() {
@@ -4156,16 +4787,17 @@ updateAiBadge();
 /* ============ NEW: TAB SWITCHING (Chat / Co-Work) ============ */
 function updateHomeView() {
   var hc = document.getElementById('hubChat');
-  var skillsPanel = document.querySelector('.skills-panel');
+  var skillsPanel = document.querySelector('#chatView .skills-panel');
   var intBar = document.getElementById('integrationBar');
   var hasMessages = hc && hc.children.length > 0;
 
+  // Skills panel stays hidden in chat view — clean thread only
   if (skillsPanel) {
-    skillsPanel.style.display = hasMessages ? 'none' : 'flex';
+    skillsPanel.style.display = 'none';
   }
 }
 
-function switchTab(tab) {
+function switchTab(tab, fromTabClick) {
   document.querySelectorAll('.header-tab').forEach(t => t.classList.remove('active'));
   document.querySelector('.header-tab[data-tab="' + tab + '"]').classList.add('active');
   document.getElementById('chatView').style.display = tab === 'chat' ? 'flex' : 'none';
@@ -4174,6 +4806,26 @@ function switchTab(tab) {
   var mainSidebar = document.querySelector('#page1 > .p1-sidebar');
   if (mainSidebar) {
     mainSidebar.style.display = tab === 'chat' ? 'flex' : 'none';
+  }
+  // Always open on a clear thread ONLY when user clicks the tab buttons directly
+  if (fromTabClick && (tab === 'chat' || tab === 'cowork')) {
+    saveCurrentThread();
+    conversationHistory = [];
+    currentThreadId = null;
+    var hc = document.getElementById('hubChat');
+    if (hc) hc.innerHTML = '';
+    var cwChat = document.getElementById('coworkChat');
+    if (cwChat) cwChat.innerHTML = '';
+    updateHomeView();
+    var input = document.getElementById('wI');
+    if (input) {
+      input.value = '';
+      input.placeholder = 'What can I help you with today?';
+    }
+    var cwInput = document.getElementById('cwInput');
+    if (cwInput) {
+      cwInput.value = '';
+    }
   }
   if (tab === 'chat') {
     document.getElementById('wI').focus();
@@ -4504,12 +5156,17 @@ function renderClientList() {
         + '</div>'
         + '</div>';
     }).join('');
+    var roleBadges = '<div class="client-role-badges">'
+      + '<span class="role-badge" data-role="client" onclick="event.stopPropagation();openClientRole(\'' + c.n.replace(/'/g, "\\'") + '\',\'Client\')">Client</span>'
+      + '<span class="role-badge" data-role="creator" onclick="event.stopPropagation();openClientRole(\'' + c.n.replace(/'/g, "\\'") + '\',\'Creator\')">Creator</span>'
+      + '<span class="role-badge" data-role="editor" onclick="event.stopPropagation();openClientRole(\'' + c.n.replace(/'/g, "\\'") + '\',\'Editor\')">Editor</span>'
+      + '</div>';
     return '<div class="client-item" id="client-' + c.id + '">'
       + '<div class="client-header" onclick="toggleClient(\'' + c.id + '\')">'
       + '<span class="client-name">' + c.n + '</span>'
-      + '<button class="client-plus-btn" onclick="event.stopPropagation(); newClientChat(\'' + c.n.replace(/'/g, "\\'") + '\');">+</button>'
       + '<span class="client-arrow">&#9656;</span>'
       + '</div>'
+      + roleBadges
       + '<div class="client-subs">'
       + foldersHtml
       + '<div class="client-sub-add" onclick="addClientFolder(\'' + c.n.replace(/'/g, "\\'") + '\');">+ Add folder</div>'
@@ -4518,6 +5175,18 @@ function renderClientList() {
   }).join('');
   container.innerHTML = html;
   if (container2) container2.innerHTML = html;
+}
+
+function openClientRole(clientName, role) {
+  var threadName = clientName + ' — ' + role;
+  if (!currentUser) return;
+  var threads = getUserThreads(currentUser.name);
+  var existing = threads.find(function(t) { return t.label === threadName; });
+  if (existing) {
+    switchThread(existing.id);
+  } else {
+    startNewThread(threadName, clientName);
+  }
 }
 
 /* ============ CALL renderClientList on user select ============ */
@@ -4805,16 +5474,122 @@ function runIntegrationAction(name, action) {
 }
 
 function toggleSearchPanel() {
-  var modal = document.createElement('div');
-  modal.className = 'modal-bg';
-  modal.onclick = function(e) { if (e.target === modal) modal.remove(); };
+  setSidebarState(sidebarState === 'search' ? 'default' : 'search');
+}
 
+function closeSearchPanel() {
+  setSidebarState('default');
+}
+
+var searchFilter = 'all';
+var searchResultsCache = [];
+
+function setSearchFilter(filter, btn) {
+  searchFilter = filter;
+  if (btn) {
+    btn.parentElement.querySelectorAll('.search-filter-chip').forEach(function(c) { c.classList.remove('active'); });
+    btn.classList.add('active');
+  }
+  var query = document.getElementById('searchInput') ? document.getElementById('searchInput').value : '';
+  performSearch(query);
+}
+
+function performSearch(query) {
+  query = (query || '').trim().toLowerCase();
+  var results = [];
+
+  if (!query) {
+    document.getElementById('searchResults').innerHTML = '<div style="padding:20px;text-align:center;color:var(--text-muted);font-size:11px;">Start typing to search...</div>';
+    return;
+  }
+
+  // Search threads
+  if (searchFilter === 'all' || searchFilter === 'chats') {
+    var threads = currentUser ? getUserThreads(currentUser.name) : [];
+    threads.forEach(function(th) {
+      var labelMatch = (th.label || '').toLowerCase().indexOf(query) !== -1;
+      var clientMatch = (th.client || '').toLowerCase().indexOf(query) !== -1;
+      var htmlText = (th.html || '').replace(/<[^>]*>/g, '').toLowerCase();
+      var contentMatch = htmlText.indexOf(query) !== -1;
+      if (labelMatch || clientMatch || contentMatch) {
+        var preview = '';
+        if (contentMatch) {
+          var idx = htmlText.indexOf(query);
+          var start = Math.max(0, idx - 30);
+          preview = (start > 0 ? '...' : '') + htmlText.substring(start, start + 80) + '...';
+        }
+        results.push({ type: 'chat', name: th.label, id: th.id, client: th.client, preview: preview, date: th.lastModified || th.created, score: labelMatch ? 100 : (clientMatch ? 80 : 40) });
+      }
+    });
+  }
+
+  // Search clients
+  if (searchFilter === 'all' || searchFilter === 'clients') {
+    var clients = typeof CL !== 'undefined' ? CL : [];
+    clients.forEach(function(c) {
+      if ((c.n || '').toLowerCase().indexOf(query) !== -1) {
+        results.push({ type: 'client', name: c.n, id: c.id, score: (c.n || '').toLowerCase().indexOf(query) === 0 ? 90 : 60 });
+      }
+    });
+  }
+
+  // Search projects
+  if (searchFilter === 'all' || searchFilter === 'projects') {
+    var projects = currentUser ? getProjects(currentUser.name) : [];
+    projects.forEach(function(p) {
+      if ((p.name || '').toLowerCase().indexOf(query) !== -1) {
+        results.push({ type: 'project', name: p.name, id: p.id, client: p.client, score: 70 });
+      }
+    });
+  }
+
+  // Sort by score
+  results.sort(function(a, b) { return b.score - a.score; });
+  searchResultsCache = results;
+  renderSearchResults(results, query);
+}
+
+function renderSearchResults(results, query) {
+  var el = document.getElementById('searchResults');
+  if (!el) return;
+  if (results.length === 0) {
+    el.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text-muted);font-size:11px;">No results found.</div>';
+    return;
+  }
+  var html = '';
+  results.forEach(function(r) {
+    var typeClass = r.type === 'chat' ? 'chat' : (r.type === 'client' ? 'client' : 'project');
+    var highlight = function(text) {
+      if (!query || !text) return escHtml(text || '');
+      var re = new RegExp('(' + query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
+      return escHtml(text).replace(re, '<mark>$1</mark>');
+    };
+    var onclick = '';
+    if (r.type === 'chat') onclick = 'switchThread(\'' + r.id + '\');closeSearchPanel();';
+    else if (r.type === 'client') onclick = 'toggleClient(\'' + r.id + '\');closeSearchPanel();';
+    else if (r.type === 'project') onclick = 'switchProject(\'' + r.id + '\');closeSearchPanel();';
+
+    html += '<div class="search-result-item" onclick="' + onclick + '">'
+      + '<div class="search-result-header">'
+      + '<span class="search-result-name">' + highlight(r.name) + '</span>'
+      + '<span class="search-result-type ' + typeClass + '">' + r.type + '</span>'
+      + '</div>'
+      + (r.preview ? '<div class="search-result-preview">' + highlight(r.preview) + '</div>' : '')
+      + (r.date ? '<div style="font-size:8px;color:var(--text-muted);margin-top:2px;">' + getRelativeDate(r.date) + '</div>' : '')
+      + '</div>';
+  });
+  el.innerHTML = html;
+}
+
+/* LEGACY toggleSearchPanel modal — replaced above */
+var _legacySearchModal = function() {
+  var modal = document.createElement('div');
   var searchResults = '';
   var clients = typeof CL !== 'undefined' ? CL : [];
   var threads = currentUser ? getUserThreads(currentUser.name) : [];
 
   var handleSearch = function() {
-    var query = document.getElementById('searchInput').value.trim().toLowerCase();
+    var query = 'placeholder';
     if (!query) {
       searchResults = '<div style="font-size:12px;color:var(--text-muted);padding:12px;">Start typing to search...</div>';
     } else {
@@ -4935,52 +5710,158 @@ function toggleSearchPanel() {
 }
 
 function toggleProjectsPanel() {
-  var modal = document.createElement('div');
-  modal.className = 'modal-bg';
-  modal.onclick = function(e) { if (e.target === modal) modal.remove(); };
-  var clients = typeof CL !== 'undefined' ? CL : [];
+  setSidebarState(sidebarState === 'projects' ? 'default' : 'projects');
+}
 
-  function buildProjectList(query) {
-    var filtered = clients;
-    if (query) {
-      filtered = clients.filter(function(c) {
-        return (c.n || '').toLowerCase().includes(query.toLowerCase());
-      });
-    }
-    if (filtered.length === 0) {
-      return '<div style="font-size:12px;color:var(--text-muted);padding:12px;">No projects found.</div>';
-    }
-    return filtered.map(function(c) {
-      var name = c.n || '';
-      return '<div class="project-item" onclick="openProject(\'' + name.replace(/'/g, "\\'") + '\');this.closest(\'.modal-bg\').remove();">'
-        + '<strong>' + name + '</strong>'
-        + '<div style="font-size:10px;color:var(--text-muted);margin-top:2px;">' + (c.cat || 'Client project') + '</div>'
-        + '</div>';
-    }).join('');
+function closeProjectsPanel() {
+  setSidebarState('default');
+}
+
+function renderProjectsPanel() {
+  var el = document.getElementById('projectsList');
+  if (!el || !currentUser) return;
+  var projects = getProjects(currentUser.name);
+  if (projects.length === 0) {
+    el.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text-muted);font-size:11px;">No projects yet. Create one to group conversations.</div>';
+    return;
   }
+  var html = '';
+  projects.forEach(function(p) {
+    var active = p.id === currentProjectId ? ' active' : '';
+    var threadCount = p.threads ? p.threads.length : 0;
+    var clientTag = p.client ? '<span class="project-card-client">' + escHtml(p.client) + '</span>' : '';
+    html += '<div class="project-card' + active + '" data-color="' + (p.color || 'red') + '" onclick="switchProject(\'' + p.id + '\');closeProjectsPanel();">'
+      + '<div class="project-card-actions">'
+      + '<button onclick="event.stopPropagation();shareProjectModal(\'' + p.id + '\',event)" title="Share">&#128279;</button>'
+      + '<button onclick="event.stopPropagation();renameProjectPrompt(\'' + p.id + '\')" title="Rename">&#9998;</button>'
+      + '<button onclick="event.stopPropagation();removeProjectTab(\'' + p.id + '\')" title="Delete">&times;</button>'
+      + '</div>'
+      + '<div class="project-card-name">' + escHtml(p.name) + '</div>'
+      + '<div class="project-card-meta">'
+      + clientTag
+      + '<span>' + threadCount + ' thread' + (threadCount !== 1 ? 's' : '') + '</span>'
+      + '<span>' + getRelativeDate(p.created) + '</span>'
+      + '</div>'
+      + '</div>';
+  });
+  el.innerHTML = html;
+}
 
-  modal.innerHTML = '<div class="modal" style="max-width:520px;">'
-    + '<h3>Projects</h3>'
-    + '<p>Click a project to open it. Projects are shareable across the team.</p>'
-    + '<div style="display:flex;gap:6px;margin-bottom:16px;">'
-    + '<input id="projectSearch" type="text" placeholder="Search projects..." style="flex:1;">'
-    + '</div>'
-    + '<div id="projectListDiv" style="max-height:300px;overflow-y:auto;display:flex;flex-direction:column;gap:6px;">'
-    + buildProjectList('')
-    + '</div>'
-    + '<div class="modal-btns"><button class="btn-cancel" onclick="this.closest(\'.modal-bg\').remove()">Close</button></div>'
-    + '</div>';
-  document.body.appendChild(modal);
-  document.getElementById('projectSearch').onkeyup = function() {
-    document.getElementById('projectListDiv').innerHTML = buildProjectList(this.value.trim());
-  };
-  document.getElementById('projectSearch').focus();
+function renameProjectPrompt(projectId) {
+  var projects = getProjects(currentUser.name);
+  var project = projects.find(function(p) { return p.id === projectId; });
+  if (!project) return;
+  var newName = prompt('Rename project:', project.name);
+  if (newName && newName.trim()) {
+    renameProjectById(currentUser.name, projectId, newName.trim());
+    renderProjectTabBar();
+    renderProjectsPanel();
+    showToast('Project renamed');
+  }
 }
 
 function openProject(clientName) {
   document.getElementById('wI').value = 'Open project for ' + clientName + '. Show me everything we have.';
   hubSend();
 }
+
+/* ============ MOVE THREAD TO PROJECT DROPDOWN ============ */
+function showMoveDropdown(threadId, event) {
+  // Remove any existing dropdown
+  var existing = document.querySelector('.move-dropdown');
+  if (existing) existing.remove();
+
+  var projects = currentUser ? getProjects(currentUser.name) : [];
+  var dropdown = document.createElement('div');
+  dropdown.className = 'move-dropdown';
+
+  var header = document.createElement('div');
+  header.className = 'move-dropdown-header';
+  header.textContent = 'Move to...';
+  dropdown.appendChild(header);
+
+  projects.forEach(function(p) {
+    var item = document.createElement('div');
+    item.className = 'move-dropdown-item';
+    item.textContent = p.name + ' (' + (p.threads ? p.threads.length : 0) + ')';
+    item.onclick = function() {
+      // Remove from all projects first
+      projects.forEach(function(proj) {
+        if (proj.threads) {
+          proj.threads = proj.threads.filter(function(tid) { return tid !== threadId; });
+        }
+      });
+      // Add to target
+      if (!p.threads) p.threads = [];
+      if (p.threads.indexOf(threadId) === -1) p.threads.push(threadId);
+      saveProjects(currentUser.name, projects);
+      dropdown.remove();
+      renderThreadBar();
+      renderProjectTabBar();
+      showToast('Moved to "' + p.name + '"');
+    };
+    dropdown.appendChild(item);
+  });
+
+  var newItem = document.createElement('div');
+  newItem.className = 'move-dropdown-new';
+  newItem.textContent = '+ New Project';
+  newItem.onclick = function() { dropdown.remove(); addNewProject(); };
+  dropdown.appendChild(newItem);
+
+  // Position near click
+  var rect = event.target.getBoundingClientRect();
+  dropdown.style.top = (rect.bottom + 4) + 'px';
+  dropdown.style.left = Math.min(rect.left, window.innerWidth - 220) + 'px';
+  document.body.appendChild(dropdown);
+
+  // Close on outside click
+  setTimeout(function() {
+    document.addEventListener('click', function closer(e) {
+      if (!dropdown.contains(e.target)) { dropdown.remove(); document.removeEventListener('click', closer); }
+    });
+  }, 10);
+}
+
+/* ============ INLINE RENAME THREAD ============ */
+function renameThreadInline(threadId) {
+  var threadEl = document.querySelector('[data-thread-id="' + threadId + '"]');
+  if (!threadEl) return;
+  var labelEl = threadEl.querySelector('.sb-thread-label');
+  if (!labelEl) return;
+  var original = labelEl.textContent;
+  var input = document.createElement('input');
+  input.type = 'text';
+  input.value = original;
+  input.style.cssText = 'width:100%;padding:3px 6px;border:1px solid var(--accent);border-radius:4px;font-size:11px;font-family:Montserrat,sans-serif;outline:none;';
+  labelEl.textContent = '';
+  labelEl.appendChild(input);
+  input.focus();
+  input.select();
+
+  var save = function() {
+    var newName = input.value.trim();
+    if (newName && newName !== original) {
+      var threads = getUserThreads(currentUser.name);
+      var th = threads.find(function(t) { return t.id === threadId; });
+      if (th) { th.label = newName; saveUserThreads(currentUser.name, threads); }
+    }
+    renderThreadBar();
+  };
+  input.onkeydown = function(e) {
+    if (e.key === 'Enter') save();
+    if (e.key === 'Escape') renderThreadBar();
+  };
+  input.onblur = save;
+}
+
+/* ============ INIT PROJECT TAB BAR ON USER SELECT ============ */
+var _origSelectUser = selectUser;
+selectUser = function(u) {
+  _origSelectUser(u);
+  currentProjectId = null;
+  renderProjectTabBar();
+};
 
 </script>
 </body>

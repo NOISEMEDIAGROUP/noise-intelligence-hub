@@ -4163,6 +4163,11 @@ function switchTab(tab) {
   document.querySelector('.header-tab[data-tab="' + tab + '"]').classList.add('active');
   document.getElementById('chatView').style.display = tab === 'chat' ? 'flex' : 'none';
   document.getElementById('coworkView').style.display = tab === 'cowork' ? 'flex' : 'none';
+  // Hide/show main sidebar when switching tabs (Co-Work has its own sidebar)
+  var mainSidebar = document.querySelector('#page1 > .p1-sidebar');
+  if (mainSidebar) {
+    mainSidebar.style.display = tab === 'chat' ? 'flex' : 'none';
+  }
   if (tab === 'chat') {
     document.getElementById('wI').focus();
   }

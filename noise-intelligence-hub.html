@@ -214,8 +214,13 @@
   }
   .client-header:hover { background: var(--surface2); }
   .client-name {
-    font-size: 12px; font-weight: 600; color: var(--text);
+    font-size: 12px; font-weight: 600; color: var(--text); flex: 1;
   }
+  .client-plus-btn {
+    font-size: 14px; color: var(--text-muted); cursor: pointer;
+    margin-right: 8px; transition: all 0.15s; padding: 0 4px;
+  }
+  .client-plus-btn:hover { color: var(--accent); }
   .client-arrow {
     font-size: 10px; color: var(--text-muted); transition: transform 0.2s;
     display: inline-block;
@@ -232,9 +237,21 @@
   .client-sub {
     font-size: 11px; color: var(--text-muted); padding: 8px 10px;
     border-radius: 6px; cursor: pointer; transition: all 0.15s;
-    margin-bottom: 2px;
+    margin-bottom: 2px; margin-left: 12px; display: flex;
+    align-items: center; gap: 6px;
+  }
+  .client-sub:before {
+    content: '📁'; font-size: 10px;
   }
   .client-sub:hover {
+    background: var(--accent-light); color: var(--accent);
+  }
+  .client-sub-add {
+    font-size: 11px; color: var(--text-muted); padding: 6px 10px;
+    border-radius: 6px; cursor: pointer; transition: all 0.15s;
+    margin-left: 12px; margin-top: 4px;
+  }
+  .client-sub-add:hover {
     background: var(--accent-light); color: var(--accent);
   }
   .p1-list { overflow-y: auto; padding: 6px 8px; flex-shrink: 0; border-bottom: 1px solid var(--border); max-height: 200px; }
@@ -896,16 +913,28 @@
   <div class="p1-top-row">
   <div class="p1-main" id="chatView">
     <div class="hub-chat-area">
-      <div class="thread-bar" id="threadBar"></div>
-      <div class="hub-msgs" id="hubChat"></div>
-      <div class="hub-suggestions" id="hubSuggestions" style="display:none;">
-        <button class="hub-sug-btn" onclick="useSuggestion(this)">What's the full Altra campaign breakdown?</button>
-        <button class="hub-sug-btn" onclick="useSuggestion(this)">Create a pitch deck for a new client</button>
-        <button class="hub-sug-btn" onclick="useSuggestion(this)">Summarise our top 5 clients by assets</button>
-        <button class="hub-sug-btn" onclick="useSuggestion(this)">Write a performance report for Altra</button>
-        <button class="hub-sug-btn" onclick="useSuggestion(this)">What audience performed best on Altra?</button>
-        <button class="hub-sug-btn" onclick="useSuggestion(this)">Draft an intro email for Amano Hotels</button>
+      <!-- Input bar at TOP -->
+      <div class="hub-input-bar">
+        <button class="plus-menu-btn" id="plusMenuBtn" onclick="togglePlusMenu()">+</button>
+        <div class="plus-menu" id="plusMenu" style="display:none;">
+          <div class="plus-menu-item" onclick="togglePluginsPanel(); hidePlusMenu();">
+            <span>📦</span> Plugins
+          </div>
+          <div class="plus-menu-item" onclick="toggleDrivePanel(); hidePlusMenu();">
+            <span>📁</span> Connectors
+          </div>
+          <div class="plus-menu-item" onclick="triggerFileUpload(); hidePlusMenu();">
+            <span>📄</span> Add Files
+          </div>
+        </div>
+        <input class="wi" id="wI" type="text" placeholder="What can I help you with today?" style="padding-left: 50px;">
+        <button class="wi-btn" onclick="hubSend()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        </button>
+        <input type="file" id="fileUploadInput" style="display:none;" multiple onchange="handleFileUpload(this.files)">
       </div>
+
+      <!-- Integration boxes -->
       <div class="integration-bar" id="integrationBar">
         <div class="int-box" onclick="connectIntegration('gmail')">Gmail</div>
         <div class="int-box" onclick="connectIntegration('google-sheets')">Google Sheets</div>
@@ -916,17 +945,175 @@
         <div class="int-box" onclick="connectIntegration('pdf')">PDF</div>
         <div class="int-box" onclick="connectIntegration('granola')">Granola</div>
       </div>
-      <div class="hub-input-bar">
-        <input class="wi" id="wI" type="text" placeholder="+ What can I help you with today?">
-        <button class="wi-btn" onclick="hubSend()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-        </button>
-        <input type="file" id="fileUploadInput" style="display:none;" multiple onchange="handleFileUpload(this.files)">
+
+      <!-- Skills & Services grid (scrollable) -->
+      <div style="flex: 0 1 auto; overflow-y: auto; padding: 0 0 12px;">
+        <div style="max-width: 700px; width: 100%;">
+          <h2 style="font-size: 14px; font-weight: 600; margin: 16px 0 12px; font-family: 'Reddit Mono', monospace; text-transform: uppercase; letter-spacing: 1px; padding: 0;">Skills & Services</h2>
+          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;">
+
+            <div class="skill-card">
+              <div class="skill-card-emoji">🌐</div>
+              <div class="skill-card-title">Social</div>
+              <div class="skill-card-subs">
+                <button class="skill-sub-btn" onclick="startSkillChat('social','Create a social media strategy')">Create a social strategy</button>
+                <button class="skill-sub-btn" onclick="startSkillChat('social','Write an influencer brief')">Influencer brief</button>
+                <button class="skill-sub-btn" onclick="startSkillChat('social','Research relevant hashtags')">Hashtag research</button>
+              </div>
+            </div>
+
+            <div class="skill-card">
+              <div class="skill-card-emoji">🎯</div>
+              <div class="skill-card-title">Strategy</div>
+              <div class="skill-card-subs">
+                <button class="skill-sub-btn" onclick="startSkillChat('strategy','Create a brand positioning document')">Brand positioning</button>
+                <button class="skill-sub-btn" onclick="startSkillChat('strategy','Plan a marketing campaign')">Campaign planning</button>
+                <button class="skill-sub-btn" onclick="startSkillChat('strategy','Do a competitor analysis')">Competitor analysis</button>
+              </div>
+            </div>
+
+            <div class="skill-card">
+              <div class="skill-card-emoji">🎨</div>
+              <div class="skill-card-title">Creative</div>
+              <div class="skill-card-subs">
+                <button class="skill-sub-btn" onclick="startSkillChat('creative','Write a creative brief')">Creative brief</button>
+                <button class="skill-sub-btn" onclick="startSkillChat('creative','Develop a creative concept')">Concept development</button>
+                <button class="skill-sub-btn" onclick="startSkillChat('creative','Create art direction guidelines')">Art direction</button>
+              </div>
+            </div>
+
+            <div class="skill-card">
+              <div class="skill-card-emoji">📊</div>
+              <div class="skill-card-title">Analytics</div>
+              <div class="skill-card-subs">
+                <button class="skill-sub-btn" onclick="startSkillChat('analytics','Build a performance report')">Performance report</button>
+                <button class="skill-sub-btn" onclick="startSkillChat('analytics','Analyse campaign data')">Data analysis</button>
+                <button class="skill-sub-btn" onclick="startSkillChat('analytics','Set up a KPI dashboard')">KPI dashboard</button>
+              </div>
+            </div>
+
+            <div class="skill-card">
+              <div class="skill-card-emoji">📹</div>
+              <div class="skill-card-title">Production</div>
+              <div class="skill-card-subs">
+                <button class="skill-sub-btn" onclick="startSkillChat('production','Write a video production brief')">Video brief</button>
+                <button class="skill-sub-btn" onclick="startSkillChat('production','Plan a photo shoot')">Photo shoot plan</button>
+                <button class="skill-sub-btn" onclick="startSkillChat('production','Organise asset management')">Asset management</button>
+              </div>
+            </div>
+
+            <div class="skill-card">
+              <div class="skill-card-emoji">🔍</div>
+              <div class="skill-card-title">Research</div>
+              <div class="skill-card-subs">
+                <button class="skill-sub-btn" onclick="startSkillChat('research','Conduct market research')">Market research</button>
+                <button class="skill-sub-btn" onclick="startSkillChat('research','Generate audience insights')">Audience insights</button>
+                <button class="skill-sub-btn" onclick="startSkillChat('research','Analyse trends')">Trend analysis</button>
+              </div>
+            </div>
+
+            <div class="skill-card">
+              <div class="skill-card-emoji">✒️</div>
+              <div class="skill-card-title">Copywriting</div>
+              <div class="skill-card-subs">
+                <button class="skill-sub-btn" onclick="startSkillChat('copywriting','Write ad copy')">Ad copy</button>
+                <button class="skill-sub-btn" onclick="startSkillChat('copywriting','Write social media captions')">Social captions</button>
+                <button class="skill-sub-btn" onclick="startSkillChat('copywriting','Draft email marketing copy')">Email marketing</button>
+              </div>
+            </div>
+
+            <div class="skill-card">
+              <div class="skill-card-emoji">📋</div>
+              <div class="skill-card-title">Reporting</div>
+              <div class="skill-card-subs">
+                <button class="skill-sub-btn" onclick="startSkillChat('reporting','Build a client report')">Client report</button>
+                <button class="skill-sub-btn" onclick="startSkillChat('reporting','Create a monthly review')">Monthly review</button>
+                <button class="skill-sub-btn" onclick="startSkillChat('reporting','Write a campaign summary')">Campaign summary</button>
+              </div>
+            </div>
+
+            <div class="skill-card">
+              <div class="skill-card-emoji">📅</div>
+              <div class="skill-card-title">Calendar</div>
+              <div class="skill-card-subs">
+                <button class="skill-sub-btn" onclick="startSkillChat('calendar','Create a content calendar')">Content calendar</button>
+                <button class="skill-sub-btn" onclick="startSkillChat('calendar','Plan a campaign timeline')">Campaign timeline</button>
+                <button class="skill-sub-btn" onclick="startSkillChat('calendar','Set up scheduling')">Scheduling</button>
+              </div>
+            </div>
+
+            <div class="skill-card" style="border-color:var(--accent);border-width:2px;">
+              <div class="skill-card-emoji">📱</div>
+              <div class="skill-card-title">Social Media Bot</div>
+              <div class="skill-card-subs">
+                <button class="skill-sub-btn" onclick="startSkillChat('social-bot','Scan all Noise Media socials (Instagram, TikTok, LinkedIn, Facebook) and summarise today\'s trends')">Daily social scan</button>
+                <button class="skill-sub-btn" onclick="startSkillChat('social-bot','Generate a monthly social media report for all Noise Media channels')">Monthly report</button>
+                <button class="skill-sub-btn" onclick="startSkillChat('social-bot','Organise and analyse recent social media trends across all platforms')">Trend analysis</button>
+              </div>
+            </div>
+
+            <div class="skill-card" style="border-color:var(--accent);border-width:2px;">
+              <div class="skill-card-emoji">🔬</div>
+              <div class="skill-card-title">Deep Research</div>
+              <div class="skill-card-subs">
+                <button class="skill-sub-btn" onclick="startSkillChat('deep-research','Deep scan of Noise Media website, Instagram, TikTok, and LinkedIn presence')">Scan Noise Media</button>
+                <button class="skill-sub-btn" onclick="startSkillChat('deep-research','Deep scan and analysis of Noise Production across all platforms')">Scan Noise Production</button>
+                <button class="skill-sub-btn" onclick="startSkillChat('deep-research','Research and analyse competitor agencies and their digital presence')">Competitor deep dive</button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- Chat messages -->
+      <div class="thread-bar" id="threadBar"></div>
+      <div class="hub-msgs" id="hubChat"></div>
+      <div class="hub-suggestions" id="hubSuggestions" style="display:none;">
+        <button class="hub-sug-btn" onclick="useSuggestion(this)">What's the full Altra campaign breakdown?</button>
+        <button class="hub-sug-btn" onclick="useSuggestion(this)">Create a pitch deck for a new client</button>
+        <button class="hub-sug-btn" onclick="useSuggestion(this)">Summarise our top 5 clients by assets</button>
+        <button class="hub-sug-btn" onclick="useSuggestion(this)">Write a performance report for Altra</button>
+        <button class="hub-sug-btn" onclick="useSuggestion(this)">What audience performed best on Altra?</button>
+        <button class="hub-sug-btn" onclick="useSuggestion(this)">Draft an intro email for Amano Hotels</button>
       </div>
     </div>
   </div>
-  <div id="coworkView" style="display:none;flex:1;flex-direction:column;overflow:hidden;">
-    <div style="flex:1;overflow:auto;padding:20px;">
+  <div id="coworkView" style="display:none;flex:1;flex-direction:column;overflow:hidden;padding:0 24px;">
+    <!-- Input bar at TOP -->
+    <div class="hub-input-bar">
+      <button class="plus-menu-btn" id="plusMenuBtn2" onclick="togglePlusMenu2()">+</button>
+      <div class="plus-menu" id="plusMenu2" style="display:none;">
+        <div class="plus-menu-item" onclick="togglePluginsPanel(); hidePlusMenu2();">
+          <span>📦</span> Plugins
+        </div>
+        <div class="plus-menu-item" onclick="toggleDrivePanel(); hidePlusMenu2();">
+          <span>📁</span> Connectors
+        </div>
+        <div class="plus-menu-item" onclick="triggerFileUpload(); hidePlusMenu2();">
+          <span>📄</span> Add Files
+        </div>
+      </div>
+      <input class="wi" id="cwI" type="text" placeholder="What can I help you with today?" style="padding-left: 50px;" onkeydown="if(event.key==='Enter'){document.getElementById('wI').value=this.value;this.value='';hubSend();}">
+      <button class="wi-btn" onclick="document.getElementById('wI').value=document.getElementById('cwI').value;document.getElementById('cwI').value='';hubSend();">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+      </button>
+    </div>
+
+    <!-- Integration boxes -->
+    <div class="integration-bar" id="integrationBar2">
+      <div class="int-box" onclick="connectIntegration('gmail')">Gmail</div>
+      <div class="int-box" onclick="connectIntegration('google-sheets')">Google Sheets</div>
+      <div class="int-box" onclick="connectIntegration('google-docs')">Google Docs</div>
+      <div class="int-box" onclick="connectIntegration('adobe-photoshop')">Adobe Photoshop</div>
+      <div class="int-box" onclick="connectIntegration('google-calendar')">Google Calendar</div>
+      <div class="int-box" onclick="connectIntegration('slack')">Slack</div>
+      <div class="int-box" onclick="connectIntegration('pdf')">PDF</div>
+      <div class="int-box" onclick="connectIntegration('granola')">Granola</div>
+    </div>
+
+    <!-- Skills & Services grid (scrollable) -->
+    <div style="flex:1;overflow-y:auto;">
     <div style="max-width:1200px;margin:0 auto;">
       <h2 style="font-size:16px;font-weight:600;margin-bottom:16px;font-family:'Reddit Mono',monospace;text-transform:uppercase;letter-spacing:1px;">Skills & Services</h2>
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">
@@ -1043,24 +1230,6 @@
 
       </div>
     </div>
-    </div>
-    <div style="padding:0 24px;">
-      <div class="integration-bar" id="integrationBar2">
-        <div class="int-box" onclick="connectIntegration('gmail')">Gmail</div>
-        <div class="int-box" onclick="connectIntegration('google-sheets')">Google Sheets</div>
-        <div class="int-box" onclick="connectIntegration('google-docs')">Google Docs</div>
-        <div class="int-box" onclick="connectIntegration('adobe-photoshop')">Adobe Photoshop</div>
-        <div class="int-box" onclick="connectIntegration('google-calendar')">Google Calendar</div>
-        <div class="int-box" onclick="connectIntegration('slack')">Slack</div>
-        <div class="int-box" onclick="connectIntegration('pdf')">PDF</div>
-        <div class="int-box" onclick="connectIntegration('granola')">Granola</div>
-      </div>
-    </div>
-    <div class="hub-input-bar" style="padding:12px 24px 16px;flex-shrink:0;">
-      <input class="wi" id="cwI" type="text" placeholder="+ What can I help you with today?" onkeydown="if(event.key==='Enter'){document.getElementById('wI').value=this.value;this.value='';hubSend();}">
-      <button class="wi-btn" onclick="document.getElementById('wI').value=document.getElementById('cwI').value;document.getElementById('cwI').value='';hubSend();">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-      </button>
     </div>
   </div>
   <!-- INLINE DOC PANEL (shown when document is generated) -->
@@ -2113,19 +2282,24 @@ function showDriveSetupGuide() {
 }
 
 function toggleDrivePanel() {
-  var teach = document.getElementById('teachPanel');
-  var drive = document.getElementById('drivePanel');
-  var conn = document.getElementById('connList');
-  if (drive.style.display === 'none') {
-    drive.style.display = 'block';
-    if (teach) teach.style.display = 'none';
-    if (conn) conn.style.display = 'none';
-    var savedId = localStorage.getItem('nih_drive_client_id');
-    if (savedId) document.getElementById('driveClientId').value = savedId;
-  } else {
-    drive.style.display = 'none';
-    if (conn) conn.style.display = 'block';
-  }
+  var modal = document.createElement('div');
+  modal.className = 'modal-bg';
+  modal.onclick = function(e) { if (e.target === modal) modal.remove(); };
+  var savedId = localStorage.getItem('nih_drive_client_id') || '';
+  modal.innerHTML = '<div class="modal" style="max-width:480px;">'
+    + '<h3 style="margin-bottom:16px;">Connectors</h3>'
+    + '<div style="font-size:13px;color:var(--text-muted);line-height:1.6;">'
+    + '<p style="margin-bottom:12px;">Connect external services to enhance the Intelligence Hub:</p>'
+    + '<div style="display:flex;flex-direction:column;gap:8px;">'
+    + '<div style="padding:12px;background:var(--surface2);border-radius:8px;display:flex;justify-content:space-between;align-items:center;"><div><strong>Google Drive</strong><br><span style="font-size:11px;">Sync documents and files</span></div><button onclick="connectGoogleDrive();this.closest(\'.modal-bg\').remove();" style="padding:6px 14px;background:var(--accent);color:white;border:none;border-radius:6px;font-size:11px;cursor:pointer;">Connect</button></div>'
+    + '<div style="padding:12px;background:var(--surface2);border-radius:8px;display:flex;justify-content:space-between;align-items:center;"><div><strong>Gmail</strong><br><span style="font-size:11px;">Send and manage emails</span></div><button onclick="connectIntegration(\'gmail\');this.closest(\'.modal-bg\').remove();" style="padding:6px 14px;background:var(--accent);color:white;border:none;border-radius:6px;font-size:11px;cursor:pointer;">Connect</button></div>'
+    + '<div style="padding:12px;background:var(--surface2);border-radius:8px;display:flex;justify-content:space-between;align-items:center;"><div><strong>Slack</strong><br><span style="font-size:11px;">Team messaging integration</span></div><button onclick="connectIntegration(\'slack\');this.closest(\'.modal-bg\').remove();" style="padding:6px 14px;background:var(--accent);color:white;border:none;border-radius:6px;font-size:11px;cursor:pointer;">Connect</button></div>'
+    + '<div style="padding:12px;background:var(--surface2);border-radius:8px;display:flex;justify-content:space-between;align-items:center;"><div><strong>Google Calendar</strong><br><span style="font-size:11px;">Schedule and events</span></div><button onclick="connectIntegration(\'google-calendar\');this.closest(\'.modal-bg\').remove();" style="padding:6px 14px;background:var(--accent);color:white;border:none;border-radius:6px;font-size:11px;cursor:pointer;">Connect</button></div>'
+    + '</div>'
+    + '</div>'
+    + '<button onclick="this.closest(\'.modal-bg\').remove()" style="margin-top:16px;padding:8px 20px;background:var(--accent);color:white;border:none;border-radius:8px;font-size:12px;cursor:pointer;">Close</button>'
+    + '</div>';
+  document.body.appendChild(modal);
 }
 
 function renderMemoryList(el, filter) {
@@ -4154,20 +4328,78 @@ function clientCategoryChat(clientName, category) {
   input.focus();
 }
 
+function getClientFolders(clientName) {
+  if (!currentUser) return ['Access Storage', 'Email Responses'];
+  var stored = localStorage.getItem('nih_client_folders_' + currentUser.name + '_' + clientName);
+  if (stored) {
+    try {
+      return JSON.parse(stored);
+    } catch (e) {
+      return ['Access Storage', 'Email Responses'];
+    }
+  }
+  return ['Access Storage', 'Email Responses'];
+}
+
+function setClientFolders(clientName, folders) {
+  if (!currentUser) return;
+  localStorage.setItem('nih_client_folders_' + currentUser.name + '_' + clientName, JSON.stringify(folders));
+}
+
+function newClientChat(clientName) {
+  switchTab('chat');
+  var threadId = 'client_' + clientName.replace(/\s+/g, '_') + '_' + Date.now();
+  var threads = JSON.parse(localStorage.getItem('nih_threads_' + currentUser.name) || '[]');
+  var newThread = {
+    id: threadId,
+    client: clientName,
+    time: new Date().toISOString(),
+    messages: [],
+    folder: 'Access Storage'
+  };
+  threads.push(newThread);
+  localStorage.setItem('nih_threads_' + currentUser.name, JSON.stringify(threads));
+  document.getElementById('wI').value = 'Starting a new chat for ' + clientName + '. ';
+  document.getElementById('wI').focus();
+  renderConvHistory();
+}
+
+function openClientFolder(clientName, folderName) {
+  switchTab('chat');
+  var input = document.getElementById('wI');
+  input.value = 'For ' + clientName + ', in the ' + folderName + ' folder: ';
+  input.focus();
+}
+
+function addClientFolder(clientName) {
+  var folderName = prompt('Enter new folder name:');
+  if (!folderName || !folderName.trim()) return;
+  var folders = getClientFolders(clientName);
+  if (folders.indexOf(folderName.trim()) === -1) {
+    folders.push(folderName.trim());
+    setClientFolders(clientName, folders);
+    renderClientList();
+  }
+}
+
 function renderClientList() {
   var container = document.getElementById('clientList');
   if (!container) return;
   var sorted = CL.slice().sort(function(a,b) { return a.n.localeCompare(b.n); });
   container.innerHTML = sorted.map(function(c) {
+    var folders = getClientFolders(c.n);
+    var foldersHtml = folders.map(function(f) {
+      return '<div class="client-sub" onclick="openClientFolder(\'' + c.n.replace(/'/g, "\\'") + '\', \'' + f.replace(/'/g, "\\'") + '\')">' + f + '</div>';
+    }).join('');
     return '<div class="client-item" id="client-' + c.id + '">'
       + '<div class="client-header" onclick="toggleClient(\'' + c.id + '\')">'
       + '<span class="client-name">' + c.n + '</span>'
+      + '<button class="client-plus-btn" onclick="event.stopPropagation(); newClientChat(\'' + c.n.replace(/'/g, "\\'") + '\');">+</button>'
       + '<span class="client-arrow">&#9656;</span>'
       + '</div>'
       + '<div class="client-subs">'
-      + '<div class="client-sub" onclick="clientCategoryChat(\'' + c.n + '\', \'Creative\')">Creative</div>'
-      + '<div class="client-sub" onclick="clientCategoryChat(\'' + c.n + '\', \'Email Responses\')">Email Responses</div>'
-      + '<div class="client-sub" onclick="clientCategoryChat(\'' + c.n + '\', \'Accounts\')">Accounts</div>'
+      + foldersHtml
+      + '<div class="client-sub-add" onclick="addClientFolder(\'' + c.n.replace(/'/g, "\\'") + '\');">+ Add folder</div>'
       + '</div>'
       + '</div>';
   }).join('');
@@ -4234,6 +4466,16 @@ function togglePlusMenu2() {
   if (menu) menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
 }
 
+function hidePlusMenu() {
+  var menu = document.getElementById('plusMenu');
+  if (menu) menu.style.display = 'none';
+}
+
+function hidePlusMenu2() {
+  var menu = document.getElementById('plusMenu2');
+  if (menu) menu.style.display = 'none';
+}
+
 // Close plus menu when clicking outside
 document.addEventListener('click', function(e) {
   var menu = document.getElementById('plusMenu');
@@ -4277,24 +4519,153 @@ function handleFileUpload(files) {
   document.getElementById('fileUploadInput').value = '';
 }
 
-function connectIntegration(name) {
-  if (name === 'google-drive') {
-    toggleDrivePanel();
-    return;
+// Integration connection status stored in localStorage
+function getIntegrationStatus(name) {
+  if (!currentUser) return null;
+  return JSON.parse(localStorage.getItem('nih_int_' + currentUser.name + '_' + name) || 'null');
+}
+function setIntegrationStatus(name, status) {
+  if (!currentUser) return;
+  localStorage.setItem('nih_int_' + currentUser.name + '_' + name, JSON.stringify(status));
+}
+
+var integrationConfigs = {
+  'gmail': {
+    name: 'Gmail',
+    icon: '',
+    desc: 'Read, draft and send emails directly from the Hub.',
+    fields: ['Google OAuth Client ID', 'Authorised Email Address'],
+    actions: ['Read inbox', 'Draft email', 'Send email', 'Search emails']
+  },
+  'google-sheets': {
+    name: 'Google Sheets',
+    icon: '',
+    desc: 'Read, edit and create spreadsheets. Import data for analysis.',
+    fields: ['Google OAuth Client ID', 'Default Spreadsheet ID (optional)'],
+    actions: ['Open spreadsheet', 'Create new sheet', 'Import data', 'Export to sheet']
+  },
+  'google-docs': {
+    name: 'Google Docs',
+    icon: '',
+    desc: 'Read, create and edit documents. Export Hub outputs to Docs.',
+    fields: ['Google OAuth Client ID'],
+    actions: ['Open document', 'Create new doc', 'Export to Docs', 'Import from Docs']
+  },
+  'adobe-photoshop': {
+    name: 'Adobe Photoshop',
+    icon: '',
+    desc: 'Send assets to Photoshop, generate briefs with specs, and manage creative files.',
+    fields: ['Adobe Creative Cloud API Key', 'Workspace Folder Path'],
+    actions: ['Open in Photoshop', 'Generate asset brief', 'Resize assets', 'Export formats']
+  },
+  'google-calendar': {
+    name: 'Google Calendar',
+    icon: '',
+    desc: 'View schedule, create events, and set reminders for campaigns and deadlines.',
+    fields: ['Google OAuth Client ID', 'Default Calendar ID (optional)'],
+    actions: ['View today', 'Create event', 'Set reminder', 'Check availability']
+  },
+  'slack': {
+    name: 'Slack',
+    icon: '',
+    desc: 'Send messages, share Hub outputs and get notifications in Slack channels.',
+    fields: ['Slack Bot Token', 'Default Channel'],
+    actions: ['Send message', 'Share to channel', 'Search messages', 'Get notifications']
+  },
+  'pdf': {
+    name: 'PDF',
+    icon: '',
+    desc: 'Generate, read and edit PDFs. Export any Hub document as PDF.',
+    fields: [],
+    actions: ['Export as PDF', 'Read PDF', 'Merge PDFs', 'Extract text'],
+    builtin: true
+  },
+  'granola': {
+    name: 'Granola',
+    icon: '',
+    desc: 'Sync meeting notes and transcripts from Granola into the Hub.',
+    fields: ['Granola API Key', 'Workspace ID'],
+    actions: ['Import notes', 'Sync meetings', 'Search transcripts', 'Link to client']
   }
+};
+
+function connectIntegration(name) {
+  if (name === 'google-drive') { toggleDrivePanel(); return; }
+  var cfg = integrationConfigs[name];
+  if (!cfg) return;
+  var status = getIntegrationStatus(name);
+  var isConnected = status && status.connected;
   var modal = document.createElement('div');
   modal.className = 'modal-bg';
   modal.onclick = function(e) { if (e.target === modal) modal.remove(); };
-  var displayName = name.split('-').map(function(w) { return w.charAt(0).toUpperCase() + w.slice(1); }).join(' ');
-  modal.innerHTML = '<div class="modal">'
-    + '<h3>' + displayName + ' Integration</h3>'
-    + '<p>Connect ' + displayName + ' to enable the Intelligence Hub to read, search and interact with your ' + displayName + ' data.</p>'
-    + '<p style="font-size:11px;color:var(--text-muted);">This integration requires OAuth setup. Contact your admin or configure API credentials in Settings.</p>'
-    + '<div class="modal-btns">'
-    + '<button class="btn-cancel" onclick="this.closest(\'.modal-bg\').remove()">Cancel</button>'
-    + '<button class="btn-save" onclick="alert(\'OAuth flow for ' + displayName + ' coming soon. Contact admin for setup.\');this.closest(\'.modal-bg\').remove()">Connect</button>'
-    + '</div></div>';
+
+  var fieldsHtml = '';
+  if (!isConnected && cfg.fields && cfg.fields.length > 0) {
+    fieldsHtml = cfg.fields.map(function(f, i) {
+      var savedVal = status && status.fields && status.fields[i] ? status.fields[i] : '';
+      return '<div style="margin-bottom:8px;">'
+        + '<label style="font-size:10px;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-muted);font-weight:600;display:block;margin-bottom:4px;">' + f + '</label>'
+        + '<input class="int-field" type="text" placeholder="Enter ' + f.toLowerCase() + '" value="' + savedVal + '" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;font-size:12px;background:var(--surface);color:var(--text);font-family:\'Reddit Mono\',monospace;">'
+        + '</div>';
+    }).join('');
+  }
+
+  var actionsHtml = cfg.actions.map(function(a) {
+    var disabled = !isConnected && !cfg.builtin ? ' opacity:0.5;pointer-events:none;' : '';
+    return '<button onclick="runIntegrationAction(\'' + name + '\',\'' + a + '\');this.closest(\'.modal-bg\').remove();" style="padding:8px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;font-size:11px;cursor:pointer;font-family:\'Reddit Mono\',monospace;' + disabled + '">' + a + '</button>';
+  }).join('');
+
+  var statusDot = isConnected ? '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#4CAF50;margin-right:6px;"></span>Connected'
+    : cfg.builtin ? '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#4CAF50;margin-right:6px;"></span>Built-in'
+    : '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#ccc;margin-right:6px;"></span>Not connected';
+
+  var connectBtn = '';
+  if (!isConnected && !cfg.builtin) {
+    connectBtn = '<button id="intConnectBtn" onclick="saveIntegration(\'' + name + '\')" style="width:100%;padding:10px;background:var(--accent);color:white;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;margin-top:8px;">Connect ' + cfg.name + '</button>';
+  } else if (isConnected) {
+    connectBtn = '<button onclick="disconnectIntegration(\'' + name + '\');this.closest(\'.modal-bg\').remove();" style="width:100%;padding:10px;background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:8px;font-size:12px;cursor:pointer;margin-top:8px;">Disconnect</button>';
+  }
+
+  modal.innerHTML = '<div class="modal" style="max-width:480px;">'
+    + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">'
+    + '<h3 style="margin:0;">' + cfg.name + '</h3>'
+    + '<span style="font-size:11px;display:flex;align-items:center;">' + statusDot + '</span>'
+    + '</div>'
+    + '<p style="margin-bottom:16px;">' + cfg.desc + '</p>'
+    + (fieldsHtml ? '<div style="margin-bottom:12px;">' + fieldsHtml + '</div>' : '')
+    + '<div style="margin-bottom:12px;"><div style="font-size:10px;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-muted);font-weight:600;margin-bottom:8px;">Actions</div>'
+    + '<div style="display:flex;flex-wrap:wrap;gap:6px;">' + actionsHtml + '</div></div>'
+    + connectBtn
+    + '<button onclick="this.closest(\'.modal-bg\').remove()" style="width:100%;padding:8px;background:transparent;color:var(--text-muted);border:1px solid var(--border);border-radius:8px;font-size:11px;cursor:pointer;margin-top:6px;">Close</button>'
+    + '</div>';
   document.body.appendChild(modal);
+}
+
+function saveIntegration(name) {
+  var modal = document.querySelector('.modal-bg');
+  var fields = modal ? Array.from(modal.querySelectorAll('.int-field')).map(function(el) { return el.value.trim(); }) : [];
+  var cfg = integrationConfigs[name];
+  if (cfg.fields && cfg.fields.length > 0) {
+    var allFilled = fields.every(function(f) { return f.length > 0; });
+    if (!allFilled) { alert('Please fill in all fields to connect.'); return; }
+  }
+  setIntegrationStatus(name, { connected: true, fields: fields, connectedAt: new Date().toISOString() });
+  if (modal) modal.remove();
+  connectIntegration(name); // reopen to show connected state
+}
+
+function disconnectIntegration(name) {
+  if (!currentUser) return;
+  localStorage.removeItem('nih_int_' + currentUser.name + '_' + name);
+}
+
+function runIntegrationAction(name, action) {
+  switchTab('chat');
+  var input = document.getElementById('wI');
+  var cfg = integrationConfigs[name];
+  input.value = 'Using ' + cfg.name + ': ' + action;
+  input.focus();
+  hubSend();
 }
 
 function toggleSearchPanel() {

@@ -3208,13 +3208,19 @@ async function hubSend() {
   addMsgTo(hc, text, true);
 
   // === AUTO-DETECT AGENT MODE ===
-  // If the message sounds like a brief/task, use autonomous agent mode
+  // If the message sounds like a brief/task, switch to Co-Work tab and use autonomous agent mode
   var agentTriggers = /\b(create|build|make|draft|prepare|design|generate|write|produce|put together|develop)\b.*\b(deck|presentation|strategy|plan|report|brief|campaign|document|doc|proposal|audit|analysis|slides|overview)\b/i;
   if (agentTriggers.test(text)) {
+    // Switch to Co-Work tab for media/document creation
+    switchTab('cowork', false);
+    var cwChat = document.getElementById('coworkChat');
+    // Show the user message in co-work chat
+    addMsgTo(cwChat, text, true);
     currentMode = 'cowork';
-    await coworkAgent(text, hc);
+    await coworkAgent(text, cwChat);
     currentMode = 'chat';
     updateHomeView();
+    if (currentUser) saveCurrentThread();
     return;
   }
 

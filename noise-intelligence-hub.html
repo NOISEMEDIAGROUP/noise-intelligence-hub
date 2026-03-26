@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Noise Intelligence</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>if(window.pdfjsLib)window.pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
@@ -3636,8 +3638,16 @@ async function callClaude(userMsg) {
         searchContext = '\n\nWEB SEARCH RESULTS (live data for context):\n' + searchResults + '\n\nUse these search results to inform your answer where relevant. Cite the info naturally.';
       }
     }
-    var systemPrompt = buildSystemPrompt() + searchContext;
-    var reply = await aiCall(systemPrompt, conversationHistory, 1500);
+    // Include uploaded file contents in context if available
+    var fileContext = '';
+    if (window.uploadedFileContents && window.uploadedFileContents.length > 0) {
+      fileContext = '\n\nUPLOADED FILES (the user has uploaded these — use this content to answer their questions):\n';
+      window.uploadedFileContents.forEach(function(fc) {
+        fileContext += '\n=== FILE: ' + fc.name + ' ===\n' + fc.content + '\n';
+      });
+    }
+    var systemPrompt = buildSystemPrompt() + searchContext + fileContext;
+    var reply = await aiCall(systemPrompt, conversationHistory, 2000);
     if (!reply) return null;
 
     // If Claude says it needs to search, do it automatically
@@ -5370,31 +5380,91 @@ function triggerFileUpload() {
   document.getElementById('fileUploadInput').click();
 }
 
-function handleFileUpload(files) {
+async function handleFileUpload(files) {
   if (!files || files.length === 0) return;
+  if (!window.uploadedFiles) window.uploadedFiles = [];
+  if (!window.uploadedFileContents) window.uploadedFileContents = [];
   var fileList = [];
+  var hc = document.getElementById('hubChat');
+  var cwChat = document.getElementById('coworkChat');
+  // Use whichever chat is currently visible
+  var activeChat = hc;
+  if (document.getElementById('coworkView').style.display !== 'none') activeChat = cwChat;
+
   for (var i = 0; i < files.length; i++) {
     var f = files[i];
     fileList.push(f.name + ' (' + (f.size / 1024).toFixed(1) + ' KB)');
-    // Store file reference for the bot to use
-    if (!window.uploadedFiles) window.uploadedFiles = [];
     window.uploadedFiles.push(f);
   }
-  // Show confirmation in chat
-  var msg = 'Files uploaded: ' + fileList.join(', ');
-  var hc = document.getElementById('hubChat');
-  if (hc) {
-    var userMsg = document.createElement('div');
-    userMsg.className = 'hub-msg user';
-    userMsg.innerHTML = '<div class="hub-msg-av hub-msg-av-user">U</div><div class="hub-msg-body">' + escHtml(msg) + '</div>';
-    hc.appendChild(userMsg);
-    var botMsg = document.createElement('div');
-    botMsg.className = 'hub-msg bot';
-    botMsg.innerHTML = '<div class="hub-msg-av hub-msg-av-bot">NI</div><div class="hub-msg-body">I\'ve received ' + files.length + ' file(s). I can help you analyse, summarise, or work with these files. What would you like me to do?</div>';
-    hc.appendChild(botMsg);
-    hc.scrollTop = hc.scrollHeight;
+
+  // Show upload confirmation
+  var msg = 'Uploaded: ' + fileList.join(', ');
+  addMsgTo(activeChat, msg, true);
+  addMsgTo(activeChat, 'Reading file contents...', false);
+
+  // Extract text from each file
+  for (var i = 0; i < files.length; i++) {
+    var f = files[i];
+    var text = '';
+    try {
+      if (f.type === 'application/pdf' || f.name.toLowerCase().endsWith('.pdf')) {
+        text = await extractPdfText(f);
+      } else if (f.type.startsWith('text/') || f.name.match(/\.(txt|csv|tsv|md|json|html|xml|css|js)$/i)) {
+        text = await readFileAsText(f);
+      } else if (f.name.match(/\.(docx)$/i)) {
+        text = '[Word document uploaded — ' + f.name + '. Text extraction limited in browser.]';
+      } else if (f.name.match(/\.(xlsx|xls)$/i) && window.XLSX) {
+        text = await extractExcelText(f);
+      } else {
+        text = '[File uploaded: ' + f.name + ' (' + f.type + '). Binary file — content not readable as text.]';
+      }
+    } catch(e) {
+      text = '[Could not read file: ' + f.name + '. Error: ' + e.message + ']';
+    }
+    window.uploadedFileContents.push({ name: f.name, content: text.substring(0, 15000) });
   }
+
+  // Replace "Reading..." message with confirmation
+  if (activeChat && activeChat.lastChild) activeChat.removeChild(activeChat.lastChild);
+  addMsgTo(activeChat, 'I\'ve read ' + files.length + ' file(s). You can now ask me to summarise, analyse, or work with the content.', false);
+  activeChat.scrollTop = activeChat.scrollHeight;
+  if (currentUser) saveCurrentThread();
   document.getElementById('fileUploadInput').value = '';
+}
+
+function readFileAsText(file) {
+  return new Promise(function(resolve, reject) {
+    var reader = new FileReader();
+    reader.onload = function(e) { resolve(e.target.result); };
+    reader.onerror = function() { reject(new Error('Failed to read file')); };
+    reader.readAsText(file);
+  });
+}
+
+async function extractPdfText(file) {
+  if (!window.pdfjsLib) return '[PDF.js not loaded — cannot extract PDF text]';
+  var arrayBuffer = await file.arrayBuffer();
+  var pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+  var allText = '';
+  for (var p = 1; p <= pdf.numPages; p++) {
+    var page = await pdf.getPage(p);
+    var content = await page.getTextContent();
+    var pageText = content.items.map(function(item) { return item.str; }).join(' ');
+    allText += '\n--- Page ' + p + ' ---\n' + pageText;
+  }
+  return allText.trim();
+}
+
+async function extractExcelText(file) {
+  var arrayBuffer = await file.arrayBuffer();
+  var workbook = XLSX.read(arrayBuffer, { type: 'array' });
+  var allText = '';
+  workbook.SheetNames.forEach(function(name) {
+    var sheet = workbook.Sheets[name];
+    var csv = XLSX.utils.sheet_to_csv(sheet);
+    allText += '\n--- Sheet: ' + name + ' ---\n' + csv;
+  });
+  return allText.trim();
 }
 
 // Integration connection status stored in localStorage

@@ -1358,15 +1358,11 @@
     </div>
     <!-- Co-Work Main Area -->
     <div style="flex:1;display:flex;flex-direction:column;overflow-y:auto;">
-      <!-- Greeting section -->
-      <div style="flex: 0 0 auto; display: flex; align-items: center; justify-content: center; padding: 32px 24px 20px;">
-        <h1 style="font-size: 42px; font-weight: 700; font-family: 'Reddit Mono', monospace; text-transform: uppercase; letter-spacing: 1px;">Hey Pixel!</h1>
-      </div>
-
-      <!-- Skills & Connectors now accessible via + menu -->
+      <!-- Co-Work chat messages -->
+      <div class="hub-msgs" id="coworkChat" style="flex:1;"></div>
 
       <!-- Input bar at BOTTOM -->
-      <div class="hub-input-bar" style="margin-top: auto; max-width:800px;width:100%;margin-left:auto;margin-right:auto;padding:12px 24px 16px;">
+      <div class="hub-input-bar" style="max-width:800px;width:100%;margin-left:auto;margin-right:auto;padding:12px 24px 16px;">
         <button class="plus-menu-btn" id="plusMenuBtn2" onclick="togglePlusMenu2()">+</button>
         <div class="plus-menu" id="plusMenu2" style="display:none;">
           <div class="plus-menu-item" onclick="triggerFileUpload(); hidePlusMenu2();">📎 Add files or photos</div>

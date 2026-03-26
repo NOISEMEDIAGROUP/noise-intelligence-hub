@@ -351,8 +351,9 @@
 
   /* Hub chat area */
   .p1-main { flex: 1; display: flex; flex-direction: column; padding: 0; overflow: hidden; min-height: 0; }
-  .hub-chat-area { flex: 1; display: flex; flex-direction: column; max-width: 700px; width: 100%; margin: 0 auto; padding: 0 24px; min-height: 0; overflow: hidden; }
-  .hub-msgs { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; padding: 24px 0; scroll-behavior: smooth; min-height: 0; }
+  .hub-chat-area { flex: 1; display: flex; flex-direction: column; max-width: 700px; width: 100%; margin: 0 auto; padding: 0 24px; min-height: 0; overflow-y: auto; }
+  .hub-msgs { overflow-y: auto; display: flex; flex-direction: column; gap: 16px; padding: 24px 0; scroll-behavior: smooth; min-height: 0; }
+  .hub-msgs:empty { display: none; }
   .hub-suggestions {
     display: flex; flex-wrap: wrap; gap: 8px; padding: 0 0 12px;
     justify-content: center;
@@ -1338,8 +1339,8 @@
     </div>
   </div>
   </div><!-- end p1-top-row -->
-  <!-- CONVERSATION HISTORY BAR -->
-  <div class="conv-history-bar">
+  <!-- CONVERSATION HISTORY BAR (hidden - Recents & Messages now in sidebar) -->
+  <div class="conv-history-bar" style="display:none;">
     <div style="display:flex;flex:1;min-height:0;">
       <div style="flex:1;display:flex;flex-direction:column;border-right:1px solid var(--border);">
         <div class="ch-header">
@@ -2016,10 +2017,8 @@ function selectUser(u) {
   if (firstThread.html) {
     hubChatEl.innerHTML = firstThread.html;
     hubChatEl.scrollTop = hubChatEl.scrollHeight;
-    addMsgTo(hubChatEl, 'Welcome back, ' + u.name.split(' ')[0] + '!', false);
-  } else {
-    addMsgTo(hubChatEl, 'Hey ' + u.name.split(' ')[0] + '! What are you working on today?', false);
   }
+  // Don't show greeting on home screen — keep it clean per wireframe
   renderSidebar();
 }
 

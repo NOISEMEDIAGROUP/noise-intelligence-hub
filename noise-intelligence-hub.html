@@ -1642,11 +1642,18 @@ function startNewThread(label, client) {
   currentThreadId = th.id;
   var hc = document.getElementById('hubChat');
   hc.innerHTML = '';
-  var greeting = client
-    ? 'Starting a new thread for <strong>' + client + '</strong>. What do you need?'
-    : 'New thread started. What are you working on?';
-  addMsgTo(hc, greeting, false);
+  // Switch to chat tab if on co-work
+  switchTab('chat');
+  // Show clean home state with skills panel visible
   updateHomeView();
+  // Set placeholder hint based on client context
+  var input = document.getElementById('wI');
+  if (input) {
+    input.placeholder = client
+      ? 'Chat about ' + client + '...'
+      : 'What can I help you with today?';
+    input.focus();
+  }
   renderThreadBar();
   if (typeof renderConvHistory === 'function') renderConvHistory();
 }
@@ -4206,89 +4213,166 @@ function switchSkillCategory(el, category) {
     'social': {
       title: 'Social',
       skills: [
-        { text: 'Create a social strategy', prompt: 'Create a social media strategy' },
-        { text: 'Influencer brief', prompt: 'Write an influencer brief' },
-        { text: 'Hashtag research', prompt: 'Research relevant hashtags' }
+        { text: 'Social media strategy', prompt: 'Develop a comprehensive social media strategy including platform selection, audience analysis, content pillars, posting cadence, and KPIs' },
+        { text: 'Influencer campaign', prompt: 'Plan an influencer campaign with talent identification, briefing, deliverables, timelines, and budget allocation' },
+        { text: 'Community management plan', prompt: 'Create engagement strategies, response templates, and community guidelines for social platforms' },
+        { text: 'UGC campaign design', prompt: 'Design a user-generated content campaign with hashtag strategies, submission guidelines, and content repurposing plans' },
+        { text: 'Social content calendar', prompt: 'Create a 30-day social media content calendar with post concepts, copy, visual direction, and platform-specific adaptations' },
+        { text: 'Social copy and captions', prompt: 'Write platform-specific captions and copy for Instagram, TikTok, LinkedIn, and Facebook that drive engagement' },
+        { text: 'Paid social plan', prompt: 'Develop paid social campaigns with audience segmentation, creative direction, bidding strategies, and performance targets' },
+        { text: 'Social analytics report', prompt: 'Analyse social media performance data, identify trends, and create a client-ready report with actionable insights' },
+        { text: 'Crisis response plan', prompt: 'Develop crisis response protocols and pre-approved response templates for social media reputation management' },
+        { text: 'Trend analysis and opportunities', prompt: 'Monitor emerging trends, viral moments, and cultural conversations relevant to client industries with actionable recommendations' }
       ]
     },
     'strategy': {
       title: 'Strategy',
       skills: [
-        { text: 'Brand positioning', prompt: 'Create a brand positioning document' },
-        { text: 'Campaign planning', prompt: 'Plan a marketing campaign' },
-        { text: 'Competitor analysis', prompt: 'Do a competitor analysis' }
+        { text: 'Brand positioning', prompt: 'Develop a differentiated brand positioning with value proposition, target audience, and competitive advantage' },
+        { text: 'Campaign planning', prompt: 'Create a comprehensive campaign strategy with objectives, audience, key messages, creative direction, and channel strategy' },
+        { text: 'Go-to-market strategy', prompt: 'Develop a launch strategy with market analysis, positioning, channel strategy, and promotion timeline' },
+        { text: 'Pitch strategy', prompt: 'Develop a winning pitch strategy with compelling narrative, strategic recommendations, and creative concepts' },
+        { text: 'Competitor analysis', prompt: 'Conduct a thorough competitor analysis to identify market opportunities and strategic positioning' },
+        { text: 'Client workshop design', prompt: 'Design a strategic workshop agenda with discussion guides, exercises, and collaborative frameworks' },
+        { text: 'Market segmentation', prompt: 'Develop audience segmentation with demographics, psychographics, behaviors, and tailored messaging strategies' },
+        { text: 'Strategic brief', prompt: 'Write a clear, actionable creative brief with business background, objectives, audience, insights, and success criteria' },
+        { text: 'Business objectives alignment', prompt: 'Align marketing strategies with business objectives, defining success metrics and connecting outcomes to activities' },
+        { text: 'Messaging architecture', prompt: 'Develop a comprehensive messaging framework with hierarchy, key messages, supporting claims, and tone guidelines' }
       ]
     },
     'creative': {
       title: 'Creative',
       skills: [
-        { text: 'Creative brief', prompt: 'Write a creative brief' },
-        { text: 'Concept development', prompt: 'Develop a creative concept' },
-        { text: 'Art direction', prompt: 'Create art direction guidelines' }
+        { text: 'Creative brief', prompt: 'Generate a comprehensive creative brief with objectives, audience insights, creative direction, and success metrics' },
+        { text: 'Concept development', prompt: 'Develop 3-5 distinct creative concept directions with narrative, rationale, and visual descriptions' },
+        { text: 'Art direction guide', prompt: 'Define visual style, colour palettes, typography, photographic styles, and composition principles for a project' },
+        { text: 'Moodboard creation', prompt: 'Curate a moodboard with photography, design, typography, colour, and cultural references that establish the creative direction' },
+        { text: 'Storyboard development', prompt: 'Create frame-by-frame storyboard sequences with visuals, actions, dialogue, sound design, and technical specs' },
+        { text: 'Design system', prompt: 'Establish a design system with component libraries, design tokens, reusable patterns, and comprehensive guidelines' },
+        { text: 'Visual identity', prompt: 'Develop a cohesive visual identity with logo principles, colour systems, typography hierarchy, and brand applications' },
+        { text: 'Creative review framework', prompt: 'Structure a creative review process with clear objectives, evaluation criteria, and feedback frameworks' },
+        { text: 'Campaign ideation', prompt: 'Facilitate a brainstorming session to generate innovative campaign concepts with multiple creative directions' },
+        { text: 'Creative project plan', prompt: 'Plan creative project execution with scope, timeline, deliverables, workflows, and quality standards' }
       ]
     },
     'analytics': {
       title: 'Analytics',
       skills: [
-        { text: 'Performance report', prompt: 'Build a performance report' },
-        { text: 'Data analysis', prompt: 'Analyse campaign data' },
-        { text: 'KPI dashboard', prompt: 'Set up a KPI dashboard' }
+        { text: 'Performance reporting', prompt: 'Generate a comprehensive performance report with campaign metrics, channel analysis, and actionable insights' },
+        { text: 'Data analysis', prompt: 'Analyse raw campaign and audience data to uncover patterns, trends, and anomalies with strategic recommendations' },
+        { text: 'KPI dashboard setup', prompt: 'Define key metrics for each campaign type, establish benchmarks, and configure tracking dashboards' },
+        { text: 'A/B testing insights', prompt: 'Analyse A/B test results, calculate statistical significance, and recommend next testing steps' },
+        { text: 'Attribution modelling', prompt: 'Analyse multi-touch attribution to understand how different touchpoints contribute to conversions' },
+        { text: 'Audience segmentation', prompt: 'Analyse audience data to identify valuable customer segments and recommend targeted messaging strategies' },
+        { text: 'ROI analysis', prompt: 'Evaluate return on investment across campaigns and channels with budget reallocation recommendations' },
+        { text: 'Platform analytics', prompt: 'Interpret analytics from Google Analytics, Meta Business Suite, LinkedIn, and other marketing platforms' },
+        { text: 'Campaign benchmarking', prompt: 'Compare campaign performance against industry benchmarks and set realistic performance targets' },
+        { text: 'Conversion funnel analysis', prompt: 'Analyse each step of the conversion funnel to identify drop-off points and recommend improvements' }
       ]
     },
     'production': {
       title: 'Production',
       skills: [
-        { text: 'Video brief', prompt: 'Write a video production brief' },
-        { text: 'Photo shoot plan', prompt: 'Plan a photo shoot' },
-        { text: 'Asset management', prompt: 'Organise asset management' }
+        { text: 'Video production plan', prompt: 'Plan a video production project with shoot dates, crew requirements, technical specs, and deliverables' },
+        { text: 'Photo shoot coordination', prompt: 'Coordinate a photo shoot with location logistics, styling requirements, shot lists, and equipment needs' },
+        { text: 'Motion graphics brief', prompt: 'Brief a motion graphics project with style preferences, animation techniques, and timeline' },
+        { text: 'Post-production workflow', prompt: 'Guide post-production including colour grading, sound design, editing, VFX, and delivery specs' },
+        { text: 'Casting and talent', prompt: 'Plan talent selection with character requirements, availability, budget constraints, and briefing documents' },
+        { text: 'Location scouting', prompt: 'Find suitable filming locations considering aesthetics, accessibility, permits, and fees' },
+        { text: 'Production schedule', prompt: 'Create a detailed production schedule with phases, task durations, critical path items, and resource allocation' },
+        { text: 'Equipment planning', prompt: 'Recommend camera systems, lighting, audio equipment, and support gear based on project requirements' },
+        { text: 'Call sheet creation', prompt: 'Prepare detailed call sheets with shoot times, locations, crew contacts, equipment lists, and logistics' },
+        { text: 'Production budget', prompt: 'Build a production budget covering crew, equipment, locations, talent, insurance, and contingency' }
       ]
     },
     'research': {
       title: 'Research',
       skills: [
-        { text: 'Market research', prompt: 'Conduct market research' },
-        { text: 'Audience insights', prompt: 'Generate audience insights' },
-        { text: 'Trend analysis', prompt: 'Analyse trends' }
+        { text: 'Market research', prompt: 'Analyse market data, competitive landscapes, and industry dynamics to provide actionable strategic insights' },
+        { text: 'Audience deep dive', prompt: 'Develop comprehensive audience profiles with demographics, psychographics, behaviours, and persona documents' },
+        { text: 'Trend forecasting', prompt: 'Identify emerging trends across culture, technology, and consumer behaviour with momentum and longevity analysis' },
+        { text: 'Cultural insights', prompt: 'Uncover cultural moments, values, and shifts relevant to brand positioning and creative campaigns' },
+        { text: 'Consumer behaviour', prompt: 'Investigate purchase journeys, decision-making triggers, and behaviour patterns for strategic influence' },
+        { text: 'Industry intelligence', prompt: 'Synthesise industry reports, market data, and competitive intelligence for client sectors' },
+        { text: 'Focus group guide', prompt: 'Create focus group discussion guides with question flows, probes, and analysis frameworks' },
+        { text: 'Survey design', prompt: 'Design quantitative surveys with clear objectives, sampling methodology, and analysis approach' },
+        { text: 'Competitive intelligence', prompt: 'Research competitor strategies, positioning, messaging, and market performance with differentiation opportunities' },
+        { text: 'Research synthesis brief', prompt: 'Consolidate research findings into executive-ready strategy briefs with clear recommendations' }
       ]
     },
     'copywriting': {
       title: 'Copywriting',
       skills: [
-        { text: 'Ad copy', prompt: 'Write ad copy' },
-        { text: 'Social captions', prompt: 'Write social media captions' },
-        { text: 'Email marketing', prompt: 'Draft email marketing copy' }
+        { text: 'Ad copy', prompt: 'Write compelling ad copy for Google, Meta, Instagram, and LinkedIn with headlines, body text, and CTAs' },
+        { text: 'Social captions', prompt: 'Create engaging platform-native captions for Instagram, TikTok, LinkedIn, and Twitter with relevant hashtags' },
+        { text: 'Email marketing', prompt: 'Craft email campaigns including subject lines, body content, CTAs, welcome sequences, and re-engagement flows' },
+        { text: 'Website copy', prompt: 'Write persuasive website copy for homepages, service pages, landing pages, and about sections optimised for UX and SEO' },
+        { text: 'Press release', prompt: 'Write a professional press release with strong headline, compelling lead, and relevant quotes' },
+        { text: 'Brand manifesto', prompt: 'Write a powerful brand manifesto that articulates mission, values, and vision with emotionally resonant language' },
+        { text: 'Taglines and headlines', prompt: 'Create memorable taglines and headlines that capture brand essence with wordplay and emotional impact' },
+        { text: 'Product descriptions', prompt: 'Write compelling product descriptions highlighting features, benefits, and unique selling points for e-commerce' },
+        { text: 'Blog posts', prompt: 'Write engaging, SEO-optimised blog posts that educate, entertain, or inspire the target audience' },
+        { text: 'Script writing', prompt: 'Write scripts for commercials, explainer videos, podcasts, and presentations with engaging narration and pacing' }
       ]
     },
     'reporting': {
       title: 'Reporting',
       skills: [
-        { text: 'Client report', prompt: 'Build a client report' },
-        { text: 'Monthly review', prompt: 'Create a monthly review' },
-        { text: 'Campaign summary', prompt: 'Write a campaign summary' }
+        { text: 'Client report', prompt: 'Generate a comprehensive client report with executive summary, metrics, campaign breakdown, and recommendations' },
+        { text: 'Monthly review', prompt: 'Create a monthly review covering objectives achieved, performance against targets, and upcoming priorities' },
+        { text: 'Campaign summary', prompt: 'Build a concise campaign summary with objectives, creative approach, channels, results, and lessons learned' },
+        { text: 'Quarterly business review', prompt: 'Prepare a QBR with quarterly performance, progress against annual goals, budget analysis, and strategic recommendations' },
+        { text: 'Media performance report', prompt: 'Analyse channel-by-channel metrics with audience demographics, content rankings, and media mix recommendations' },
+        { text: 'Competitive benchmarking', prompt: 'Create a competitive benchmarking report comparing client performance against industry competitors' },
+        { text: 'ROI report', prompt: 'Develop a detailed ROI report with investment breakdown, revenue attribution, and channel-level returns' },
+        { text: 'Trend report', prompt: 'Prepare a trend analysis report with industry trends, emerging preferences, and strategic implications' },
+        { text: 'Performance dashboard', prompt: 'Create a performance dashboard tracking real-time KPIs, campaign progress, and budget status' },
+        { text: 'Executive summary', prompt: 'Generate an executive-level summary distilling campaign data into key wins, metrics, and action items' }
       ]
     },
     'calendar': {
       title: 'Calendar',
       skills: [
-        { text: 'Content calendar', prompt: 'Create a content calendar' },
-        { text: 'Campaign timeline', prompt: 'Plan a campaign timeline' },
-        { text: 'Scheduling', prompt: 'Set up scheduling' }
+        { text: 'Content calendar', prompt: 'Create a comprehensive content calendar with dates, content types, captions, hashtags, and visual descriptions' },
+        { text: 'Campaign timeline', prompt: 'Create a detailed campaign timeline from concept to execution with phases, milestones, and dependencies' },
+        { text: 'Editorial planning', prompt: 'Develop a strategic editorial calendar balancing promotional, educational, and engagement content' },
+        { text: 'Seasonal strategy', prompt: 'Develop seasonal content and campaign strategies around peak seasons, holidays, and cultural moments' },
+        { text: 'Posting schedule', prompt: 'Optimise posting schedules for maximum engagement across platforms with platform-specific timing recommendations' },
+        { text: 'Product launch timeline', prompt: 'Develop a product launch timeline with pre-launch teasers, launch day activities, and post-launch momentum' },
+        { text: 'Event marketing calendar', prompt: 'Create an integrated event marketing calendar with pre-event, day-of, and post-event engagement plans' },
+        { text: 'Quarterly content roadmap', prompt: 'Plan a quarterly content strategy with monthly themes, weekly priorities, and resource requirements' },
+        { text: 'Holiday and promo calendar', prompt: 'Map out holidays, shopping seasons, and promotional periods with campaign concepts for each moment' },
+        { text: 'Multi-channel schedule', prompt: 'Coordinate content publishing across multiple platforms with synchronised timing and platform-specific variations' }
       ]
     },
     'social-bot': {
       title: 'Social Media Bot',
       skills: [
-        { text: 'Daily social scan', prompt: 'Scan all Noise Media socials (Instagram, TikTok, LinkedIn, Facebook) and summarise today\'s trends' },
-        { text: 'Monthly report', prompt: 'Generate a monthly social media report for all Noise Media channels' },
-        { text: 'Trend analysis', prompt: 'Organise and analyse recent social media trends across all platforms' }
+        { text: 'Monitor brand mentions', prompt: 'Monitor social media for mentions of our client brands. Compile a sentiment report categorising mentions as positive, neutral, or negative with engagement metrics' },
+        { text: 'Track industry trends', prompt: 'Research trending topics, hashtags, and conversations across social platforms relevant to our client industries with recommendations on which to leverage' },
+        { text: 'Analyse content performance', prompt: 'Analyse recent social media post performance across all platforms with metrics on reach, engagement, CTR, shares, and saves for the past 7 days' },
+        { text: 'Competitive social analysis', prompt: 'Conduct a competitive analysis of our client competitors on social media reviewing posting frequency, content types, engagement rates, and follower growth' },
+        { text: 'Audience engagement report', prompt: 'Generate an audience engagement report with demographics, growth trends, peak times, most active segments, and content topics driving highest engagement' },
+        { text: 'Content calendar planning', prompt: 'Create a 4-week social content calendar incorporating trending topics, industry events, seasonal moments, and client promotions with copy suggestions' },
+        { text: 'Hashtag performance', prompt: 'Analyse hashtag performance across campaigns reporting on reach, impressions, engagement, and trending status with optimisation recommendations' },
+        { text: 'Crisis alert monitoring', prompt: 'Monitor social media for negative sentiment or potential PR issues with escalation recommendations and proposed response messaging' },
+        { text: 'Influencer opportunity scan', prompt: 'Identify relevant influencers in our client niche analysing audience demographics, engagement rates, content alignment, and partnership potential' },
+        { text: 'Platform strategy review', prompt: 'Conduct a platform-by-platform review of client social presence with performance metrics, audience composition, and resource allocation recommendations' }
       ]
     },
     'deep-research': {
       title: 'Deep Research',
       skills: [
-        { text: 'Scan Noise Media', prompt: 'Deep scan of Noise Media website, Instagram, TikTok, and LinkedIn presence' },
-        { text: 'Scan Noise Production', prompt: 'Deep scan and analysis of Noise Production across all platforms' },
-        { text: 'Competitor deep dive', prompt: 'Research and analyse competitor agencies and their digital presence' }
+        { text: 'Competitive deep dive', prompt: 'Conduct deep competitive analysis covering competitor messaging, content strategy, social presence, engagement rates, and audience demographics with differentiation opportunities' },
+        { text: 'Industry deep dive', prompt: 'Research industry size, growth trends, key players, market share, regulatory landscape, and emerging business models with strategic opportunities' },
+        { text: 'Platform algorithm research', prompt: 'Research current social media algorithm factors including engagement signals, content types favoured, timing optimisation, and recent algorithm updates with optimisation strategies' },
+        { text: 'Emerging trends scout', prompt: 'Scout emerging consumer behaviours, social trends gaining momentum, new content formats, and cultural shifts relevant to client industries with early-mover recommendations' },
+        { text: 'Audience deep dive', prompt: 'Conduct comprehensive audience research with psychographic profiling, behavioural patterns, media consumption habits, and online community analysis' },
+        { text: 'Brand audit', prompt: 'Conduct a comprehensive brand audit covering positioning, messaging consistency, visual identity, customer perception, and competitive comparison with recommendations' },
+        { text: 'Market opportunity analysis', prompt: 'Identify underserved market segments, emerging customer needs, whitespace opportunities, and adjacent market expansion potential' },
+        { text: 'Technology scouting', prompt: 'Evaluate emerging marketing technologies and tools for content creation, analytics, automation, and social listening with implementation recommendations' },
+        { text: 'Consumer behaviour research', prompt: 'Research consumer decision-making psychology, motivation drivers, social influence dynamics, and brand trust factors with messaging insights' },
+        { text: 'Competitive messaging analysis', prompt: 'Deep analysis of competitor messaging strategies, value propositions, emotional vs rational messaging, and audience response with positioning recommendations' }
       ]
     }
   };
@@ -4378,21 +4462,7 @@ function deleteClientFolder(clientName, folderName) {
 }
 
 function newClientChat(clientName) {
-  switchTab('chat');
-  var threadId = 'client_' + clientName.replace(/\s+/g, '_') + '_' + Date.now();
-  var threads = JSON.parse(localStorage.getItem('nih_threads_' + currentUser.name) || '[]');
-  var newThread = {
-    id: threadId,
-    client: clientName,
-    time: new Date().toISOString(),
-    messages: [],
-    folder: 'Access Storage'
-  };
-  threads.push(newThread);
-  localStorage.setItem('nih_threads_' + currentUser.name, JSON.stringify(threads));
-  document.getElementById('wI').value = 'Starting a new chat for ' + clientName + '. ';
-  document.getElementById('wI').focus();
-  renderConvHistory();
+  startNewThread(clientName + ' Chat', clientName);
 }
 
 function openClientFolder(clientName, folderName) {

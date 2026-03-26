@@ -960,6 +960,66 @@
     background: var(--green-bg); color: var(--green); padding: 1px 5px;
     border-radius: 3px; font-size: 8px; font-weight: 600;
   }
+  /* Full-page Projects view */
+  .projects-page { display: none; flex: 1; flex-direction: column; overflow: hidden; background: var(--bg); }
+  .projects-page.active { display: flex; }
+  .projects-page-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 24px 32px 16px; border-bottom: 1px solid var(--border); flex-shrink: 0;
+  }
+  .projects-page-title { font-family: 'Reddit Mono', monospace; font-size: 22px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
+  .projects-page-actions { display: flex; gap: 8px; align-items: center; }
+  .projects-page-search {
+    padding: 8px 14px; border: 1px solid var(--border); border-radius: 8px;
+    background: var(--surface); color: var(--text); font-size: 12px;
+    font-family: 'Montserrat', sans-serif; width: 220px; outline: none;
+  }
+  .projects-page-search:focus { border-color: var(--accent); }
+  .projects-page-add {
+    padding: 8px 16px; background: var(--accent); color: white; border: none;
+    border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer;
+    font-family: 'Montserrat', sans-serif;
+  }
+  .projects-page-add:hover { opacity: 0.9; }
+  .projects-page-back {
+    padding: 6px 12px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; font-size: 11px; cursor: pointer; color: var(--text);
+    font-family: 'Montserrat', sans-serif;
+  }
+  .projects-page-back:hover { background: var(--surface2); }
+  .projects-page-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px; padding: 24px 32px; overflow-y: auto; flex: 1;
+  }
+  .projects-page-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+    padding: 20px; cursor: pointer; transition: all 0.2s; border-left: 4px solid var(--accent);
+    position: relative;
+  }
+  .projects-page-card:hover { border-color: var(--accent); box-shadow: 0 4px 20px rgba(0,0,0,0.08); transform: translateY(-2px); }
+  .projects-page-card[data-color="red"] { border-left-color: #C73C1E; }
+  .projects-page-card[data-color="blue"] { border-left-color: #2B6CB0; }
+  .projects-page-card[data-color="green"] { border-left-color: #2D8A4E; }
+  .projects-page-card[data-color="purple"] { border-left-color: #8B5CF6; }
+  .projects-page-card[data-color="amber"] { border-left-color: #D97706; }
+  .projects-page-card-name { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 6px; font-family: 'Reddit Mono', monospace; }
+  .projects-page-card-client { font-size: 11px; color: var(--accent); font-weight: 600; margin-bottom: 8px; }
+  .projects-page-card-meta { font-size: 10px; color: var(--text-muted); display: flex; gap: 12px; align-items: center; }
+  .projects-page-card-actions {
+    position: absolute; top: 12px; right: 12px; display: flex; gap: 4px;
+    opacity: 0; transition: opacity 0.15s;
+  }
+  .projects-page-card:hover .projects-page-card-actions { opacity: 1; }
+  .projects-page-card-actions button {
+    background: var(--surface2); border: none; border-radius: 6px; padding: 4px 8px;
+    font-size: 11px; cursor: pointer; color: var(--text-muted);
+  }
+  .projects-page-card-actions button:hover { color: var(--accent); background: var(--accent-light); }
+  .projects-page-empty {
+    text-align: center; padding: 60px 20px; color: var(--text-muted);
+    font-size: 13px; grid-column: 1 / -1;
+  }
+  .projects-page-empty h3 { font-family: 'Reddit Mono', monospace; font-size: 18px; margin-bottom: 8px; color: var(--text); }
   .project-card-actions {
     display: none; gap: 2px; position: absolute; top: 6px; right: 6px;
   }
@@ -1350,6 +1410,20 @@
         </button>
       </div>
     </div>
+  </div>
+  <!-- FULL-PAGE PROJECTS VIEW -->
+  <div id="projectsView" class="projects-page">
+    <div class="projects-page-header">
+      <div style="display:flex;align-items:center;gap:16px;">
+        <button class="projects-page-back" onclick="closeProjectsPage()">&larr; Back</button>
+        <span class="projects-page-title">Projects</span>
+      </div>
+      <div class="projects-page-actions">
+        <input type="text" class="projects-page-search" id="projectsPageSearch" placeholder="Search projects..." oninput="renderProjectsPage()">
+        <button class="projects-page-add" onclick="addNewProject()">+ New Project</button>
+      </div>
+    </div>
+    <div class="projects-page-grid" id="projectsPageGrid"></div>
   </div>
   <!-- INLINE DOC PANEL (shown when document is generated) -->
   <div class="p1-doc" id="p1Doc">
@@ -4798,6 +4872,9 @@ function updateHomeView() {
 }
 
 function switchTab(tab, fromTabClick) {
+  // Close projects page if open
+  var pv = document.getElementById('projectsView');
+  if (pv) { pv.style.display = 'none'; pv.classList.remove('active'); }
   document.querySelectorAll('.header-tab').forEach(t => t.classList.remove('active'));
   document.querySelector('.header-tab[data-tab="' + tab + '"]').classList.add('active');
   document.getElementById('chatView').style.display = tab === 'chat' ? 'flex' : 'none';
@@ -5710,7 +5787,7 @@ var _legacySearchModal = function() {
 }
 
 function toggleProjectsPanel() {
-  setSidebarState(sidebarState === 'projects' ? 'default' : 'projects');
+  openProjectsPage();
 }
 
 function closeProjectsPanel() {
@@ -5745,6 +5822,91 @@ function renderProjectsPanel() {
       + '</div>';
   });
   el.innerHTML = html;
+}
+
+/* ============ FULL-PAGE PROJECTS VIEW ============ */
+function openProjectsPage() {
+  document.getElementById('chatView').style.display = 'none';
+  document.getElementById('coworkView').style.display = 'none';
+  var pv = document.getElementById('projectsView');
+  pv.style.display = 'flex';
+  pv.classList.add('active');
+  // Hide sidebar when in projects view
+  var mainSidebar = document.querySelector('#page1 > .p1-sidebar');
+  if (mainSidebar) mainSidebar.style.display = 'none';
+  // Deactivate tab highlights
+  document.querySelectorAll('.header-tab').forEach(function(t) { t.classList.remove('active'); });
+  renderProjectsPage();
+}
+
+function closeProjectsPage() {
+  var pv = document.getElementById('projectsView');
+  pv.style.display = 'none';
+  pv.classList.remove('active');
+  // Re-show chat view and sidebar
+  document.getElementById('chatView').style.display = 'flex';
+  var mainSidebar = document.querySelector('#page1 > .p1-sidebar');
+  if (mainSidebar) mainSidebar.style.display = 'flex';
+  document.querySelector('.header-tab[data-tab="chat"]').classList.add('active');
+}
+
+function renderProjectsPage() {
+  var grid = document.getElementById('projectsPageGrid');
+  if (!grid || !currentUser) return;
+  var projects = getProjects(currentUser.name);
+  var searchVal = (document.getElementById('projectsPageSearch') || {}).value || '';
+  searchVal = searchVal.trim().toLowerCase();
+
+  if (searchVal) {
+    projects = projects.filter(function(p) {
+      return p.name.toLowerCase().indexOf(searchVal) !== -1
+        || (p.client && p.client.toLowerCase().indexOf(searchVal) !== -1);
+    });
+  }
+
+  if (projects.length === 0) {
+    grid.innerHTML = '<div class="projects-page-empty">'
+      + '<h3>' + (searchVal ? 'No matching projects' : 'No projects yet') + '</h3>'
+      + '<p>' + (searchVal ? 'Try a different search term.' : 'Create your first project to group conversations and collaborate with your team.') + '</p>'
+      + '</div>';
+    return;
+  }
+
+  var html = '';
+  projects.forEach(function(p) {
+    var threadCount = p.threads ? p.threads.length : 0;
+    var sharedWith = p.sharedWith ? p.sharedWith.length : 0;
+    html += '<div class="projects-page-card" data-color="' + (p.color || 'red') + '" onclick="openProjectFromPage(\'' + p.id + '\')">'
+      + '<div class="projects-page-card-actions">'
+      + '<button onclick="event.stopPropagation();shareProjectModal(\'' + p.id + '\',event)" title="Share">Share</button>'
+      + '<button onclick="event.stopPropagation();renameProjectPrompt(\'' + p.id + '\')" title="Rename">Rename</button>'
+      + '<button onclick="event.stopPropagation();deleteProjectFromPage(\'' + p.id + '\')" title="Delete">Delete</button>'
+      + '</div>'
+      + '<div class="projects-page-card-name">' + escHtml(p.name) + '</div>'
+      + (p.client ? '<div class="projects-page-card-client">' + escHtml(p.client) + '</div>' : '')
+      + '<div class="projects-page-card-meta">'
+      + '<span>' + threadCount + ' thread' + (threadCount !== 1 ? 's' : '') + '</span>'
+      + (sharedWith > 0 ? '<span>Shared with ' + sharedWith + '</span>' : '')
+      + '<span>' + getRelativeDate(p.created) + '</span>'
+      + '</div>'
+      + '</div>';
+  });
+  grid.innerHTML = html;
+}
+
+function openProjectFromPage(projectId) {
+  closeProjectsPage();
+  switchProject(projectId);
+}
+
+function deleteProjectFromPage(projectId) {
+  if (confirm('Delete this project? Threads inside won\'t be deleted.')) {
+    deleteProjectById(currentUser.name, projectId);
+    if (currentProjectId === projectId) currentProjectId = null;
+    renderProjectsPage();
+    renderProjectTabBar();
+    showToast('Project deleted');
+  }
 }
 
 function renameProjectPrompt(projectId) {

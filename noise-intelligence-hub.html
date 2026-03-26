@@ -379,7 +379,8 @@
   .modal { background: var(--surface); border-radius: 16px; padding: 28px; width: 440px; max-width: 90vw; box-shadow: 0 8px 40px rgba(0,0,0,0.15); }
   .modal h3 { font-family: 'Reddit Mono', monospace; font-size: 16px; margin-bottom: 6px; }
   .modal p { font-size: 13px; color: var(--text-muted); margin-bottom: 16px; line-height: 1.5; }
-  .modal input { width: 100%; padding: 12px 14px; border: 1px solid var(--border); border-radius: 10px; font-size: 13px; margin-bottom: 10px; outline: none; font-family: 'Reddit Mono', monospace; }
+  .modal input[type="text"], .modal input:not([type]) { width: 100%; padding: 12px 14px; border: 1px solid var(--border); border-radius: 10px; font-size: 13px; margin-bottom: 10px; outline: none; font-family: 'Reddit Mono', monospace; }
+  .modal input[type="checkbox"] { width: auto; margin: 0; }
   .modal input:focus { border-color: var(--accent); }
   .modal-btns { display: flex; gap: 8px; justify-content: flex-end; margin-top: 8px; }
   .modal-btns button { padding: 10px 20px; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; }

@@ -3439,6 +3439,9 @@ function docWriterPrompt(docType) {
       + '5. End with <div style="background:#1B1B1B;padding:60px;text-align:center;color:white;"><h2>NOISE MEDIA</h2></div>\n'
       + 'STYLE: Write like the Noise Media Zapp OOH pitch — short punchy sentences, provocative, opinion-led. "It\'s not wholesome. It\'s not relaxing. It\'s admin." NOT corporate marketing speak.';
   }
+  if (docType === 'strategy') {
+    return base + 'Write a Noise Media strategy document in HTML. Use <h2> for sections (UPPERCASE): THE CHALLENGE, THE AUDIENCE, THE INSIGHT, THE STRATEGY, KEY PILLARS, CHANNELS & TACTICS, MEASUREMENT, TIMELINE. Keep each section SHORT and punchy — 2-4 sentences. Write like a strategist: opinionated, evidence-based, action-oriented. Use tables for data.';
+  }
   return base + 'Write a Noise Media branded document in HTML. Use <h2> for each major section (UPPERCASE titles). Keep sections focused — one topic per section. Write in a direct, punchy agency voice. Use tables for data. Each <h2> section becomes a separate page, so keep them concise (150-300 words each). Structure with clear sections: BRIEF, AUDIENCE, STRATEGY, APPROACH, DELIVERABLES, TIMELINE, BUDGET, NEXT STEPS as relevant.';
 }
 
@@ -3564,27 +3567,85 @@ async function coworkAgent(task, hc) {
   var headerText = planCard.querySelector('.task-card-header');
   if (headerText) headerText.childNodes[1].textContent = 'AGENT COMPLETE';
 
+  // If no doc was generated from the last step, force-generate one as a fallback
+  if (!finalDoc) {
+    // Detect doc type and client from the original task
+    var fallbackDocType = 'report';
+    if (task.match(/presentation|deck|slides|pptx/i)) fallbackDocType = 'presentation';
+    else if (task.match(/email|template/i)) fallbackDocType = 'email';
+    else if (task.match(/brief/i)) fallbackDocType = 'brief';
+    else if (task.match(/social|copy|post/i)) fallbackDocType = 'social';
+    else if (task.match(/proposal/i)) fallbackDocType = 'proposal';
+    else if (task.match(/strategy|plan/i)) fallbackDocType = 'strategy';
+    else if (task.match(/audit/i)) fallbackDocType = 'report';
+
+    // Try to extract client name from task
+    var fallbackClient = '';
+    CL.forEach(function(c) {
+      if (task.toLowerCase().indexOf(c.n.toLowerCase()) !== -1) fallbackClient = c.n;
+    });
+    if (!fallbackClient) fallbackClient = 'Client';
+    var fallbackCat = '';
+    var fallbackCl = CL.find(function(c) { return c.n === fallbackClient; });
+    if (fallbackCl) fallbackCat = fallbackCl.cat || '';
+
+    // Build rich context for document generation
+    var fbClientCtx = '';
+    if (fallbackCl && fallbackCl.knowledge) fbClientCtx += '\n\nCLIENT KNOWLEDGE: ' + fallbackCl.knowledge;
+    var fbStrat = getStrategyInfo(fallbackClient);
+    if (fbStrat) {
+      fbClientCtx += '\n\nSTRATEGY DATA:';
+      for (var fbp in fbStrat) { if (typeof fbStrat[fbp] === 'string') fbClientCtx += '\n- ' + fbp.replace(/_/g,' ') + ': ' + fbStrat[fbp]; }
+    }
+
+    // Include uploaded file contents if available
+    var fbFileCtx = '';
+    if (window.uploadedFileContents && window.uploadedFileContents.length > 0) {
+      fbFileCtx = '\n\nUPLOADED FILES:\n';
+      window.uploadedFileContents.forEach(function(fc) {
+        fbFileCtx += '\n=== FILE: ' + fc.name + ' ===\n' + fc.content + '\n';
+      });
+    }
+
+    var fbWritePrompt = docWriterPrompt(fallbackDocType);
+    var fbWriteMsg = 'Write a ' + fallbackDocType + ' for ' + fallbackClient + (fallbackCat ? ' (' + fallbackCat + ')' : '') + '. Original task: "' + task + '". Research context from agent steps: ' + contextSoFar + fbClientCtx + fbFileCtx + '. Return ONLY raw HTML — no markdown, no code fences, no ```. Start with an HTML tag.';
+
+    // Update card to show document generation
+    var genStep = document.createElement('div');
+    genStep.className = 'task-step active';
+    genStep.innerHTML = '<span class="step-icon">⟳</span><span>Generating document...</span>';
+    var stepsContainer = planCard.querySelector('.task-steps') || planCard;
+    stepsContainer.appendChild(genStep);
+    hc.scrollTop = hc.scrollHeight;
+
+    var fbDocHtml = await aiCall(fbWritePrompt, [{ role: 'user', content: fbWriteMsg }], 4000);
+    if (fbDocHtml) finalDoc = stripCodeFences(fbDocHtml);
+
+    // Mark generation step done
+    genStep.className = 'task-step done';
+    genStep.querySelector('.step-icon').textContent = '✓';
+    genStep.querySelector('span:last-child').textContent = 'Document generated';
+  }
+
   // Show final result
   if (finalDoc) {
     showDoc(finalDoc);
+    if (!planCard.querySelector('.task-card-done')) {
+      var doneDiv = document.createElement('div');
+      doneDiv.className = 'task-card-done';
+      doneDiv.textContent = 'COMPLETE — Document ready for review';
+      planCard.appendChild(doneDiv);
+    }
     addMsgTo(hc, 'Done — your deliverable is in the document panel. Review, edit, and export when ready.', false);
   } else {
-    // No doc generated, show a clean summary
-    var lastStep = steps[steps.length - 1] || 'Task';
-    var summaryLines = contextSoFar.split('\n').filter(function(l) { return l.trim() && !l.startsWith('Step '); });
-    var summaryReply = summaryLines.length > 0 ? summaryLines[summaryLines.length - 1] : 'I\'ve completed the task: ' + lastStep;
-    // Clean up the reply
-    summaryReply = summaryReply.replace(/^Completed:\s*/i, '').trim();
-    if (!summaryReply || summaryReply === 'null' || summaryReply === 'undefined') {
-      summaryReply = 'I\'ve completed the task. Let me know if you need any changes.';
-    }
+    // Truly no doc possible — show summary
     if (!planCard.querySelector('.task-card-done')) {
       var doneDiv = document.createElement('div');
       doneDiv.className = 'task-card-done';
       doneDiv.textContent = 'COMPLETE';
       planCard.appendChild(doneDiv);
     }
-    addMsgTo(hc, summaryReply, false);
+    addMsgTo(hc, 'I\'ve completed the research and planning. Let me know if you\'d like me to generate a document from this.', false);
   }
 
   if (currentUser) saveCurrentThread();

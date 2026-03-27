@@ -763,9 +763,9 @@
   }
   .plus-menu-btn:hover { background: var(--accent); color: white; border-color: var(--accent); }
   .plus-menu {
-    position: absolute; bottom: calc(100% + 8px); left: 0;
+    position: fixed;
     background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
-    box-shadow: var(--shadow-lg); min-width: 180px; z-index: 100; overflow: hidden;
+    box-shadow: var(--shadow-lg); min-width: 180px; z-index: 9999; overflow: hidden;
     max-height: 320px; overflow-y: auto;
   }
   .plus-menu-item {
@@ -4628,10 +4628,19 @@ function triggerDownload(blob, filename) {
   URL.revokeObjectURL(url);
 }
 
+/* Helper: find whichever doc panel has content */
+function getActiveDocPanel() {
+  var dc = document.getElementById('docC');
+  if (dc && dc.style.display !== 'none') return dc;
+  var p1dc = document.getElementById('p1DocC');
+  if (p1dc && document.getElementById('page1').classList.contains('has-doc')) return p1dc;
+  return null;
+}
+
 /* PDF Export */
 function exportPDF() {
-  var dc = document.getElementById('docC');
-  if (dc.style.display==='none') { alert('Generate a document first.'); return; }
+  var dc = getActiveDocPanel();
+  if (!dc) { alert('Generate a document first.'); return; }
   var title = getDocTitle();
   // Create a clean printable container
   var wrap = document.createElement('div');
@@ -4656,8 +4665,8 @@ function exportPDF() {
 
 /* DOCX Export (HTML blob method — opens in Word) */
 function exportDOCX() {
-  var dc = document.getElementById('docC');
-  if (dc.style.display==='none') { alert('Generate a document first.'); return; }
+  var dc = getActiveDocPanel();
+  if (!dc) { alert('Generate a document first.'); return; }
   var title = getDocTitle();
   var html = '<!DOCTYPE html><html><head><meta charset="utf-8"><style>body{font-family:Calibri,sans-serif;font-size:11pt;line-height:1.6;color:#1B1B1B;max-width:700px;margin:0 auto;padding:20px;}h1{font-size:18pt;margin-bottom:4px;}h2{font-size:14pt;margin-top:16px;border-bottom:1px solid #ddd;padding-bottom:4px;}h3{font-size:12pt;}table{width:100%;border-collapse:collapse;margin:10px 0;}th,td{border:1px solid #ccc;padding:6px 10px;text-align:left;font-size:10pt;}th{background:#f5f5f5;font-weight:bold;}.dm{color:#888;font-size:9pt;margin-bottom:12px;}</style></head><body>' + dc.innerHTML + '</body></html>';
   var blob = new Blob([html], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
@@ -4666,8 +4675,8 @@ function exportDOCX() {
 
 /* XLSX Export (extracts tables from document) */
 function exportXLSX() {
-  var dc = document.getElementById('docC');
-  if (dc.style.display==='none') { alert('Generate a document first.'); return; }
+  var dc = getActiveDocPanel();
+  if (!dc) { alert('Generate a document first.'); return; }
   var title = getDocTitle();
   var tables = dc.querySelectorAll('table');
   if (tables.length === 0) { alert('No tables found in this document to export to spreadsheet.'); return; }
@@ -4681,8 +4690,8 @@ function exportXLSX() {
 
 /* PPTX Export */
 function exportPPTX() {
-  var dc = document.getElementById('docC');
-  if (dc.style.display==='none') { alert('Generate a document first.'); return; }
+  var dc = getActiveDocPanel();
+  if (!dc) { alert('Generate a document first.'); return; }
   var title = getDocTitle();
   var pptx = new PptxGenJS();
   pptx.author = currentUser ? currentUser.name : 'Noise Intelligence';
@@ -5810,14 +5819,29 @@ function togglePluginsPanel() {
   document.body.appendChild(modal);
 }
 
+function positionPlusMenu(menu) {
+  var btn = menu.parentElement.querySelector('.plus-menu-btn');
+  if (!btn) return;
+  var r = btn.getBoundingClientRect();
+  menu.style.left = r.left + 'px';
+  menu.style.bottom = (window.innerHeight - r.top + 8) + 'px';
+  menu.style.top = 'auto';
+}
+
 function togglePlusMenu() {
   var menu = document.getElementById('plusMenu');
-  if (menu) menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+  if (!menu) return;
+  var showing = menu.style.display === 'none' || !menu.style.display;
+  menu.style.display = showing ? 'block' : 'none';
+  if (showing) positionPlusMenu(menu);
 }
 
 function togglePlusMenu2() {
   var menu = document.getElementById('plusMenu2');
-  if (menu) menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+  if (!menu) return;
+  var showing = menu.style.display === 'none' || !menu.style.display;
+  menu.style.display = showing ? 'block' : 'none';
+  if (showing) positionPlusMenu(menu);
 }
 
 function hidePlusMenu() {

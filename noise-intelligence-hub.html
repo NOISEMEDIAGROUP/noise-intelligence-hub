@@ -594,52 +594,57 @@
   .hub-msg-body li { margin: 3px 0; }
 
   /* ============ TASK CARDS (Agent steps) ============ */
+  /* ============ AGENT TASK CARDS (CLAUDE STYLE) ============ */
   .task-card {
     background: var(--surface); border: 1px solid var(--border);
-    border-radius: 12px; padding: 20px; margin: 10px 0; max-width: 600px;
+    border-radius: 10px; padding: 16px 18px; margin: 12px 0; max-width: 620px;
+    box-shadow: var(--shadow-sm);
   }
   .task-card-header {
-    display: flex; align-items: center; gap: 10px; margin-bottom: 14px;
-    font-family: 'Reddit Mono', monospace; font-size: 11px; font-weight: 700;
-    text-transform: uppercase; letter-spacing: 1.5px; color: var(--text);
+    display: flex; align-items: center; gap: 10px; margin-bottom: 12px;
+    font-family: 'Reddit Mono', monospace; font-size: 10px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted);
+  }
+  .task-card-header .pulse {
+    width: 6px; height: 6px; border-radius: 50%; background: var(--accent);
+    display: inline-block; animation: pulse 2s infinite; flex-shrink: 0;
   }
   .task-card-title {
-    font-weight: 600; font-size: 13px; color: var(--text); margin-bottom: 12px;
-    line-height: 1.5;
+    font-weight: 500; font-size: 13px; color: var(--text); margin-bottom: 14px;
+    line-height: 1.5; font-family: 'Montserrat', sans-serif;
   }
   .task-card-done {
-    margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border);
-    font-size: 12px; color: var(--text); line-height: 1.6;
+    margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border);
+    font-size: 12px; color: var(--text); line-height: 1.5;
+    font-family: 'Montserrat', sans-serif;
   }
   .task-steps {
-    display: flex; flex-direction: column; gap: 2px;
+    display: flex; flex-direction: column; gap: 8px;
   }
   .task-step {
-    display: flex; gap: 10px; align-items: center; font-size: 12px;
-    padding: 6px 8px; border-radius: 6px; color: var(--text-muted);
+    display: flex; gap: 10px; align-items: flex-start; font-size: 13px;
+    padding: 6px 0; color: var(--text-muted); font-family: 'Montserrat', sans-serif;
   }
   .task-step::before { display: none; }
   .task-step .step-icon {
-    width: 20px; height: 20px; border-radius: 50%; flex-shrink: 0;
+    width: 18px; height: 18px; border-radius: 50%; flex-shrink: 0;
     display: flex; align-items: center; justify-content: center;
-    font-size: 10px; border: 1.5px solid var(--border); color: var(--text-muted);
-    background: var(--surface2);
+    font-size: 9px; font-weight: 700; color: var(--text-muted);
+    background: transparent; margin-top: 2px;
   }
   .task-step.active { color: var(--text); }
   .task-step.active .step-icon {
-    border-color: var(--accent); color: var(--accent); background: var(--accent-light);
-    animation: pulse 2s infinite;
+    color: var(--accent); animation: pulse 2s infinite;
   }
   .task-step.done { color: var(--text); }
   .task-step.done .step-icon {
-    border-color: var(--green); color: white; background: var(--green);
-    font-size: 9px; animation: none;
+    color: var(--text-muted); font-weight: 700; animation: none;
   }
   .pulse {
-    width: 8px; height: 8px; border-radius: 50%; background: var(--accent);
+    width: 6px; height: 6px; border-radius: 50%; background: var(--accent);
     display: inline-block; animation: pulse 2s infinite;
   }
-  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
 
   /* ============ RESIZABLE ELEMENTS ============ */
   .nih-editable-box {
@@ -1803,7 +1808,10 @@ const CL = [
   { id:"winter-wonderland", n:"Winter Wonderland", s:"r", cat:"Events / Entertainment", sum:"Hyde Park London Christmas festival. Since 2008 (18th year 2025). ~2.5M visitors over 6 weeks. UK's largest open-air ice rink. 100+ rides.", a:4, c:2, knowledge:"Hyde Park London Christmas festival. Since 2008 (18th year 2025). MARI Group acquired from IMG Nov 2025 (IMG extended contract through 2032). ~2.5-3M visitors over 6 weeks (Nov 14 - Jan 1). 5000+ staff. 150+ attractions across themed zones: Santa Land, Show Town, Arctic Circle, Thrillville, Skaters Corner, Bavarian Village. UKs largest open-air ice rink (GBP11.50-17.50). Magical Ice Kingdom (Europes largest ice sculpture installation, 500+ tonnes ice). Cirque Berserk: Ignite. Entry: free off-peak, GBP7.50 peak. Instagram 292K followers. TikTok 128.5K followers (2.6M likes). Accessibility: sensory-friendly Tuesdays, Winter Wishes community day (6000+ free tickets). Sustainability: zero landfill, HVO biofuel, LED management, compostable packaging. Competitors: Manchester Christmas Markets, Edinburgh Hogmanay." },
   { id:"xigxag", n:"XigXag", s:"r", cat:"Tech / Footwear", sum:"Founded 2019, HQ Cornwall and London. Listen-and-read audiobook platform. Unique x-book format combining audiobook and e-book. 125000+ titles in 60 countries.", a:1, c:1, knowledge:"Founded 2019, HQ Cornwall and London. Founders: Kelli Fairbrother (ex-McKinsey, ex-COO Gelato) and Mark Chaplin (ex-ITV Director Production Technology). UKs first B Corp certified audiobook platform. Unique x-book format: synchronized audio, text, illustrations with autoscroll, word search, note-taking. Pay-per-book model: tiered loyalty pricing GBP7.99 down to GBP3.99 after 20 purchases (no subscription). 125000+ titles in 60 countries via HarperCollins, Penguin Random House, Pan MacMillan, Faber. GBP650K EIS funding round at GBP6.5M valuation (late 2025), backed by Lifted Ventures, Alma Angels, World of Books founders. Targeting GBP1B company in $35B global audiobook market. Doubled business twice in 2 years, zero paid marketing. Trustpilot 4.5/5. Awards: 2022 Tech Nation Rising Star, Startup Awards South West. Competitors: Audible (63.4% share), Spotify Audiobooks, Storytel, Apple Books." },
   { id:"zapp", n:"Zapp", s:"r", cat:"Tech / Delivery", sum:"Founded 2020, London. Premium 24/7 on-demand grocery delivery. 20-minute delivery in London. 3000+ hand-picked products. Total funding $300M. Zapp+ subscription launched Oct 2025.", a:2, c:1, knowledge:"Founded 2020, London. Founders: Joe Falter and Navid Hadzaad. Premium 24/7 on-demand grocery delivery, ~20 min in central London. Multiple dark stores: Kensington, Chelsea, Fulham, Notting Hill, Shoreditch, Islington, Angel, St Johns Wood. 3000+ hand-picked products. $200M Series B (2022) led by Lightspeed, 468 Capital, BroadLight; Lewis Hamilton investor. Doubled business in 18 months post-Getir UK exit (April 2024). Zapp+ subscription Oct 2025: GBP4.99/month, 10% cashback on orders GBP30+, free delivery GBP15+, thousands of subscribers, ~GBP300 annual savings. Fortnum and Mason 24/7 delivery partnership (March 2025, 33 SKUs). Zapp Boutique: LVMH, Apple, Antinori, Belvedere, Dr Barbara Sturm, wines to GBP5499. Deliveroo partnership: 2500+ products. Standard delivery GBP2.99. Competitors: Deliveroo, Gopuff." },
-  { id:"zeigo", n:"Zeigo", s:"r", cat:"Energy / Sustainability", sum:"Part of Schneider Electric. AI-native sustainability software ecosystem. Zeigo Hub launched July 2025: AI-powered SaaS for supply chain Scope 3 emissions tracking.", a:2, c:1, knowledge:"Climate-tech sustainability platform acquired by Schneider Electric (Jan 2022). Founded 2018 by Juan Pablo Cerda, London HQ. Originally renewable energy PPA digital procurement, expanded to comprehensive sustainability ecosystem. 20-person team integrated into Schneider advisory services (worlds largest corporate renewable energy advisor). Products: Zeigo Power (AI-powered RFP in 8-12 weeks, 150+ renewable developers), Zeigo Activate (Scope 1/2/3 carbon tracking, decarbonization roadmaps), Zeigo Hub (supply chain decarbonization, July 2025, agentic AI). Guidehouse Insights: #1 PPA marketplace solution. Clients: Marks and Spencer (RE:Spark), Levi Strauss (LEAP India). 2700+ suppliers across 40+ Schneider decarbonization programs since 2021. Supports CDP, CSRD, TCFD reporting. Competitors: PPAYA, Pexapark." }
+  { id:"zeigo", n:"Zeigo", s:"r", cat:"Energy / Sustainability", sum:"Part of Schneider Electric. AI-native sustainability software ecosystem. Zeigo Hub launched July 2025: AI-powered SaaS for supply chain Scope 3 emissions tracking.", a:2, c:1, knowledge:"Climate-tech sustainability platform acquired by Schneider Electric (Jan 2022). Founded 2018 by Juan Pablo Cerda, London HQ. Originally renewable energy PPA digital procurement, expanded to comprehensive sustainability ecosystem. 20-person team integrated into Schneider advisory services (worlds largest corporate renewable energy advisor). Products: Zeigo Power (AI-powered RFP in 8-12 weeks, 150+ renewable developers), Zeigo Activate (Scope 1/2/3 carbon tracking, decarbonization roadmaps), Zeigo Hub (supply chain decarbonization, July 2025, agentic AI). Guidehouse Insights: #1 PPA marketplace solution. Clients: Marks and Spencer (RE:Spark), Levi Strauss (LEAP India). 2700+ suppliers across 40+ Schneider decarbonization programs since 2021. Supports CDP, CSRD, TCFD reporting. Competitors: PPAYA, Pexapark." },
+  { id:"singapore-tourism", n:"Singapore Tourism Board", s:"r", cat:"Tourism / Government", sum:"Government agency promoting Singapore as tourism destination. Strategic campaign development proposal called City in Nature.", a:1, c:1, knowledge:"Government agency promoting Singapore as tourism destination. Strategic campaign development with Noise Intelligence. £40,000 proposal for 4-phase City in Nature campaign approach. We Don\'t Wait for Fun campaign for Gen Z/millennials. Culinary Capital campaign Jan 2025. Data-driven audience segmentation. Instagram @visit_singapore 845K followers. @stb_sg 58K followers." },
+  { id:"taskrabbit", n:"TaskRabbit", s:"r", cat:"Tech / Services", sum:"Gig economy platform by Amazon connecting customers with task professionals. Hybrid organic + paid strategy partner with Noise.", a:2, c:1, knowledge:"Gig economy platform by Amazon connecting customers with task professionals. Appointed Noise Intelligence for hybrid organic + paid strategy with LinkedIn/Instagram approach. Video campaign strategy and execution. Scaled IKEA partnership across North America and Europe Feb 2025. Instagram @taskrabbit 119K followers. TikTok @taskrabbit 14.5K followers." },
+  { id:"justpark", n:"JustPark", s:"r", cat:"Tech / Parking", sum:"UK parking app connecting drivers with 45,000+ locations. 10M+ drivers. Launched North America 2025.", a:1, c:1, knowledge:"UK parking app connecting drivers with 45,000+ locations. 10M+ drivers. $1B+ annual booking volume. Noise Intelligence work: Summer OOH campaign (29.7M impressions). Always-on creative brief. Launched in North America 2025. Partnership with University of Hawaii. Instagram @justparkhq 2,931 followers." }
 ];
 
 const CONN = [
@@ -3884,7 +3892,84 @@ var STRATEGY_KB = {
     video_specs: 'Primary codec H.264. Formats: 1080x1920 (9:16 vertical, 55+ files), 1080x1080 (1:1 square, 35+ files), 1920x1080 (16:9, 40+ files), 3840x2160 (4K UHD, 3 files). Duration: 2 sec to 30+ min. ProRes archive (2 MOV, Culture Club).',
     three_d: '14 3D models total. ORBX format (Hype4 platform): 10 flower/character designs (58.8MB each) + 2 AltraSkin models (117.59MB). STL format: 2 Altra product/packaging files (3D printing). Suggests AR/VR or interactive product visualization strategy.',
     design_files: 'Adobe PSD: social templates, seasonal campaigns (largest: Find 4 Flavours Stories 73MB). Adobe AI: vector graphics, multi-artboard campaigns (largest: Xmas-Social-Posts 243MB). Adobe AEP: Brothers Cracker campaign animation source files.'
-  }
+  },
+  'fable and mane': {
+    strategy_2026: true,
+    brand: 'Ayurvedic-inspired luxury hair wellness. Founded 2020 by Akash and Nikita Mehta. Tagline: "Rooted in Ritual, Reimagined".',
+    positioning: 'Moving away from overly spiritual/generic messaging. Leaning into: rituals, sensorial beauty, Indian heritage, hair strength and science. Content should feel elevated-but-social-native.',
+    creative_direction: 'FUGC (fake/optimised UGC) over pure branded or low-quality UGC. Content made for feed, not adapted. ASMR transformations, creator + brand mix, authority positioning.',
+    audiences: 'Three segments mapped to funnel: aesthetic storytelling (top), trustworthy reviews (middle), transformation-focused (bottom). Quiet luxury, purposeful content.',
+    channels: 'Meta, TikTok, YouTube. Channel research covers Google, YouTube, TikTok, Snapchat, Meta, Pinterest.',
+    competitors: 'Sahajan, Indē Wild, Kulfi Beauty (South Asian-inspired beauty brands).',
+    social: 'Instagram @fableandmane 216K followers. TikTok active with viral campaigns generating 6-figure sales in single weeks. 90% YoY growth in Earned Media Value.',
+    current_challenges: 'Paid content assessed as slow, boring, impersonal and generic. Need to shift to social-native, scroll-stopping content.'
+  },
+  'indian motorcycles': {
+    strategy_2026: true,
+    brand: '125-year heritage motorcycle manufacturer. Luxury cruiser brand, part of Polaris portfolio. Committed to cruiser-focused strategy, discontinued FTR naked roadster range.',
+    noise_role: 'Appointed as paid media partner. Full-funnel approach connecting brand storytelling with performance. Strategy across Meta and Google, balancing national brand with regional dealer network.',
+    social: 'Instagram @indianmotorcycle 1M followers. TikTok active. Regional accounts: UK, Mexico, European markets.',
+    product_range: '2025 models: Scout Sixty ($9,999 entry), Roadmaster Elite (300 units worldwide), Challenger Elite, Pursuit Elite with PowerPlus 112 motor.',
+    competitors: 'Harley-Davidson, Victory.'
+  },
+  'xigxag': {
+    strategy_2026: true,
+    brand: 'UK audiobook company making reading accessible and sustainable. Proprietary x-book format combining audio, text, illustrations, note-taking. Certified B Corp.',
+    pricing: 'No subscription. £7.99/audiobook max, drops to £3.99 after 20 books.',
+    competitors: 'Audible, Scribd.',
+    social: 'Trustpilot rated Excellent 4.5/5 stars.'
+  },
+  'paradisus by melia': {
+    strategy_2026: true,
+    brand: 'Luxury all-inclusive resort by Meliá Hotels International. "Destination Inclusive" concept with wellness and cultural immersion.',
+    noise_role: 'Noise handles strategy, digital execution, growth across social media, new markets, global brand perception. £10k/month retainer. Scope includes content calendar, trends, TikTok content, paid adaptation.',
+    social: 'Instagram @paradisusbymelia 446K followers, 2,150 posts. Regional accounts for English and Spanish.',
+    recent: 'Paradisus Bali opened Dec 2025 (485 suites, $40M renovation). Paradisus Cancún reopening April 2026 ($50M). Meliá investing $60M in Mexico expansion 2025.',
+    influencer_strategy: '7-9 partnerships over 6 months, targeting mid-tier to macro influencers.',
+    competitors: 'Sandals Resorts, Barceló luxury.'
+  },
+  'zapp': {
+    strategy_2026: true,
+    brand: 'London premium convenience delivery app. Quick-commerce with dark stores/micro-fulfilment. 24/7 delivery in minutes.',
+    positioning: '"Elevate Your Everyday" - Recent rebrand targeting affluent central London. Luxury brands including Daylesford Organic, LVMH, Apple, Charbonnel et Walker, Dr Barbara Sturm.',
+    social: 'Instagram @justzapp 32K followers.',
+    market: 'Survived UK quick-commerce consolidation (Weezy, Jiffy, Gorillas all gone). Partnered with Deliveroo.'
+  },
+  'singapore tourism board': {
+    strategy_2026: true,
+    brand: 'Government agency promoting Singapore as tourism destination.',
+    noise_proposal: '£40,000 strategic campaign development proposal with 4-phase approach called "City in Nature".',
+    campaigns: '"We Don\'t Wait for Fun" campaign for Gen Z/millennials. Culinary Capital campaign Jan 2025. Data-driven audience segmentation.',
+    social: 'Instagram @visit_singapore 845K followers. @stb_sg 58K followers.'
+  },
+  'taskrabbit': {
+    strategy_2026: true,
+    brand: 'Gig economy platform by Amazon connecting customers with task professionals.',
+    noise_work: 'Hybrid organic + paid strategy with LinkedIn/Instagram approach. Video campaign strategy and execution.',
+    social: 'Instagram @taskrabbit 119K followers. TikTok @taskrabbit 14.5K followers.',
+    recent: 'Scaled IKEA partnership across North America and Europe Feb 2025.'
+  },
+  'barbri': {
+    strategy_2026: true,
+    brand: 'Global leader in legal exam prep. 1.43M+ legal professionals served. Offers bar exam, SQE, MPRE, LSAT prep.',
+    social: 'Instagram @barbri_inc 17K followers. LinkedIn 13,607 followers. BARBRI SQE Prep LinkedIn 6,880 followers.',
+    market: 'Market leader in bar exam prep. Expanding internationally with SQE for UK solicitors.'
+  },
+  'apricot': {
+    strategy_2026: true,
+    brand: 'Independent British women\'s fashion brand. Playful prints and statement styles.',
+    noise_work: 'TikTok UGC Campaign brief (10 UGC videos, £5k budget). Black Friday 6-week campaign plan (£120k budget).',
+    social: 'Instagram @apricot_clothing 61K followers.',
+    retail: '14 standalone UK/Ireland stores. 300+ concessions in New Look. Available through Next, Very, QVC UK, SilkFred.'
+  },
+  'justpark': {
+    strategy_2026: true,
+    brand: 'UK parking app connecting drivers with 45,000+ locations. 10M+ drivers. $1B+ annual booking volume.',
+    noise_work: 'Summer OOH campaign (29.7M impressions). Always-on creative brief.',
+    social: 'Instagram @justparkhq 2,931 followers.',
+    recent: 'Launched in North America 2025. Partnership with University of Hawaii.'
+  },
+
 };
 
 function getStrategyInfo(clientName, query) {
@@ -3989,43 +4074,43 @@ function docWriterPrompt(docType) {
   var ur = currentUser ? currentUser.role : '';
   var se = currentUser ? currentUser.name.toLowerCase().replace(/\s/g,'.') + '@noisemediagroup.co.uk' : 'hello@noisemediagroup.co.uk';
   var teamInfo = TEAM.map(function(t) { return t.name + ' — ' + t.role; }).join(', ');
-  var base = 'You are a document writer for Noise Media, a creative agency specialising in paid social, content production, and brand storytelling. Write on behalf of ' + un + ' (' + ur + ', email: ' + se + '). Write complete, professional, ready-to-send content — NOT templates with placeholders. Use real names, real details from context. Be warm, professional, and concise.\n\nCRITICAL FORMATTING RULES:\n- Return ONLY raw HTML tags. Do NOT wrap your response in markdown code fences (```). Do NOT use ``` anywhere.\n- Start your response directly with an HTML tag like <h1> or <div>. No preamble, no explanation, no markdown.\n\nTeam: ' + teamInfo + '\n\n';
+  var base = 'You are a document writer for Noise Media, a creative agency specialising in paid social, content production, and brand storytelling. Write on behalf of ' + un + ' (' + ur + ', email: ' + se + '). Write complete, professional, ready-to-send content — NOT templates with placeholders. Use real names, real details from context. Be warm, professional, and concise.\n\nNOISE MEDIA BRANDING:\n- PRIMARY RED: #C73C1E\n- DARK: #1B1B1B\n- LIGHT BG: #F8F8E9\n- TEXT: #1A1B1F\n- MUTED: #8C8C8C\n- Use these fonts in all HTML output: font-family: \'Montserrat\', sans-serif for body text (400/500 weight). font-family: \'Reddit Mono\', monospace for headings and section titles (600 weight).\n\nCRITICAL FORMATTING RULES:\n- Return ONLY raw HTML tags. Do NOT wrap your response in markdown code fences (```). Do NOT use ``` anywhere.\n- Start your response directly with an HTML tag like <h1> or <div>. No preamble, no explanation, no markdown.\n\nTeam: ' + teamInfo + '\n\n';
 
   if (docType === 'email') {
-    return base + 'Write a complete professional email in HTML format. Structure:\n<div style="max-width:640px;margin:0 auto;">\n<div style="background:#F0EFED;padding:16px 20px;border-radius:8px;margin-bottom:20px;font-size:13px;">From/To/Subject/Date header</div>\n<p>Email body paragraphs</p>\n<p>Sign-off with sender name, role, Noise Media</p>\n</div>\n\nFill in ALL fields with real content based on context. If names are mentioned, use them. If a topic is given, write about it. Today is ' + fmtDate() + '. The sender is ' + un + ' (' + ur + ').';
+    return base + 'Write a complete professional email in HTML format with Noise Media branding. Use font-family: Montserrat for body text, Reddit Mono for headers. Use color #1A1B1F for text, #C73C1E for accent links. Structure:\n<div style="max-width:640px;margin:0 auto;font-family:Montserrat,sans-serif;">\n<div style="background:#F8F8E9;padding:16px 20px;border-radius:8px;margin-bottom:20px;font-size:13px;color:#1A1B1F;">From/To/Subject/Date header (use Reddit Mono for labels)</div>\n<p style="color:#1A1B1F;">Email body paragraphs in Montserrat</p>\n<p style="color:#1A1B1F;">Sign-off with sender name, role, Noise Media</p>\n</div>\n\nFill in ALL fields with real content based on context. If names are mentioned, use them. If a topic is given, write about it. Today is ' + fmtDate() + '. The sender is ' + un + ' (' + ur + ').';
   }
   if (docType === 'brief') {
-    return base + 'Write a Noise Media brief in HTML. Use <h2> for each section (UPPERCASE). Sections: THE BRIEF, THE AUDIENCE, THE OBJECTIVE, KEY MESSAGES, DELIVERABLES, TIMELINE. Keep each section short and punchy (2-4 paragraphs max). Use tables for structured data. Write in direct agency voice — no fluff.';
+    return base + 'Write a Noise Media brief in HTML with proper branding. Use font-family: Montserrat for body (400/500 weight), Reddit Mono for headings (600 weight, uppercase). Color scheme: text #1A1B1F, accent #C73C1E, muted #8C8C8C, light bg #F8F8E9. Use <h2 style="font-family:Reddit Mono,monospace;font-weight:600;text-transform:uppercase;color:#C73C1E;"> for each section (UPPERCASE). Sections: THE BRIEF, THE AUDIENCE, THE OBJECTIVE, KEY MESSAGES, DELIVERABLES, TIMELINE. Keep each section short and punchy (2-4 paragraphs max). Use tables for structured data. Write in direct agency voice — no fluff.';
   }
   if (docType === 'social') {
-    return base + 'Write social media copy in HTML. Use <h2> for each post/platform. Write actual engaging copy — punchy, conversational, scroll-stopping. Include hashtags and posting times. Write like a social-first creative agency.';
+    return base + 'Write social media copy in HTML with Noise Media branding. Use font-family: Montserrat for body (400/500 weight), Reddit Mono for headings (600 weight). Color scheme: text #1A1B1F, accent #C73C1E. Use <h2 style="font-family:Reddit Mono,monospace;font-weight:600;color:#C73C1E;"> for each post/platform. Write actual engaging copy — punchy, conversational, scroll-stopping. Include hashtags and posting times. Write like a social-first creative agency.';
   }
   if (docType === 'proposal') {
-    return base + 'Write a Noise Media proposal in HTML. Use <h2> for sections (UPPERCASE): ABOUT NOISE, THE OPPORTUNITY, PROPOSED APPROACH, SERVICES, INVESTMENT, TIMELINE, NEXT STEPS. Use tables for pricing. Be direct and confident, not salesy.';
+    return base + 'Write a Noise Media proposal in HTML with proper branding. Use font-family: Montserrat for body (400/500 weight), Reddit Mono for headings (600 weight, uppercase). Color scheme: text #1A1B1F, accent #C73C1E, backgrounds #F8F8E9. Use <h2 style="font-family:Reddit Mono,monospace;font-weight:600;text-transform:uppercase;color:#C73C1E;"> for sections: ABOUT NOISE, THE OPPORTUNITY, PROPOSED APPROACH, SERVICES, INVESTMENT, TIMELINE, NEXT STEPS. Use tables for pricing with clean styling. Be direct and confident, not salesy.';
   }
   if (docType === 'cost') {
-    return base + 'Write a cost breakdown in HTML. Use <h2> for sections. Use tables for line items with columns: ITEM, DESCRIPTION, COST. Include team hours where relevant. Be clear and transparent.';
+    return base + 'Write a cost breakdown in HTML with Noise Media branding. Use font-family: Montserrat for body (400/500 weight), Reddit Mono for headings (600 weight, uppercase). Color scheme: text #1A1B1F, accent #C73C1E. Use <h2 style="font-family:Reddit Mono,monospace;font-weight:600;text-transform:uppercase;color:#C73C1E;"> for sections. Use tables for line items with columns: ITEM, DESCRIPTION, COST. Include team hours where relevant. Be clear and transparent.';
   }
   if (docType === 'report') {
-    return base + 'Write a Noise Media performance report in HTML. Use <h2> for sections (UPPERCASE): OVERVIEW, KEY METRICS, TOP PERFORMING CONTENT, ANALYSIS, RECOMMENDATIONS. Use tables for metrics. Be data-led and actionable.';
+    return base + 'Write a Noise Media performance report in HTML with proper branding. Use font-family: Montserrat for body (400/500 weight), Reddit Mono for headings (600 weight, uppercase). Color scheme: text #1A1B1F, accent #C73C1E. Use <h2 style="font-family:Reddit Mono,monospace;font-weight:600;text-transform:uppercase;color:#C73C1E;"> for sections: OVERVIEW, KEY METRICS, TOP PERFORMING CONTENT, ANALYSIS, RECOMMENDATIONS. Use tables for metrics. Be data-led and actionable.';
   }
   if (docType === 'agenda') {
-    return base + 'Write a meeting agenda in HTML. Use <h2> for sections. Include a table with columns: TIME, TOPIC, LEAD, DURATION. Add <h2>KEY ACTION ITEMS</h2> section at the end. Use real team names from context.';
+    return base + 'Write a meeting agenda in HTML with Noise Media branding. Use font-family: Montserrat for body (400/500 weight), Reddit Mono for headings (600 weight, uppercase). Color scheme: text #1A1B1F, accent #C73C1E. Use <h2 style="font-family:Reddit Mono,monospace;font-weight:600;text-transform:uppercase;color:#C73C1E;"> for sections. Include a table with columns: TIME, TOPIC, LEAD, DURATION. Add <h2 style="font-family:Reddit Mono,monospace;font-weight:600;text-transform:uppercase;color:#C73C1E;">KEY ACTION ITEMS</h2> section at the end. Use real team names from context.';
   }
   if (docType === 'presentation') {
-    return base + 'Write a Noise Media presentation in HTML. Structure:\n'
-      + '1. Start with <div style="background:#1B1B1B;padding:60px;color:white;"><h1 style="color:#C73C1E;">TITLE</h1><p>Subtitle</p></div>\n'
-      + '2. Use <h2> for each major section — these become separate slides. Use UPPERCASE, bold, punchy section titles (e.g., THE NEED, THE PROBLEM, THE AUDIENCE, THE STRATEGY, KEY METRICS).\n'
+    return base + 'Write a Noise Media presentation in HTML with proper branding. Use font-family: Reddit Mono for headings (uppercase, 600 weight), Montserrat for body text. Color scheme: background #1B1B1B (dark), text #F8F8E9 (light), accent #C73C1E (red). Structure:\n'
+      + '1. Start with <div style="background:#1B1B1B;padding:60px;font-family:Montserrat,sans-serif;"><h1 style="font-family:Reddit Mono,monospace;font-weight:600;color:#C73C1E;text-transform:uppercase;font-size:32px;">TITLE</h1><p style="color:#F8F8E9;">Subtitle</p></div>\n'
+      + '2. Use <h2 style="font-family:Reddit Mono,monospace;font-weight:600;text-transform:uppercase;color:#1B1B1B;"> for each major section — these become separate slides. Keep titles punchy (e.g., THE NEED, THE PROBLEM, THE AUDIENCE, THE STRATEGY, KEY METRICS).\n'
       + '3. Keep each section SHORT and punchy — 2-4 sentences max per section. Write like a creative agency: direct, opinionated, no corporate fluff.\n'
-      + '4. Use tables for data, comparisons, timelines.\n'
-      + '5. End with <div style="background:#1B1B1B;padding:60px;text-align:center;color:white;"><h2>NOISE MEDIA</h2></div>\n'
+      + '4. Use tables for data, comparisons, timelines. Light sections use background #F8F8E9 with text #1A1B1F.\n'
+      + '5. End with <div style="background:#1B1B1B;padding:60px;text-align:center;"><h2 style="font-family:Reddit Mono,monospace;font-weight:600;color:white;text-transform:uppercase;">NOISE<span style="color:#C73C1E;">.</span></h2></div>\n'
       + 'IMPORTANT DATE FORMATTING: Always write dates as full text like "January 2026" or "Q1 2026" — NEVER as "012026" or compact numeric formats. Always separate the date from company names with proper spacing or line breaks.\n'
       + 'STYLE: Write like the Noise Media Zapp OOH pitch — short punchy sentences, provocative, opinion-led. "It\'s not wholesome. It\'s not relaxing. It\'s admin." NOT corporate marketing speak.';
   }
   if (docType === 'strategy') {
-    return base + 'Write a Noise Media strategy document in HTML. Use <h2> for sections (UPPERCASE): THE CHALLENGE, THE AUDIENCE, THE INSIGHT, THE STRATEGY, KEY PILLARS, CHANNELS & TACTICS, MEASUREMENT, TIMELINE. Keep each section SHORT and punchy — 2-4 sentences. Write like a strategist: opinionated, evidence-based, action-oriented. Use tables for data.';
+    return base + 'Write a Noise Media strategy document in HTML with proper branding. Use font-family: Montserrat for body (400/500 weight), Reddit Mono for headings (600 weight, uppercase). Color scheme: text #1A1B1F, accent #C73C1E. Use <h2 style="font-family:Reddit Mono,monospace;font-weight:600;text-transform:uppercase;color:#C73C1E;"> for sections: THE CHALLENGE, THE AUDIENCE, THE INSIGHT, THE STRATEGY, KEY PILLARS, CHANNELS & TACTICS, MEASUREMENT, TIMELINE. Keep each section SHORT and punchy — 2-4 sentences. Write like a strategist: opinionated, evidence-based, action-oriented. Use tables for data.';
   }
-  return base + 'Write a Noise Media branded document in HTML. Use <h2> for each major section (UPPERCASE titles). Keep sections focused — one topic per section. Write in a direct, punchy agency voice. Use tables for data. Each <h2> section becomes a separate page, so keep them concise (150-300 words each). Structure with clear sections: BRIEF, AUDIENCE, STRATEGY, APPROACH, DELIVERABLES, TIMELINE, BUDGET, NEXT STEPS as relevant.';
+  return base + 'Write a Noise Media branded document in HTML with proper branding. Use font-family: Montserrat for body (400/500 weight), Reddit Mono for headings (600 weight, uppercase). Color scheme: text #1A1B1F, accent #C73C1E, light bg #F8F8E9, muted #8C8C8C. Use <h2 style="font-family:Reddit Mono,monospace;font-weight:600;text-transform:uppercase;color:#C73C1E;"> for each major section (UPPERCASE titles). Keep sections focused — one topic per section. Write in a direct, punchy agency voice. Use tables for data. Each <h2> section becomes a separate page, so keep them concise (150-300 words each). Structure with clear sections: BRIEF, AUDIENCE, STRATEGY, APPROACH, DELIVERABLES, TIMELINE, BUDGET, NEXT STEPS as relevant.';
 }
 
 /* ============ CO-WORK AUTONOMOUS AGENT ============ */
@@ -4036,9 +4121,9 @@ async function coworkAgent(task, hc) {
   // Step 1: Show "thinking" and get a plan from Claude
   var planCard = document.createElement('div');
   planCard.className = 'task-card';
-  planCard.innerHTML = '<div class="task-card-header"><div class="pulse"></div><span>AGENT WORKING</span></div>'
+  planCard.innerHTML = '<div class="task-card-header"><div class="pulse"></div><span>Agent working</span></div>'
     + '<div class="task-card-title">' + escHtml(task) + '</div>'
-    + '<div class="task-steps" id="agentSteps"><div class="task-step active"><span class="step-icon">&#8226;</span><span>Planning approach...</span></div></div>';
+    + '<div class="task-steps" id="agentSteps"><div class="task-step active"><span class="step-icon">●</span><span>Planning approach...</span></div></div>';
   hc.appendChild(planCard);
   hc.scrollTop = hc.scrollHeight;
 
@@ -4063,7 +4148,7 @@ async function coworkAgent(task, hc) {
     var div = document.createElement('div');
     div.className = 'task-step' + (i === 0 ? ' active' : '');
     div.id = 'agentStep_' + i;
-    div.innerHTML = '<span class="step-icon">' + (i === 0 ? '&#8226;' : '&#9675;') + '</span><span>' + escHtml(s) + '</span>';
+    div.innerHTML = '<span class="step-icon">' + (i === 0 ? '●' : '○') + '</span><span>' + escHtml(s) + '</span>';
     stepsEl.appendChild(div);
   });
   hc.scrollTop = hc.scrollHeight;
@@ -4075,7 +4160,7 @@ async function coworkAgent(task, hc) {
   for (var i = 0; i < steps.length; i++) {
     // Mark current step active
     var stepEl = document.getElementById('agentStep_' + i);
-    if (stepEl) { stepEl.className = 'task-step active'; stepEl.querySelector('.step-icon').innerHTML = '&#8226;'; }
+    if (stepEl) { stepEl.className = 'task-step active'; stepEl.querySelector('.step-icon').innerHTML = '●'; }
 
     var isLast = (i === steps.length - 1);
     var stepPrompt = 'You are an autonomous AI agent for Noise Media agency, working for ' + un + ' (' + ur + ').\n\n'
@@ -4098,7 +4183,7 @@ async function coworkAgent(task, hc) {
     contextSoFar += '\nStep ' + (i + 1) + ': ' + stepReply;
 
     // Mark step done
-    if (stepEl) { stepEl.className = 'task-step done'; stepEl.querySelector('.step-icon').innerHTML = '&#10003;'; }
+    if (stepEl) { stepEl.className = 'task-step done'; stepEl.querySelector('.step-icon').innerHTML = '✓'; }
     hc.scrollTop = hc.scrollHeight;
 
     // Check if last step returned a doc request
@@ -4132,7 +4217,7 @@ async function coworkAgent(task, hc) {
           // Update card with completion summary
           var doneDiv = document.createElement('div');
           doneDiv.className = 'task-card-done';
-          doneDiv.textContent = 'COMPLETE — ' + (docReq.summary || docReq.doc_type + ' created for ' + dcn);
+          doneDiv.textContent = 'Complete — ' + (docReq.summary || docReq.doc_type + ' created for ' + dcn);
           planCard.appendChild(doneDiv);
         }
       } catch(e) {}
@@ -4146,9 +4231,9 @@ async function coworkAgent(task, hc) {
 
   // Stop the pulse animation
   var pulse = planCard.querySelector('.pulse');
-  if (pulse) { pulse.style.animation = 'none'; pulse.style.background = '#27AE60'; }
+  if (pulse) { pulse.style.animation = 'none'; pulse.style.opacity = '0.4'; }
   var headerText = planCard.querySelector('.task-card-header');
-  if (headerText) headerText.childNodes[1].textContent = 'AGENT COMPLETE';
+  if (headerText) headerText.childNodes[1].textContent = 'Agent complete';
 
   // If no doc was generated from the last step, force-generate one as a fallback
   if (!finalDoc) {
@@ -4196,7 +4281,7 @@ async function coworkAgent(task, hc) {
     // Update card to show document generation
     var genStep = document.createElement('div');
     genStep.className = 'task-step active';
-    genStep.innerHTML = '<span class="step-icon">&#8226;</span><span>Generating document...</span>';
+    genStep.innerHTML = '<span class="step-icon">●</span><span>Generating document...</span>';
     var stepsContainer = planCard.querySelector('.task-steps') || planCard;
     stepsContainer.appendChild(genStep);
     hc.scrollTop = hc.scrollHeight;
@@ -4206,7 +4291,7 @@ async function coworkAgent(task, hc) {
 
     // Mark generation step done
     genStep.className = 'task-step done';
-    genStep.querySelector('.step-icon').innerHTML = '&#10003;';
+    genStep.querySelector('.step-icon').innerHTML = '✓';
     genStep.querySelector('span:last-child').textContent = 'Document generated';
   }
 
@@ -4216,16 +4301,16 @@ async function coworkAgent(task, hc) {
     if (!planCard.querySelector('.task-card-done')) {
       var doneDiv = document.createElement('div');
       doneDiv.className = 'task-card-done';
-      doneDiv.textContent = 'COMPLETE — Document ready for review';
+      doneDiv.textContent = 'Complete — document ready for review';
       planCard.appendChild(doneDiv);
     }
-    addMsgTo(hc, 'Done — your deliverable is in the document panel. Review, edit, and export when ready.', false);
+    addMsgTo(hc, 'Done — your deliverable is ready. Review, edit, and export when ready.', false);
   } else {
     // Truly no doc possible — show summary
     if (!planCard.querySelector('.task-card-done')) {
       var doneDiv = document.createElement('div');
       doneDiv.className = 'task-card-done';
-      doneDiv.textContent = 'COMPLETE';
+      doneDiv.textContent = 'Complete';
       planCard.appendChild(doneDiv);
     }
     addMsgTo(hc, 'I\'ve completed the research and planning. Let me know if you\'d like me to generate a document from this.', false);
@@ -5204,35 +5289,38 @@ function sr() { return currentUser ? currentUser.role : ''; }
 /* --- Document builders (keep these separate so chat responses stay clean) --- */
 function buildBrief(cn, cc) {
   const d = fmtDate();
-  return `<h1>${cn} — Content Brief</h1>
-<div class="dm">Prepared by ${sn()} &middot; ${d} &middot; Noise Media</div>
-<h2>1. Overview</h2>
+  return `<div style="font-family:Montserrat,sans-serif;color:#1A1B1F;">
+<h1 style="font-family:Reddit Mono,monospace;font-weight:600;color:#C73C1E;font-size:24px;">${cn} — CONTENT BRIEF</h1>
+<div style="color:#8C8C8C;font-size:13px;margin-bottom:20px;">Prepared by ${sn()} &middot; ${d} &middot; Noise Media</div>
+<h2 style="font-family:Reddit Mono,monospace;font-weight:600;color:#C73C1E;text-transform:uppercase;margin-top:24px;">1. Overview</h2>
 <p><strong>Client:</strong> ${cn}<br><strong>Category:</strong> ${cc}<br><strong>Brief Type:</strong> Content Brief<br><strong>Prepared by:</strong> ${sn()} (${sr()})</p>
-<h2>2. Objectives</h2>
+<h2 style="font-family:Reddit Mono,monospace;font-weight:600;color:#C73C1E;text-transform:uppercase;margin-top:24px;">2. Objectives</h2>
 <ul><li>Drive awareness and consideration through targeted paid social content</li><li>Increase engagement rate by 15% vs. previous campaign period</li><li>Generate high-quality UGC-style assets for organic and paid distribution</li></ul>
-<h2>3. Target Audience</h2>
-<table><tr><th>Segment</th><th>Demographics</th><th>Interests</th><th>Platform</th></tr>
-<tr><td>Primary</td><td>25-40, M/F</td><td>Category enthusiasts</td><td>Instagram, TikTok</td></tr>
-<tr><td>Secondary</td><td>18-24, M/F</td><td>Discovery-driven</td><td>TikTok, YouTube</td></tr></table>
-<h2>4. Key Messages</h2>
+<h2 style="font-family:Reddit Mono,monospace;font-weight:600;color:#C73C1E;text-transform:uppercase;margin-top:24px;">3. Target Audience</h2>
+<table style="width:100%;border-collapse:collapse;"><tr style="background:#F8F8E9;"><th style="padding:12px;text-align:left;border:1px solid #E0E0E0;">Segment</th><th style="padding:12px;text-align:left;border:1px solid #E0E0E0;">Demographics</th><th style="padding:12px;text-align:left;border:1px solid #E0E0E0;">Interests</th><th style="padding:12px;text-align:left;border:1px solid #E0E0E0;">Platform</th></tr>
+<tr><td style="padding:12px;border:1px solid #E0E0E0;">Primary</td><td style="padding:12px;border:1px solid #E0E0E0;">25-40, M/F</td><td style="padding:12px;border:1px solid #E0E0E0;">Category enthusiasts</td><td style="padding:12px;border:1px solid #E0E0E0;">Instagram, TikTok</td></tr>
+<tr><td style="padding:12px;border:1px solid #E0E0E0;">Secondary</td><td style="padding:12px;border:1px solid #E0E0E0;">18-24, M/F</td><td style="padding:12px;border:1px solid #E0E0E0;">Discovery-driven</td><td style="padding:12px;border:1px solid #E0E0E0;">TikTok, YouTube</td></tr></table>
+<h2 style="font-family:Reddit Mono,monospace;font-weight:600;color:#C73C1E;text-transform:uppercase;margin-top:24px;">4. Key Messages</h2>
 <ul><li>Hero message: [To be defined with client]</li><li>Supporting proof points from existing asset library</li><li>CTA: Drive to product page / signup</li></ul>
-<h2>5. Deliverables</h2>
-<table><tr><th>Asset</th><th>Format</th><th>Qty</th><th>Owner</th></tr>
-<tr><td>Video ads</td><td>9:16 + 1:1</td><td>6</td><td>Luke / Adam</td></tr>
-<tr><td>Static carousels</td><td>1080x1080</td><td>4</td><td>Steph / Georgie</td></tr>
-<tr><td>UGC clips</td><td>9:16</td><td>3</td><td>Leah</td></tr></table>
-<h2>6. Timeline</h2>
-<table><tr><th>Phase</th><th>Dates</th><th>Notes</th></tr>
-<tr><td>Brief sign-off</td><td>Week 1</td><td>Client approval</td></tr>
-<tr><td>Production</td><td>Weeks 2-3</td><td>Shoot + post</td></tr>
-<tr><td>Review</td><td>Week 4</td><td>Max 2 rounds</td></tr>
-<tr><td>Go live</td><td>Week 5</td><td>Paid + organic</td></tr></table>
-<h2>7. Budget</h2><p>To be confirmed with ${cn} based on campaign scope.</p>
-<h2>8. Approvals</h2>
-<table><tr><th>Role</th><th>Name</th><th>Status</th></tr>
-<tr><td>Account Lead</td><td>Beau / Louise</td><td>Pending</td></tr>
-<tr><td>Creative Director</td><td>Beau</td><td>Pending</td></tr>
-<tr><td>Client</td><td>${cn}</td><td>Pending</td></tr></table>`;
+<h2 style="font-family:Reddit Mono,monospace;font-weight:600;color:#C73C1E;text-transform:uppercase;margin-top:24px;">5. Deliverables</h2>
+<table style="width:100%;border-collapse:collapse;"><tr style="background:#F8F8E9;"><th style="padding:12px;text-align:left;border:1px solid #E0E0E0;">Asset</th><th style="padding:12px;text-align:left;border:1px solid #E0E0E0;">Format</th><th style="padding:12px;text-align:left;border:1px solid #E0E0E0;">Qty</th><th style="padding:12px;text-align:left;border:1px solid #E0E0E0;">Owner</th></tr>
+<tr><td style="padding:12px;border:1px solid #E0E0E0;">Video ads</td><td style="padding:12px;border:1px solid #E0E0E0;">9:16 + 1:1</td><td style="padding:12px;border:1px solid #E0E0E0;">6</td><td style="padding:12px;border:1px solid #E0E0E0;">Luke / Adam</td></tr>
+<tr><td style="padding:12px;border:1px solid #E0E0E0;">Static carousels</td><td style="padding:12px;border:1px solid #E0E0E0;">1080x1080</td><td style="padding:12px;border:1px solid #E0E0E0;">4</td><td style="padding:12px;border:1px solid #E0E0E0;">Steph / Georgie</td></tr>
+<tr><td style="padding:12px;border:1px solid #E0E0E0;">UGC clips</td><td style="padding:12px;border:1px solid #E0E0E0;">9:16</td><td style="padding:12px;border:1px solid #E0E0E0;">3</td><td style="padding:12px;border:1px solid #E0E0E0;">Leah</td></tr></table>
+<h2 style="font-family:Reddit Mono,monospace;font-weight:600;color:#C73C1E;text-transform:uppercase;margin-top:24px;">6. Timeline</h2>
+<table style="width:100%;border-collapse:collapse;"><tr style="background:#F8F8E9;"><th style="padding:12px;text-align:left;border:1px solid #E0E0E0;">Phase</th><th style="padding:12px;text-align:left;border:1px solid #E0E0E0;">Dates</th><th style="padding:12px;text-align:left;border:1px solid #E0E0E0;">Notes</th></tr>
+<tr><td style="padding:12px;border:1px solid #E0E0E0;">Brief sign-off</td><td style="padding:12px;border:1px solid #E0E0E0;">Week 1</td><td style="padding:12px;border:1px solid #E0E0E0;">Client approval</td></tr>
+<tr><td style="padding:12px;border:1px solid #E0E0E0;">Production</td><td style="padding:12px;border:1px solid #E0E0E0;">Weeks 2-3</td><td style="padding:12px;border:1px solid #E0E0E0;">Shoot + post</td></tr>
+<tr><td style="padding:12px;border:1px solid #E0E0E0;">Review</td><td style="padding:12px;border:1px solid #E0E0E0;">Week 4</td><td style="padding:12px;border:1px solid #E0E0E0;">Max 2 rounds</td></tr>
+<tr><td style="padding:12px;border:1px solid #E0E0E0;">Go live</td><td style="padding:12px;border:1px solid #E0E0E0;">Week 5</td><td style="padding:12px;border:1px solid #E0E0E0;">Paid + organic</td></tr></table>
+<h2 style="font-family:Reddit Mono,monospace;font-weight:600;color:#C73C1E;text-transform:uppercase;margin-top:24px;">7. Budget</h2>
+<p>To be confirmed with ${cn} based on campaign scope.</p>
+<h2 style="font-family:Reddit Mono,monospace;font-weight:600;color:#C73C1E;text-transform:uppercase;margin-top:24px;">8. Approvals</h2>
+<table style="width:100%;border-collapse:collapse;"><tr style="background:#F8F8E9;"><th style="padding:12px;text-align:left;border:1px solid #E0E0E0;">Role</th><th style="padding:12px;text-align:left;border:1px solid #E0E0E0;">Name</th><th style="padding:12px;text-align:left;border:1px solid #E0E0E0;">Status</th></tr>
+<tr><td style="padding:12px;border:1px solid #E0E0E0;">Account Lead</td><td style="padding:12px;border:1px solid #E0E0E0;">Beau / Louise</td><td style="padding:12px;border:1px solid #E0E0E0;">Pending</td></tr>
+<tr><td style="padding:12px;border:1px solid #E0E0E0;">Creative Director</td><td style="padding:12px;border:1px solid #E0E0E0;">Beau</td><td style="padding:12px;border:1px solid #E0E0E0;">Pending</td></tr>
+<tr><td style="padding:12px;border:1px solid #E0E0E0;">Client</td><td style="padding:12px;border:1px solid #E0E0E0;">${cn}</td><td style="padding:12px;border:1px solid #E0E0E0;">Pending</td></tr></table>
+</div>`;
 }
 
 function buildEmail(cn, cc, type) {
@@ -5272,68 +5360,68 @@ function buildCost(cn) {
 
 function buildReport(cn) {
   const d = fmtDate();
-  return '<h1>' + cn + ' — Performance Report</h1><div class="dm">Prepared by ' + sn() + ' &middot; ' + d + '</div><h2>Key Metrics</h2><table><tr><th>Metric</th><th>This Period</th><th>Previous</th><th>Change</th></tr><tr><td>Impressions</td><td>—</td><td>—</td><td>—</td></tr><tr><td>Reach</td><td>—</td><td>—</td><td>—</td></tr><tr><td>Engagement Rate</td><td>—</td><td>—</td><td>—</td></tr><tr><td>Link Clicks</td><td>—</td><td>—</td><td>—</td></tr><tr><td>CPC</td><td>—</td><td>—</td><td>—</td></tr></table><h2>Top Creative</h2><p>[Insert top 3 creatives with performance data]</p><h2>Recommendations</h2><ul><li>Scale top-performing ad sets</li><li>Test new creative formats</li><li>Review audience targeting</li></ul>';
+  return '<div style="font-family:Montserrat,sans-serif;color:#1A1B1F;"><h1 style="font-family:Reddit Mono,monospace;font-weight:600;color:#C73C1E;font-size:24px;">' + cn + ' — PERFORMANCE REPORT</h1><div style="color:#8C8C8C;font-size:13px;margin-bottom:20px;">Prepared by ' + sn() + ' &middot; ' + d + '</div><h2 style="font-family:Reddit Mono,monospace;font-weight:600;color:#C73C1E;text-transform:uppercase;margin-top:24px;">Key Metrics</h2><table style="width:100%;border-collapse:collapse;"><tr style="background:#F8F8E9;"><th style="padding:12px;text-align:left;border:1px solid #E0E0E0;font-family:Reddit Mono,monospace;font-weight:600;">Metric</th><th style="padding:12px;text-align:left;border:1px solid #E0E0E0;font-family:Reddit Mono,monospace;font-weight:600;">This Period</th><th style="padding:12px;text-align:left;border:1px solid #E0E0E0;font-family:Reddit Mono,monospace;font-weight:600;">Previous</th><th style="padding:12px;text-align:left;border:1px solid #E0E0E0;font-family:Reddit Mono,monospace;font-weight:600;">Change</th></tr><tr><td style="padding:12px;border:1px solid #E0E0E0;">Impressions</td><td style="padding:12px;border:1px solid #E0E0E0;">—</td><td style="padding:12px;border:1px solid #E0E0E0;">—</td><td style="padding:12px;border:1px solid #E0E0E0;">—</td></tr><tr><td style="padding:12px;border:1px solid #E0E0E0;">Reach</td><td style="padding:12px;border:1px solid #E0E0E0;">—</td><td style="padding:12px;border:1px solid #E0E0E0;">—</td><td style="padding:12px;border:1px solid #E0E0E0;">—</td></tr><tr><td style="padding:12px;border:1px solid #E0E0E0;">Engagement Rate</td><td style="padding:12px;border:1px solid #E0E0E0;">—</td><td style="padding:12px;border:1px solid #E0E0E0;">—</td><td style="padding:12px;border:1px solid #E0E0E0;">—</td></tr><tr><td style="padding:12px;border:1px solid #E0E0E0;">Link Clicks</td><td style="padding:12px;border:1px solid #E0E0E0;">—</td><td style="padding:12px;border:1px solid #E0E0E0;">—</td><td style="padding:12px;border:1px solid #E0E0E0;">—</td></tr><tr><td style="padding:12px;border:1px solid #E0E0E0;">CPC</td><td style="padding:12px;border:1px solid #E0E0E0;">—</td><td style="padding:12px;border:1px solid #E0E0E0;">—</td><td style="padding:12px;border:1px solid #E0E0E0;">—</td></tr></table><h2 style="font-family:Reddit Mono,monospace;font-weight:600;color:#C73C1E;text-transform:uppercase;margin-top:24px;">Top Creative</h2><p>[Insert top 3 creatives with performance data]</p><h2 style="font-family:Reddit Mono,monospace;font-weight:600;color:#C73C1E;text-transform:uppercase;margin-top:24px;">Recommendations</h2><ul style="color:#1A1B1F;"><li>Scale top-performing ad sets</li><li>Test new creative formats</li><li>Review audience targeting</li></ul></div>';
 }
 
 function buildAgenda(cn) {
   const d = fmtDate();
-  return '<h1>' + cn + ' — Meeting Agenda</h1><div class="dm">' + sn() + ' &middot; ' + d + '</div><table><tr><th>Detail</th><th></th></tr><tr><td>Date</td><td>[Date & Time]</td></tr><tr><td>Attendees</td><td>' + sn() + ' (Noise), [Client]</td></tr><tr><td>Duration</td><td>30 min</td></tr></table><h2>Agenda</h2><table><tr><th>#</th><th>Topic</th><th>Owner</th><th>Time</th></tr><tr><td>1</td><td>Welcome</td><td>' + sn() + '</td><td>2 min</td></tr><tr><td>2</td><td>Campaign performance</td><td>Dan</td><td>5 min</td></tr><tr><td>3</td><td>Creative update</td><td>Beau</td><td>5 min</td></tr><tr><td>4</td><td>Content calendar</td><td>' + sn() + '</td><td>8 min</td></tr><tr><td>5</td><td>Client feedback</td><td>[Client]</td><td>5 min</td></tr><tr><td>6</td><td>Actions & next steps</td><td>All</td><td>5 min</td></tr></table><h2>Action Items</h2><table><tr><th>Action</th><th>Owner</th><th>Due</th></tr><tr><td>[To be completed]</td><td></td><td></td></tr></table>';
+  return '<div style="font-family:Montserrat,sans-serif;color:#1A1B1F;"><h1 style="font-family:Reddit Mono,monospace;font-weight:600;color:#C73C1E;font-size:24px;">' + cn + ' — MEETING AGENDA</h1><div style="color:#8C8C8C;font-size:13px;margin-bottom:20px;">' + sn() + ' &middot; ' + d + '</div><table style="width:100%;border-collapse:collapse;"><tr style="background:#F8F8E9;"><th style="padding:12px;text-align:left;border:1px solid #E0E0E0;font-family:Reddit Mono,monospace;font-weight:600;">Detail</th><th style="padding:12px;text-align:left;border:1px solid #E0E0E0;"></th></tr><tr><td style="padding:12px;border:1px solid #E0E0E0;">Date</td><td style="padding:12px;border:1px solid #E0E0E0;">[Date & Time]</td></tr><tr><td style="padding:12px;border:1px solid #E0E0E0;">Attendees</td><td style="padding:12px;border:1px solid #E0E0E0;">' + sn() + ' (Noise), [Client]</td></tr><tr><td style="padding:12px;border:1px solid #E0E0E0;">Duration</td><td style="padding:12px;border:1px solid #E0E0E0;">30 min</td></tr></table><h2 style="font-family:Reddit Mono,monospace;font-weight:600;color:#C73C1E;text-transform:uppercase;margin-top:24px;">Agenda</h2><table style="width:100%;border-collapse:collapse;"><tr style="background:#F8F8E9;"><th style="padding:12px;text-align:left;border:1px solid #E0E0E0;font-family:Reddit Mono,monospace;font-weight:600;">#</th><th style="padding:12px;text-align:left;border:1px solid #E0E0E0;font-family:Reddit Mono,monospace;font-weight:600;">Topic</th><th style="padding:12px;text-align:left;border:1px solid #E0E0E0;font-family:Reddit Mono,monospace;font-weight:600;">Owner</th><th style="padding:12px;text-align:left;border:1px solid #E0E0E0;font-family:Reddit Mono,monospace;font-weight:600;">Time</th></tr><tr><td style="padding:12px;border:1px solid #E0E0E0;">1</td><td style="padding:12px;border:1px solid #E0E0E0;">Welcome</td><td style="padding:12px;border:1px solid #E0E0E0;">' + sn() + '</td><td style="padding:12px;border:1px solid #E0E0E0;">2 min</td></tr><tr><td style="padding:12px;border:1px solid #E0E0E0;">2</td><td style="padding:12px;border:1px solid #E0E0E0;">Campaign performance</td><td style="padding:12px;border:1px solid #E0E0E0;">Dan</td><td style="padding:12px;border:1px solid #E0E0E0;">5 min</td></tr><tr><td style="padding:12px;border:1px solid #E0E0E0;">3</td><td style="padding:12px;border:1px solid #E0E0E0;">Creative update</td><td style="padding:12px;border:1px solid #E0E0E0;">Beau</td><td style="padding:12px;border:1px solid #E0E0E0;">5 min</td></tr><tr><td style="padding:12px;border:1px solid #E0E0E0;">4</td><td style="padding:12px;border:1px solid #E0E0E0;">Content calendar</td><td style="padding:12px;border:1px solid #E0E0E0;">' + sn() + '</td><td style="padding:12px;border:1px solid #E0E0E0;">8 min</td></tr><tr><td style="padding:12px;border:1px solid #E0E0E0;">5</td><td style="padding:12px;border:1px solid #E0E0E0;">Client feedback</td><td style="padding:12px;border:1px solid #E0E0E0;">[Client]</td><td style="padding:12px;border:1px solid #E0E0E0;">5 min</td></tr><tr><td style="padding:12px;border:1px solid #E0E0E0;">6</td><td style="padding:12px;border:1px solid #E0E0E0;">Actions & next steps</td><td style="padding:12px;border:1px solid #E0E0E0;">All</td><td style="padding:12px;border:1px solid #E0E0E0;">5 min</td></tr></table><h2 style="font-family:Reddit Mono,monospace;font-weight:600;color:#C73C1E;text-transform:uppercase;margin-top:24px;">Action Items</h2><table style="width:100%;border-collapse:collapse;"><tr style="background:#F8F8E9;"><th style="padding:12px;text-align:left;border:1px solid #E0E0E0;font-family:Reddit Mono,monospace;font-weight:600;">Action</th><th style="padding:12px;text-align:left;border:1px solid #E0E0E0;font-family:Reddit Mono,monospace;font-weight:600;">Owner</th><th style="padding:12px;text-align:left;border:1px solid #E0E0E0;font-family:Reddit Mono,monospace;font-weight:600;">Due</th></tr><tr><td style="padding:12px;border:1px solid #E0E0E0;">[To be completed]</td><td style="padding:12px;border:1px solid #E0E0E0;"></td><td style="padding:12px;border:1px solid #E0E0E0;"></td></tr></table></div>';
 }
 
 function buildPresentation(cn, cc, topic) {
   const d = fmtDate();
   const t = topic || 'Campaign';
-  return '<div style="font-family:Montserrat,sans-serif;">' +
+  return '<div style="font-family:Montserrat,sans-serif;color:#1A1B1F;">' +
     '<div style="background:#1B1B1B;color:white;padding:60px 48px;margin:-20px -20px 24px -20px;border-radius:4px;">' +
       '<div style="font-family:Reddit Mono,monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#C73C1E;margin-bottom:12px;">NOISE MEDIA</div>' +
-      '<h1 style="font-size:32px;font-weight:700;margin:0 0 8px 0;color:white;">' + cn + '</h1>' +
+      '<h1 style="font-family:Reddit Mono,monospace;font-size:32px;font-weight:600;margin:0 0 8px 0;color:white;text-transform:uppercase;">' + cn + '</h1>' +
       '<p style="font-size:18px;font-weight:300;margin:0 0 24px 0;color:rgba(255,255,255,0.7);">' + t + ' Presentation</p>' +
       '<div style="font-size:12px;color:rgba(255,255,255,0.4);">Prepared by ' + sn() + ' &middot; ' + d + '</div>' +
     '</div>' +
-    '<h2>Agenda</h2>' +
-    '<table><tr><th>#</th><th>Section</th></tr>' +
-    '<tr><td>1</td><td>Overview & Objectives</td></tr>' +
-    '<tr><td>2</td><td>Strategy & Approach</td></tr>' +
-    '<tr><td>3</td><td>Creative Direction</td></tr>' +
-    '<tr><td>4</td><td>Channel Plan</td></tr>' +
-    '<tr><td>5</td><td>Timeline & Budget</td></tr>' +
-    '<tr><td>6</td><td>Next Steps</td></tr></table>' +
-    '<h2>1. Overview & Objectives</h2>' +
-    '<p><strong>Client:</strong> ' + cn + (cc ? ' (' + cc + ')' : '') + '</p>' +
-    '<p><strong>Objective:</strong> [Define the primary campaign/project objective]</p>' +
-    '<p><strong>KPIs:</strong> [Reach, Engagement Rate, Conversions, ROAS — set targets]</p>' +
-    '<h2>2. Strategy & Approach</h2>' +
-    '<p><strong>Target Audience:</strong> [Demographics, interests, behaviours]</p>' +
-    '<p><strong>Key Insight:</strong> [The consumer truth driving this campaign]</p>' +
-    '<p><strong>Strategic Approach:</strong> [How we plan to achieve the objectives]</p>' +
-    '<h2>3. Creative Direction</h2>' +
-    '<p><strong>Concept:</strong> [Campaign concept / big idea]</p>' +
-    '<p><strong>Tone of Voice:</strong> [Brand voice direction]</p>' +
-    '<p><strong>Content Formats:</strong></p>' +
-    '<table><tr><th>Format</th><th>Platform</th><th>Quantity</th></tr>' +
-    '<tr><td>Short-form Video (Reels/TikTok)</td><td>Instagram, TikTok</td><td>—</td></tr>' +
-    '<tr><td>Static Posts</td><td>Instagram, Facebook</td><td>—</td></tr>' +
-    '<tr><td>Stories</td><td>Instagram</td><td>—</td></tr>' +
-    '<tr><td>UGC Content</td><td>All platforms</td><td>—</td></tr></table>' +
-    '<h2>4. Channel Plan</h2>' +
-    '<table><tr><th>Channel</th><th>Role</th><th>Budget Split</th></tr>' +
-    '<tr><td>Instagram (Organic)</td><td>Brand awareness & community</td><td>—</td></tr>' +
-    '<tr><td>Instagram (Paid)</td><td>Reach & conversions</td><td>—</td></tr>' +
-    '<tr><td>TikTok</td><td>Discovery & engagement</td><td>—</td></tr>' +
-    '<tr><td>Facebook</td><td>Retargeting & conversions</td><td>—</td></tr></table>' +
-    '<h2>5. Timeline & Budget</h2>' +
-    '<table><tr><th>Phase</th><th>Dates</th><th>Activity</th></tr>' +
-    '<tr><td>Phase 1: Pre-launch</td><td>[Dates]</td><td>Strategy, creative production, asset prep</td></tr>' +
-    '<tr><td>Phase 2: Launch</td><td>[Dates]</td><td>Content rollout, paid activation</td></tr>' +
-    '<tr><td>Phase 3: Optimise</td><td>[Dates]</td><td>Performance review, creative refresh</td></tr>' +
-    '<tr><td>Phase 4: Report</td><td>[Dates]</td><td>Wrap-up report, learnings</td></tr></table>' +
-    '<p><strong>Total Budget:</strong> £[TBC] (Agency fee + Media spend)</p>' +
-    '<h2>6. Next Steps</h2>' +
-    '<table><tr><th>Action</th><th>Owner</th><th>Due</th></tr>' +
-    '<tr><td>Client approval on strategy</td><td>[Client]</td><td>[Date]</td></tr>' +
-    '<tr><td>Creative production begins</td><td>Noise</td><td>[Date]</td></tr>' +
-    '<tr><td>Content review & sign-off</td><td>[Client]</td><td>[Date]</td></tr>' +
-    '<tr><td>Campaign go-live</td><td>Noise</td><td>[Date]</td></tr></table>' +
+    '<h2 style="font-family:Reddit Mono,monospace;font-weight:600;color:#1B1B1B;text-transform:uppercase;">Agenda</h2>' +
+    '<table style="width:100%;border-collapse:collapse;"><tr style="background:#F8F8E9;"><th style="padding:12px;text-align:left;border:1px solid #E0E0E0;font-family:Reddit Mono,monospace;font-weight:600;">#</th><th style="padding:12px;text-align:left;border:1px solid #E0E0E0;font-family:Reddit Mono,monospace;font-weight:600;">Section</th></tr>' +
+    '<tr><td style="padding:12px;border:1px solid #E0E0E0;">1</td><td style="padding:12px;border:1px solid #E0E0E0;">Overview & Objectives</td></tr>' +
+    '<tr><td style="padding:12px;border:1px solid #E0E0E0;">2</td><td style="padding:12px;border:1px solid #E0E0E0;">Strategy & Approach</td></tr>' +
+    '<tr><td style="padding:12px;border:1px solid #E0E0E0;">3</td><td style="padding:12px;border:1px solid #E0E0E0;">Creative Direction</td></tr>' +
+    '<tr><td style="padding:12px;border:1px solid #E0E0E0;">4</td><td style="padding:12px;border:1px solid #E0E0E0;">Channel Plan</td></tr>' +
+    '<tr><td style="padding:12px;border:1px solid #E0E0E0;">5</td><td style="padding:12px;border:1px solid #E0E0E0;">Timeline & Budget</td></tr>' +
+    '<tr><td style="padding:12px;border:1px solid #E0E0E0;">6</td><td style="padding:12px;border:1px solid #E0E0E0;">Next Steps</td></tr></table>' +
+    '<h2 style="font-family:Reddit Mono,monospace;font-weight:600;color:#1B1B1B;text-transform:uppercase;margin-top:24px;">1. Overview & Objectives</h2>' +
+    '<p><strong style="color:#C73C1E;">Client:</strong> ' + cn + (cc ? ' (' + cc + ')' : '') + '</p>' +
+    '<p><strong style="color:#C73C1E;">Objective:</strong> [Define the primary campaign/project objective]</p>' +
+    '<p><strong style="color:#C73C1E;">KPIs:</strong> [Reach, Engagement Rate, Conversions, ROAS \u2014 set targets]</p>' +
+    '<h2 style="font-family:Reddit Mono,monospace;font-weight:600;color:#1B1B1B;text-transform:uppercase;margin-top:24px;">2. Strategy & Approach</h2>' +
+    '<p><strong style="color:#C73C1E;">Target Audience:</strong> [Demographics, interests, behaviours]</p>' +
+    '<p><strong style="color:#C73C1E;">Key Insight:</strong> [The consumer truth driving this campaign]</p>' +
+    '<p><strong style="color:#C73C1E;">Strategic Approach:</strong> [How we plan to achieve the objectives]</p>' +
+    '<h2 style="font-family:Reddit Mono,monospace;font-weight:600;color:#1B1B1B;text-transform:uppercase;margin-top:24px;">3. Creative Direction</h2>' +
+    '<p><strong style="color:#C73C1E;">Concept:</strong> [Campaign concept / big idea]</p>' +
+    '<p><strong style="color:#C73C1E;">Tone of Voice:</strong> [Brand voice direction]</p>' +
+    '<p><strong style="color:#C73C1E;">Content Formats:</strong></p>' +
+    '<table style="width:100%;border-collapse:collapse;"><tr style="background:#F8F8E9;"><th style="padding:12px;text-align:left;border:1px solid #E0E0E0;font-family:Reddit Mono,monospace;font-weight:600;">Format</th><th style="padding:12px;text-align:left;border:1px solid #E0E0E0;font-family:Reddit Mono,monospace;font-weight:600;">Platform</th><th style="padding:12px;text-align:left;border:1px solid #E0E0E0;font-family:Reddit Mono,monospace;font-weight:600;">Quantity</th></tr>' +
+    '<tr><td style="padding:12px;border:1px solid #E0E0E0;">Short-form Video (Reels/TikTok)</td><td style="padding:12px;border:1px solid #E0E0E0;">Instagram, TikTok</td><td style="padding:12px;border:1px solid #E0E0E0;">\u2014</td></tr>' +
+    '<tr><td style="padding:12px;border:1px solid #E0E0E0;">Static Posts</td><td style="padding:12px;border:1px solid #E0E0E0;">Instagram, Facebook</td><td style="padding:12px;border:1px solid #E0E0E0;">\u2014</td></tr>' +
+    '<tr><td style="padding:12px;border:1px solid #E0E0E0;">Stories</td><td style="padding:12px;border:1px solid #E0E0E0;">Instagram</td><td style="padding:12px;border:1px solid #E0E0E0;">\u2014</td></tr>' +
+    '<tr><td style="padding:12px;border:1px solid #E0E0E0;">UGC Content</td><td style="padding:12px;border:1px solid #E0E0E0;">All platforms</td><td style="padding:12px;border:1px solid #E0E0E0;">\u2014</td></tr></table>' +
+    '<h2 style="font-family:Reddit Mono,monospace;font-weight:600;color:#1B1B1B;text-transform:uppercase;margin-top:24px;">4. Channel Plan</h2>' +
+    '<table style="width:100%;border-collapse:collapse;"><tr style="background:#F8F8E9;"><th style="padding:12px;text-align:left;border:1px solid #E0E0E0;font-family:Reddit Mono,monospace;font-weight:600;">Channel</th><th style="padding:12px;text-align:left;border:1px solid #E0E0E0;font-family:Reddit Mono,monospace;font-weight:600;">Role</th><th style="padding:12px;text-align:left;border:1px solid #E0E0E0;font-family:Reddit Mono,monospace;font-weight:600;">Budget Split</th></tr>' +
+    '<tr><td style="padding:12px;border:1px solid #E0E0E0;">Instagram (Organic)</td><td style="padding:12px;border:1px solid #E0E0E0;">Brand awareness & community</td><td style="padding:12px;border:1px solid #E0E0E0;">\u2014</td></tr>' +
+    '<tr><td style="padding:12px;border:1px solid #E0E0E0;">Instagram (Paid)</td><td style="padding:12px;border:1px solid #E0E0E0;">Reach & conversions</td><td style="padding:12px;border:1px solid #E0E0E0;">\u2014</td></tr>' +
+    '<tr><td style="padding:12px;border:1px solid #E0E0E0;">TikTok</td><td style="padding:12px;border:1px solid #E0E0E0;">Discovery & engagement</td><td style="padding:12px;border:1px solid #E0E0E0;">\u2014</td></tr>' +
+    '<tr><td style="padding:12px;border:1px solid #E0E0E0;">Facebook</td><td style="padding:12px;border:1px solid #E0E0E0;">Retargeting & conversions</td><td style="padding:12px;border:1px solid #E0E0E0;">\u2014</td></tr></table>' +
+    '<h2 style="font-family:Reddit Mono,monospace;font-weight:600;color:#1B1B1B;text-transform:uppercase;margin-top:24px;">5. Timeline & Budget</h2>' +
+    '<table style="width:100%;border-collapse:collapse;"><tr style="background:#F8F8E9;"><th style="padding:12px;text-align:left;border:1px solid #E0E0E0;font-family:Reddit Mono,monospace;font-weight:600;">Phase</th><th style="padding:12px;text-align:left;border:1px solid #E0E0E0;font-family:Reddit Mono,monospace;font-weight:600;">Dates</th><th style="padding:12px;text-align:left;border:1px solid #E0E0E0;font-family:Reddit Mono,monospace;font-weight:600;">Activity</th></tr>' +
+    '<tr><td style="padding:12px;border:1px solid #E0E0E0;">Phase 1: Pre-launch</td><td style="padding:12px;border:1px solid #E0E0E0;">[Dates]</td><td style="padding:12px;border:1px solid #E0E0E0;">Strategy, creative production, asset prep</td></tr>' +
+    '<tr><td style="padding:12px;border:1px solid #E0E0E0;">Phase 2: Launch</td><td style="padding:12px;border:1px solid #E0E0E0;">[Dates]</td><td style="padding:12px;border:1px solid #E0E0E0;">Content rollout, paid activation</td></tr>' +
+    '<tr><td style="padding:12px;border:1px solid #E0E0E0;">Phase 3: Optimise</td><td style="padding:12px;border:1px solid #E0E0E0;">[Dates]</td><td style="padding:12px;border:1px solid #E0E0E0;">Performance review, creative refresh</td></tr>' +
+    '<tr><td style="padding:12px;border:1px solid #E0E0E0;">Phase 4: Report</td><td style="padding:12px;border:1px solid #E0E0E0;">[Dates]</td><td style="padding:12px;border:1px solid #E0E0E0;">Wrap-up report, learnings</td></tr></table>' +
+    '<p style="margin-top:16px;"><strong style="color:#C73C1E;">Total Budget:</strong> \u00a3[TBC] (Agency fee + Media spend)</p>' +
+    '<h2 style="font-family:Reddit Mono,monospace;font-weight:600;color:#1B1B1B;text-transform:uppercase;margin-top:24px;">6. Next Steps</h2>' +
+    '<table style="width:100%;border-collapse:collapse;"><tr style="background:#F8F8E9;"><th style="padding:12px;text-align:left;border:1px solid #E0E0E0;font-family:Reddit Mono,monospace;font-weight:600;">Action</th><th style="padding:12px;text-align:left;border:1px solid #E0E0E0;font-family:Reddit Mono,monospace;font-weight:600;">Owner</th><th style="padding:12px;text-align:left;border:1px solid #E0E0E0;font-family:Reddit Mono,monospace;font-weight:600;">Due</th></tr>' +
+    '<tr><td style="padding:12px;border:1px solid #E0E0E0;">Client approval on strategy</td><td style="padding:12px;border:1px solid #E0E0E0;">[Client]</td><td style="padding:12px;border:1px solid #E0E0E0;">[Date]</td></tr>' +
+    '<tr><td style="padding:12px;border:1px solid #E0E0E0;">Creative production begins</td><td style="padding:12px;border:1px solid #E0E0E0;">Noise</td><td style="padding:12px;border:1px solid #E0E0E0;">[Date]</td></tr>' +
+    '<tr><td style="padding:12px;border:1px solid #E0E0E0;">Content review & sign-off</td><td style="padding:12px;border:1px solid #E0E0E0;">[Client]</td><td style="padding:12px;border:1px solid #E0E0E0;">[Date]</td></tr>' +
+    '<tr><td style="padding:12px;border:1px solid #E0E0E0;">Campaign go-live</td><td style="padding:12px;border:1px solid #E0E0E0;">Noise</td><td style="padding:12px;border:1px solid #E0E0E0;">[Date]</td></tr></table>' +
     '<div style="background:#1B1B1B;color:white;padding:40px 48px;margin:32px -20px -20px -20px;border-radius:4px;text-align:center;">' +
       '<div style="font-family:Reddit Mono,monospace;font-size:18px;font-weight:700;letter-spacing:2px;">NOISE<span style="color:#C73C1E;">.</span></div>' +
       '<div style="font-size:12px;color:rgba(255,255,255,0.4);margin-top:8px;">noisemediagroup.co.uk</div>' +

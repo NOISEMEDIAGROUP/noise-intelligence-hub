@@ -811,6 +811,11 @@
     padding: 5px 10px; font-size: 11px; font-family: 'Montserrat', sans-serif;
     color: var(--text); cursor: pointer; transition: all 0.2s; text-align: left;
   }
+  .plus-menu-sub-header {
+    padding: 6px 14px 4px; font-size: 9px; font-weight: 700; font-family: 'Reddit Mono', monospace;
+    text-transform: uppercase; letter-spacing: 1.2px; color: var(--text-muted);
+    border-bottom: 1px solid var(--border); margin-bottom: 2px;
+  }
   .skill-sub-btn:hover {
     background: var(--accent-light); border-color: var(--accent); color: var(--accent);
   }
@@ -1346,18 +1351,27 @@
           <div class="plus-menu-divider"></div>
           <div class="plus-menu-item-parent">
             <div class="plus-menu-item" onclick="toggleSubMenu(this); event.stopPropagation();">Skills</div>
-            <div class="plus-menu-sub">
-              <div class="plus-menu-item" onclick="startSkillChat('social','Help with social media'); hidePlusMenu();">Social</div>
-              <div class="plus-menu-item" onclick="startSkillChat('strategy','Help with strategy'); hidePlusMenu();">Strategy</div>
-              <div class="plus-menu-item" onclick="startSkillChat('creative','Help with creative'); hidePlusMenu();">Creative</div>
-              <div class="plus-menu-item" onclick="startSkillChat('analytics','Help with analytics'); hidePlusMenu();">Analytics</div>
-              <div class="plus-menu-item" onclick="startSkillChat('production','Help with production'); hidePlusMenu();">Production</div>
-              <div class="plus-menu-item" onclick="startSkillChat('research','Help with research'); hidePlusMenu();">Research</div>
-              <div class="plus-menu-item" onclick="startSkillChat('copywriting','Help with copywriting'); hidePlusMenu();">Copywriting</div>
-              <div class="plus-menu-item" onclick="startSkillChat('reporting','Help with reporting'); hidePlusMenu();">Reporting</div>
-              <div class="plus-menu-item" onclick="startSkillChat('calendar','Help with calendar'); hidePlusMenu();">Calendar</div>
-              <div class="plus-menu-item" onclick="startSkillChat('social-bot','Help with social media bot'); hidePlusMenu();">Social Media Bot</div>
-              <div class="plus-menu-item" onclick="startSkillChat('deep-research','Help with deep research'); hidePlusMenu();">Deep Research</div>
+            <div class="plus-menu-sub" style="max-height:400px;overflow-y:auto;">
+              <div class="plus-menu-sub-header">CLAUDE SKILLS</div>
+              <div class="plus-menu-item" onclick="startSkillChat('marketing'); hidePlusMenu();">Marketing</div>
+              <div class="plus-menu-item" onclick="startSkillChat('sales'); hidePlusMenu();">Sales</div>
+              <div class="plus-menu-item" onclick="startSkillChat('product'); hidePlusMenu();">Product Management</div>
+              <div class="plus-menu-item" onclick="startSkillChat('support'); hidePlusMenu();">Customer Support</div>
+              <div class="plus-menu-item" onclick="startSkillChat('enterprise-search'); hidePlusMenu();">Enterprise Search</div>
+              <div class="plus-menu-item" onclick="startSkillChat('documents'); hidePlusMenu();">Documents</div>
+              <div class="plus-menu-item" onclick="startSkillChat('productivity'); hidePlusMenu();">Productivity</div>
+              <div class="plus-menu-sub-header" style="margin-top:4px;">NOISE SKILLS</div>
+              <div class="plus-menu-item" onclick="startSkillChat('social'); hidePlusMenu();">Social</div>
+              <div class="plus-menu-item" onclick="startSkillChat('strategy'); hidePlusMenu();">Strategy</div>
+              <div class="plus-menu-item" onclick="startSkillChat('creative'); hidePlusMenu();">Creative</div>
+              <div class="plus-menu-item" onclick="startSkillChat('analytics'); hidePlusMenu();">Analytics</div>
+              <div class="plus-menu-item" onclick="startSkillChat('production'); hidePlusMenu();">Production</div>
+              <div class="plus-menu-item" onclick="startSkillChat('research'); hidePlusMenu();">Research</div>
+              <div class="plus-menu-item" onclick="startSkillChat('copywriting'); hidePlusMenu();">Copywriting</div>
+              <div class="plus-menu-item" onclick="startSkillChat('reporting'); hidePlusMenu();">Reporting</div>
+              <div class="plus-menu-item" onclick="startSkillChat('calendar'); hidePlusMenu();">Calendar</div>
+              <div class="plus-menu-item" onclick="startSkillChat('social-bot'); hidePlusMenu();">Social Media Bot</div>
+              <div class="plus-menu-item" onclick="startSkillChat('deep-research'); hidePlusMenu();">Deep Research</div>
             </div>
           </div>
           <div class="plus-menu-item-parent">
@@ -1373,7 +1387,19 @@
             </div>
           </div>
           <div class="plus-menu-item-parent">
-            <div class="plus-menu-item" onclick="togglePluginsPanel(); hidePlusMenu();">Plugins</div>
+            <div class="plus-menu-item" onclick="toggleSubMenu(this); event.stopPropagation();">Plugins</div>
+            <div class="plus-menu-sub">
+              <div class="plus-menu-item" onclick="activatePlugin('slack'); hidePlusMenu();">Slack</div>
+              <div class="plus-menu-item" onclick="activatePlugin('google-drive'); hidePlusMenu();">Google Drive</div>
+              <div class="plus-menu-item" onclick="activatePlugin('figma'); hidePlusMenu();">Figma</div>
+              <div class="plus-menu-item" onclick="activatePlugin('notion'); hidePlusMenu();">Notion</div>
+              <div class="plus-menu-item" onclick="activatePlugin('linear'); hidePlusMenu();">Linear</div>
+              <div class="plus-menu-item" onclick="activatePlugin('github'); hidePlusMenu();">GitHub</div>
+              <div class="plus-menu-item" onclick="activatePlugin('asana'); hidePlusMenu();">Asana</div>
+              <div class="plus-menu-item" onclick="activatePlugin('hubspot'); hidePlusMenu();">HubSpot</div>
+              <div class="plus-menu-item" onclick="activatePlugin('salesforce'); hidePlusMenu();">Salesforce</div>
+              <div class="plus-menu-item" onclick="activatePlugin('zapier'); hidePlusMenu();">Zapier</div>
+            </div>
           </div>
         </div>
         <input class="wi" id="wI" type="text" placeholder="What can I help you with today?" style="padding-left: 50px;">
@@ -1421,18 +1447,27 @@
           <div class="plus-menu-divider"></div>
           <div class="plus-menu-item-parent">
             <div class="plus-menu-item" onclick="toggleSubMenu(this); event.stopPropagation();">Skills</div>
-            <div class="plus-menu-sub">
-              <div class="plus-menu-item" onclick="startSkillChat('social','Help with social media'); hidePlusMenu2();">Social</div>
-              <div class="plus-menu-item" onclick="startSkillChat('strategy','Help with strategy'); hidePlusMenu2();">Strategy</div>
-              <div class="plus-menu-item" onclick="startSkillChat('creative','Help with creative'); hidePlusMenu2();">Creative</div>
-              <div class="plus-menu-item" onclick="startSkillChat('analytics','Help with analytics'); hidePlusMenu2();">Analytics</div>
-              <div class="plus-menu-item" onclick="startSkillChat('production','Help with production'); hidePlusMenu2();">Production</div>
-              <div class="plus-menu-item" onclick="startSkillChat('research','Help with research'); hidePlusMenu2();">Research</div>
-              <div class="plus-menu-item" onclick="startSkillChat('copywriting','Help with copywriting'); hidePlusMenu2();">Copywriting</div>
-              <div class="plus-menu-item" onclick="startSkillChat('reporting','Help with reporting'); hidePlusMenu2();">Reporting</div>
-              <div class="plus-menu-item" onclick="startSkillChat('calendar','Help with calendar'); hidePlusMenu2();">Calendar</div>
-              <div class="plus-menu-item" onclick="startSkillChat('social-bot','Help with social media bot'); hidePlusMenu2();">Social Media Bot</div>
-              <div class="plus-menu-item" onclick="startSkillChat('deep-research','Help with deep research'); hidePlusMenu2();">Deep Research</div>
+            <div class="plus-menu-sub" style="max-height:400px;overflow-y:auto;">
+              <div class="plus-menu-sub-header">CLAUDE SKILLS</div>
+              <div class="plus-menu-item" onclick="startSkillChat('marketing'); hidePlusMenu2();">Marketing</div>
+              <div class="plus-menu-item" onclick="startSkillChat('sales'); hidePlusMenu2();">Sales</div>
+              <div class="plus-menu-item" onclick="startSkillChat('product'); hidePlusMenu2();">Product Management</div>
+              <div class="plus-menu-item" onclick="startSkillChat('support'); hidePlusMenu2();">Customer Support</div>
+              <div class="plus-menu-item" onclick="startSkillChat('enterprise-search'); hidePlusMenu2();">Enterprise Search</div>
+              <div class="plus-menu-item" onclick="startSkillChat('documents'); hidePlusMenu2();">Documents</div>
+              <div class="plus-menu-item" onclick="startSkillChat('productivity'); hidePlusMenu2();">Productivity</div>
+              <div class="plus-menu-sub-header" style="margin-top:4px;">NOISE SKILLS</div>
+              <div class="plus-menu-item" onclick="startSkillChat('social'); hidePlusMenu2();">Social</div>
+              <div class="plus-menu-item" onclick="startSkillChat('strategy'); hidePlusMenu2();">Strategy</div>
+              <div class="plus-menu-item" onclick="startSkillChat('creative'); hidePlusMenu2();">Creative</div>
+              <div class="plus-menu-item" onclick="startSkillChat('analytics'); hidePlusMenu2();">Analytics</div>
+              <div class="plus-menu-item" onclick="startSkillChat('production'); hidePlusMenu2();">Production</div>
+              <div class="plus-menu-item" onclick="startSkillChat('research'); hidePlusMenu2();">Research</div>
+              <div class="plus-menu-item" onclick="startSkillChat('copywriting'); hidePlusMenu2();">Copywriting</div>
+              <div class="plus-menu-item" onclick="startSkillChat('reporting'); hidePlusMenu2();">Reporting</div>
+              <div class="plus-menu-item" onclick="startSkillChat('calendar'); hidePlusMenu2();">Calendar</div>
+              <div class="plus-menu-item" onclick="startSkillChat('social-bot'); hidePlusMenu2();">Social Media Bot</div>
+              <div class="plus-menu-item" onclick="startSkillChat('deep-research'); hidePlusMenu2();">Deep Research</div>
             </div>
           </div>
           <div class="plus-menu-item-parent">
@@ -1448,7 +1483,19 @@
             </div>
           </div>
           <div class="plus-menu-item-parent">
-            <div class="plus-menu-item" onclick="togglePluginsPanel(); hidePlusMenu2();">Plugins</div>
+            <div class="plus-menu-item" onclick="toggleSubMenu(this); event.stopPropagation();">Plugins</div>
+            <div class="plus-menu-sub">
+              <div class="plus-menu-item" onclick="activatePlugin('slack'); hidePlusMenu2();">Slack</div>
+              <div class="plus-menu-item" onclick="activatePlugin('google-drive'); hidePlusMenu2();">Google Drive</div>
+              <div class="plus-menu-item" onclick="activatePlugin('figma'); hidePlusMenu2();">Figma</div>
+              <div class="plus-menu-item" onclick="activatePlugin('notion'); hidePlusMenu2();">Notion</div>
+              <div class="plus-menu-item" onclick="activatePlugin('linear'); hidePlusMenu2();">Linear</div>
+              <div class="plus-menu-item" onclick="activatePlugin('github'); hidePlusMenu2();">GitHub</div>
+              <div class="plus-menu-item" onclick="activatePlugin('asana'); hidePlusMenu2();">Asana</div>
+              <div class="plus-menu-item" onclick="activatePlugin('hubspot'); hidePlusMenu2();">HubSpot</div>
+              <div class="plus-menu-item" onclick="activatePlugin('salesforce'); hidePlusMenu2();">Salesforce</div>
+              <div class="plus-menu-item" onclick="activatePlugin('zapier'); hidePlusMenu2();">Zapier</div>
+            </div>
           </div>
         </div>
         <input class="wi" id="cwI" type="text" placeholder="What can I help you with today?" style="padding-left: 50px;" onkeydown="if(event.key==='Enter'){document.getElementById('wI').value=this.value;this.value='';hubSend();}">
@@ -3720,8 +3767,21 @@ async function hubSend() {
     return;
   }
 
+  // Show web search indicator if query needs live data
+  if (needsWebSearch(text)) {
+    var searchIndicator = document.createElement('div');
+    searchIndicator.className = 'msg msg-b';
+    searchIndicator.id = 'searchIndicator';
+    searchIndicator.innerHTML = '<div class="m-av m-av-b">NI</div><div class="m-body" style="font-size:12px;color:var(--text-muted);"><span class="pulse"></span> Searching the web...</div>';
+    hc.appendChild(searchIndicator);
+    hc.scrollTop = hc.scrollHeight;
+  }
+
   addTypingTo(hc);
   var resp = await processMsg(text);
+  // Remove search indicator if present
+  var si = document.getElementById('searchIndicator');
+  if (si) si.remove();
   removeTyping();
   addMsgTo(hc, resp.chat, false);
   updateHomeView();
@@ -3862,13 +3922,24 @@ function buildSystemPrompt() {
     return info;
   }).join('\n');
   var teamData = TEAM.map(function(t) { return t.name + ' — ' + t.role; }).join('\n');
-  return 'You are Noise Intelligence, the internal AI brain for Noise Media — a creative agency with a social-first mindset. You are speaking with ' + (currentUser ? currentUser.name + ' (' + currentUser.role + ')' : 'a team member') + '.\n\nYour personality: You are sharp, direct, and deeply knowledgeable. You speak like a senior strategist who has read every brief, every report, every campaign deck in the agency. You give specific answers with real data — never vague or generic. When you know numbers, cite them. When you know strategy details, share them with confidence.\n\nRESPONSE RULES:\n- Be conversational but substantive. Default to 2-5 sentences. Go longer when the question warrants depth (strategy, performance, campaign analysis).\n- NEVER use markdown (no **, ##, ```, code fences). Plain text only. Use line breaks for readability.\n- When discussing a client, ALWAYS use the specific data from DEEP KNOWLEDGE below — budgets, metrics, audience segments, creative details, scent names, campaign phases, etc.\n- For Altra specifically: you have COMPLETE campaign data — £22,714.25 total spend, 14 weekly reports, 5 campaign phases, 3 audience segments (Luxury, Digital Native, Conscious), 5 scent products, 50+ creatives, platform breakdowns. USE THIS DATA in every Altra answer.\n- When asked about strategy, brand, audiences, paid media, or campaign approach — dig into the STRATEGY DEEP-DIVE DATA and give informed, specific, data-backed answers.\n- If someone asks a broad question like "tell me about Altra" — give a rich, comprehensive answer with key stats, not a one-liner.\n- For questions about performance, budgets, or metrics — always include actual numbers.\n\nDOCUMENT GENERATION:\nWhen asked to create a document (email, brief, social copy, proposal, cost allocation, report, meeting agenda, presentation/deck/slides), respond with ONLY a JSON object like: {"doc_type":"email","client":"BARBRI","variant":"general"}\nFor presentations, include a topic field: {"doc_type":"presentation","client":"Thortful","topic":"Campaign"}\nValid doc_type values: email, brief, social, proposal, cost, report, agenda, presentation\nValid email variants: general, intro, followup, update\n\nWEB SEARCH:\nYou have web search capability. If the user asks about current events, trends, competitors, industry news, or anything you need live data for, include [SEARCH:your search query] in your response and the system will fetch results and let you respond with them. Only use this when you genuinely need external info — your internal client knowledge is already comprehensive.\n\nFor all other messages, reply with intelligence and depth.\n\nCLIENTS (' + CL.length + '):\n' + clientData + '\n\nTEAM (' + TEAM.length + '):\n' + teamData + '\n\nNoise Media specialises in paid social, content production, and brand storytelling. Services: content strategy, creative production (video, photo, design), paid social management, UGC/influencer, community management. Offices in London, Los Angeles, New York. Contact: brands@noisemediagroup.co.uk, +44 0203 007 0500. Co-founded by Anthony and Joe.' + buildStrategyContext() + '\n\nAGENCY CASE STUDIES: Apple Gift Cards (overstocked to sold out), VOXI (UGC-style creative drove 124% higher CTR than usual ads, became the student SIM everyone switched to). Our approach: social-first mindset across Social, Influencer, Production, OOH, Paid, Activations.\n\nADVANCED SKILLS:\n\nSOCIAL MEDIA BOT: You can scan and analyse all Noise Media social channels (Instagram: @noisemedia, TikTok: @noisemedia, LinkedIn: Noise Media, Facebook: Noise Media). Provide daily trend summaries, monthly reports, engagement analysis, and content performance metrics. Use web search to pull latest data from all platforms. You are expert at identifying trending content, audience sentiment, viral opportunities, and competitive positioning across social.\n\nDEEP RESEARCH: You can perform deep research scans of Noise Media\'s digital presence including their website (noisemedia.co.uk), social channels, and Noise Production. Analyse SEO performance, content strategy, engagement metrics, and competitive positioning. Use web search extensively to pull comprehensive data about the agency, their competitors, industry trends, and digital landscape. Provide detailed reports with actionable insights.' + getMemoryContext() + getOrgMemoryContext() + getLearningContext();
+  return 'You are Noise Intelligence, the internal AI brain for Noise Media — a creative agency with a social-first mindset. You are speaking with ' + (currentUser ? currentUser.name + ' (' + currentUser.role + ')' : 'a team member') + '.\n\nYour personality: You are sharp, direct, and deeply knowledgeable. You speak like a senior strategist who has read every brief, every report, every campaign deck in the agency. You give specific answers with real data — never vague or generic. When you know numbers, cite them. When you know strategy details, share them with confidence.\n\nRESPONSE RULES:\n- Be conversational but substantive. Default to 2-5 sentences. Go longer when the question warrants depth (strategy, performance, campaign analysis).\n- NEVER use markdown (no **, ##, ```, code fences). Plain text only. Use line breaks for readability.\n- When discussing a client, ALWAYS use the specific data from DEEP KNOWLEDGE below — budgets, metrics, audience segments, creative details, scent names, campaign phases, etc.\n- For Altra specifically: you have COMPLETE campaign data — £22,714.25 total spend, 14 weekly reports, 5 campaign phases, 3 audience segments (Luxury, Digital Native, Conscious), 5 scent products, 50+ creatives, platform breakdowns. USE THIS DATA in every Altra answer.\n- When asked about strategy, brand, audiences, paid media, or campaign approach — dig into the STRATEGY DEEP-DIVE DATA and give informed, specific, data-backed answers.\n- If someone asks a broad question like "tell me about Altra" — give a rich, comprehensive answer with key stats, not a one-liner.\n- For questions about performance, budgets, or metrics — always include actual numbers.\n\nDOCUMENT GENERATION:\nWhen asked to create a document (email, brief, social copy, proposal, cost allocation, report, meeting agenda, presentation/deck/slides), respond with ONLY a JSON object like: {"doc_type":"email","client":"BARBRI","variant":"general"}\nFor presentations, include a topic field: {"doc_type":"presentation","client":"Thortful","topic":"Campaign"}\nValid doc_type values: email, brief, social, proposal, cost, report, agenda, presentation\nValid email variants: general, intro, followup, update\n\nWEB SEARCH & LIVE INTERNET ACCESS:\nYou have FULL internet access via built-in web search. When the user asks about current events, trends, news, competitor analysis, industry data, live statistics, or anything requiring up-to-date information, you can search the web and provide real-time results. The system automatically detects when web search is needed and enables it. Your responses will include live data from the internet. If you need to search but it was not auto-detected, include [SEARCH:your search query] in your response and the system will retry with web search enabled. Use web search generously — the user expects real-time internet access like ChatGPT and Claude.\n\nFor all other messages, reply with intelligence and depth.\n\nCLIENTS (' + CL.length + '):\n' + clientData + '\n\nTEAM (' + TEAM.length + '):\n' + teamData + '\n\nNoise Media specialises in paid social, content production, and brand storytelling. Services: content strategy, creative production (video, photo, design), paid social management, UGC/influencer, community management. Offices in London, Los Angeles, New York. Contact: brands@noisemediagroup.co.uk, +44 0203 007 0500. Co-founded by Anthony and Joe.' + buildStrategyContext() + '\n\nAGENCY CASE STUDIES: Apple Gift Cards (overstocked to sold out), VOXI (UGC-style creative drove 124% higher CTR than usual ads, became the student SIM everyone switched to). Our approach: social-first mindset across Social, Influencer, Production, OOH, Paid, Activations.\n\nADVANCED SKILLS:\n\nSOCIAL MEDIA BOT: You can scan and analyse all Noise Media social channels (Instagram: @noisemedia, TikTok: @noisemedia, LinkedIn: Noise Media, Facebook: Noise Media). Provide daily trend summaries, monthly reports, engagement analysis, and content performance metrics. Use web search to pull latest data from all platforms. You are expert at identifying trending content, audience sentiment, viral opportunities, and competitive positioning across social.\n\nDEEP RESEARCH: You can perform deep research scans of Noise Media\'s digital presence including their website (noisemedia.co.uk), social channels, and Noise Production. Analyse SEO performance, content strategy, engagement metrics, and competitive positioning. Use web search extensively to pull comprehensive data about the agency, their competitors, industry trends, and digital landscape. Provide detailed reports with actionable insights.' + getMemoryContext() + getOrgMemoryContext() + getLearningContext();
 }
 
-async function aiCall(sysPrompt, msgs, maxTok) {
+async function aiCall(sysPrompt, msgs, maxTok, useWebSearch) {
   var controller = new AbortController();
   var timeout = setTimeout(function() { controller.abort(); }, 300000);
   try {
+    var body = {
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: maxTok || 400,
+      system: sysPrompt,
+      messages: msgs
+    };
+    // Add Anthropic's native web search tool when needed
+    if (useWebSearch) {
+      body.tools = [{ type: 'web_search_20250305', name: 'web_search', max_uses: 3 }];
+      body.model = 'claude-sonnet-4-20250514'; // Sonnet is fast + supports web search
+    }
     var res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       signal: controller.signal,
@@ -3878,17 +3949,34 @@ async function aiCall(sysPrompt, msgs, maxTok) {
         'anthropic-version': '2023-06-01',
         'anthropic-dangerous-direct-browser-access': 'true'
       },
-      body: JSON.stringify({
-        model: 'claude-opus-4-20250514',
-        max_tokens: maxTok || 400,
-        system: sysPrompt,
-        messages: msgs
-      })
+      body: JSON.stringify(body)
     });
     clearTimeout(timeout);
     var data = await res.json();
-    if (data.content && data.content[0]) return data.content[0].text;
-    return null;
+    if (!data.content) return null;
+    // Extract text from response — may include web search results inline
+    var textParts = [];
+    var citations = [];
+    for (var i = 0; i < data.content.length; i++) {
+      var block = data.content[i];
+      if (block.type === 'text') {
+        textParts.push(block.text);
+        // Collect citations if present
+        if (block.citations && block.citations.length > 0) {
+          block.citations.forEach(function(c) {
+            if (c.url && citations.indexOf(c.url) === -1) citations.push(c.url);
+          });
+        }
+      }
+    }
+    var result = textParts.join('\n') || null;
+    // Append source links if we have citations from web search
+    if (result && citations.length > 0 && useWebSearch) {
+      result += '\n\nSources: ' + citations.slice(0, 3).map(function(u) {
+        try { return new URL(u).hostname; } catch(e) { return u; }
+      }).join(', ');
+    }
+    return result;
   } catch(e) {
     clearTimeout(timeout);
     console.warn('AI call failed:', e.message);
@@ -4154,8 +4242,8 @@ function escHtml(s) {
 
 /* ============ WEB SEARCH ============ */
 async function webSearch(query) {
+  // Primary: Use DuckDuckGo instant answer API as lightweight fallback
   try {
-    // Use DuckDuckGo instant answer API (no key needed, CORS-friendly via proxy)
     var url = 'https://api.duckduckgo.com/?q=' + encodeURIComponent(query) + '&format=json&no_html=1&skip_disambig=1';
     var res = await fetch(url);
     var data = await res.json();
@@ -4168,12 +4256,6 @@ async function webSearch(query) {
       });
     }
     if (results.length > 0) return results.join('\n\n');
-    // Fallback: try SearXNG public instance
-    try {
-      var sx = await fetch('https://search.brave.com/api/suggest?q=' + encodeURIComponent(query));
-      var sxd = await sx.json();
-      if (sxd && sxd[1] && sxd[1].length > 0) return 'Related searches: ' + sxd[1].slice(0, 5).join(', ');
-    } catch(e2) {}
     return null;
   } catch(e) {
     console.warn('Web search failed:', e.message);
@@ -4181,19 +4263,33 @@ async function webSearch(query) {
   }
 }
 
+function needsWebSearch(msg) {
+  // Detect if a message needs live internet data
+  var searchPatterns = [
+    /\b(latest|current|recent|today'?s?|this week|this month|right now|up.?to.?date)\b/i,
+    /\b(news|trending|trend|viral|happening|what happened)\b/i,
+    /\b(search|look up|find me|google|find out|research|check online)\b/i,
+    /\b(2025|2026|2027)\b/i,
+    /\b(price|stock|weather|score|result|election|update)\b/i,
+    /\b(who (is|was|are)|what (is|are|was)|when (did|was|is)|how (much|many|is))\b.*\b(now|currently|today|latest)\b/i,
+    /\b(competitor|industry|market|benchmark|statistics|stats|data)\b.*\b(latest|current|recent|2025|2026)\b/i,
+    /\b(website|site|url|link|page)\b.*\b(check|visit|look|see|analyze|analyse)\b/i,
+    /\bwhat.{0,20}(trending|popular|hot|viral)\b/i,
+    /\bhow.{0,10}(doing|performing)\b/i,
+    /\b(compare|versus|vs)\b.*\b(competitor|brand|company)\b/i
+  ];
+  for (var i = 0; i < searchPatterns.length; i++) {
+    if (searchPatterns[i].test(msg)) return true;
+  }
+  return false;
+}
+
 async function callClaude(userMsg) {
   conversationHistory.push({ role: 'user', content: userMsg });
   if (conversationHistory.length > 40) conversationHistory = conversationHistory.slice(-40);
   try {
-    // Check if the user is asking about something that needs live info
-    var needsSearch = userMsg.match(/latest|current|today|news|trending|what('s| is) happening|search|look up|find me|google|2025|2026|right now/i);
-    var searchContext = '';
-    if (needsSearch) {
-      var searchResults = await webSearch(userMsg);
-      if (searchResults) {
-        searchContext = '\n\nWEB SEARCH RESULTS (live data for context):\n' + searchResults + '\n\nUse these search results to inform your answer where relevant. Cite the info naturally.';
-      }
-    }
+    var useSearch = needsWebSearch(userMsg);
+
     // Include uploaded file contents in context if available
     var fileContext = '';
     if (window.uploadedFileContents && window.uploadedFileContents.length > 0) {
@@ -4202,19 +4298,29 @@ async function callClaude(userMsg) {
         fileContext += '\n=== FILE: ' + fc.name + ' ===\n' + fc.content + '\n';
       });
     }
-    var systemPrompt = buildSystemPrompt() + searchContext + fileContext;
-    var reply = await aiCall(systemPrompt, conversationHistory, 2000);
+    var systemPrompt = buildSystemPrompt() + fileContext;
+
+    // Use Anthropic's native web search tool for live internet access
+    var reply = await aiCall(systemPrompt, conversationHistory, 2000, useSearch);
+
+    // If first call failed with search, retry without it
+    if (!reply && useSearch) {
+      reply = await aiCall(systemPrompt, conversationHistory, 2000, false);
+    }
     if (!reply) return null;
 
-    // If Claude says it needs to search, do it automatically
+    // If Claude requests a search via [SEARCH:] tag, do a second call with web search enabled
     if (reply.match(/\[SEARCH:(.*?)\]/)) {
-      var searchQuery = reply.match(/\[SEARCH:(.*?)\]/)[1].trim();
-      var searchResults = await webSearch(searchQuery);
-      if (searchResults) {
-        conversationHistory.push({ role: 'assistant', content: reply });
-        conversationHistory.push({ role: 'user', content: '[Search results for "' + searchQuery + '"]: ' + searchResults });
-        reply = await aiCall(buildSystemPrompt(), conversationHistory, 1500);
-        if (!reply) return null;
+      conversationHistory.push({ role: 'assistant', content: reply });
+      var searchNote = 'Please search the web and provide up-to-date information for my question.';
+      conversationHistory.push({ role: 'user', content: searchNote });
+      var searchReply = await aiCall(systemPrompt, conversationHistory, 2000, true);
+      if (searchReply) {
+        reply = searchReply;
+      } else {
+        // Remove the extra messages if search retry failed
+        conversationHistory.pop();
+        conversationHistory.pop();
       }
     }
 
@@ -5646,6 +5752,13 @@ function startSkillChat(skill, prompt) {
   } else {
     // Use the generic skill prompt
     var prompts = {
+      marketing: 'Help me with marketing strategy and execution.',
+      sales: 'Help me with sales strategy and execution.',
+      product: 'Help me with product management and strategy.',
+      support: 'Help me with customer support and issue resolution.',
+      'enterprise-search': 'Help me search across connected sources and synthesize information.',
+      documents: 'Help me create and manage documents.',
+      productivity: 'Help me improve my productivity and manage tasks.',
       social: 'I need help with social media strategy. Let\'s work on ',
       strategy: 'I need help with brand/campaign strategy. Let\'s work on ',
       creative: 'I need help with creative direction. Let\'s work on ',
@@ -5661,9 +5774,101 @@ function startSkillChat(skill, prompt) {
   }
 }
 
+/* ============ NEW: ACTIVATE PLUGIN ============ */
+function activatePlugin(pluginId) {
+  var pluginPrompts = {
+    'slack': 'I want to use the Slack integration. Help me send messages, search channels, or read conversations in Slack.',
+    'google-drive': 'I want to use Google Drive. Help me search, read, or manage files in my Google Drive.',
+    'figma': 'I want to use Figma. Help me access designs, get screenshots, or work with my Figma files.',
+    'notion': 'I want to use Notion. Help me search, read, or create pages in my Notion workspace.',
+    'linear': 'I want to use Linear. Help me manage issues, track progress, or update my Linear projects.',
+    'github': 'I want to use GitHub. Help me manage repositories, issues, pull requests, or review code.',
+    'asana': 'I want to use Asana. Help me manage tasks, projects, and track work in Asana.',
+    'hubspot': 'I want to use HubSpot. Help me manage contacts, deals, and marketing in HubSpot.',
+    'salesforce': 'I want to use Salesforce. Help me manage accounts, opportunities, and CRM data in Salesforce.',
+    'zapier': 'I want to use Zapier. Help me create automations, manage zaps, and connect different apps.'
+  };
+  switchTab('chat');
+  var input = document.getElementById('wI');
+  input.value = pluginPrompts[pluginId] || 'Help me use the ' + pluginId + ' plugin.';
+  input.focus();
+  hubSend();
+}
+
 /* ============ NEW: SKILL CATEGORY SWITCHER ============ */
 function switchSkillCategory(el, category) {
   var skillsData = {
+    'marketing': {
+      title: 'Marketing',
+      skills: [
+        { text: 'Content Creation', prompt: 'Help me draft marketing content. I can write blog posts, social media, email newsletters, landing pages, press releases, and case studies with channel-specific formatting and SEO optimisation.' },
+        { text: 'Campaign Planning', prompt: 'Help me plan a marketing campaign with objectives, audience segmentation, channel strategy, content calendar, budget allocation, and success metrics.' },
+        { text: 'Competitive Analysis', prompt: 'Help me research competitors and compare positioning, messaging, content strategy, and market presence with actionable recommendations.' },
+        { text: 'Brand Voice', prompt: 'Help me apply and enforce brand voice, style guide, and messaging pillars across content. I can review for consistency, document voice, and adapt tone for different audiences.' },
+        { text: 'Performance Analytics', prompt: 'Help me analyse marketing performance with key metrics, trend analysis, and optimisation recommendations across email, social, paid, and SEO channels.' },
+        { text: 'SEO Audit', prompt: 'Help me run a comprehensive SEO audit with keyword research, on-page analysis, content gaps, technical checks, and competitor comparison.' },
+        { text: 'Email Sequence', prompt: 'Help me design and draft a multi-email sequence for nurture flows, onboarding, drip campaigns, or re-engagement with subject lines, body content, and CTAs.' }
+      ]
+    },
+    'sales': {
+      title: 'Sales',
+      skills: [
+        { text: 'Account Research', prompt: 'Help me research a company or person for actionable sales intel including company overview, recent news, tech stack, and key decision makers.' },
+        { text: 'Call Prep', prompt: 'Help me prepare for a sales call with account context, attendee research, suggested talking points, objection handling, and a proposed agenda.' },
+        { text: 'Competitive Intelligence', prompt: 'Help me research competitors and build a battlecard with feature comparison, pricing analysis, win/loss patterns, and positioning recommendations.' },
+        { text: 'Create Sales Asset', prompt: 'Help me generate a tailored sales asset like a landing page, one-pager, deck, or workflow demo for a specific prospect and deal context.' },
+        { text: 'Daily Briefing', prompt: 'Help me create a prioritised daily sales briefing with key meetings, deal updates, follow-up actions, and pipeline priorities.' },
+        { text: 'Draft Outreach', prompt: 'Help me research a prospect and draft personalised outreach with a compelling subject line, personalised opening, clear value prop, and call to action.' },
+        { text: 'Call Summary', prompt: 'Help me process call notes or a transcript to extract action items, draft a follow-up email, and generate an internal summary.' },
+        { text: 'Forecast', prompt: 'Help me generate a weighted sales forecast with best/likely/worst scenarios, commit vs upside breakdown, and gap analysis.' },
+        { text: 'Pipeline Review', prompt: 'Help me analyse pipeline health, prioritise deals, flag risks, and create a weekly action plan with next steps for each opportunity.' }
+      ]
+    },
+    'product': {
+      title: 'Product Management',
+      skills: [
+        { text: 'Feature Spec / PRD', prompt: 'Help me write a structured product requirements document with problem statement, user stories, requirements, acceptance criteria, and success metrics.' },
+        { text: 'Roadmap Management', prompt: 'Help me plan and prioritise a product roadmap using frameworks like RICE, MoSCoW, or ICE with dependency mapping and trade-off analysis.' },
+        { text: 'Stakeholder Comms', prompt: 'Help me draft a stakeholder update tailored to the audience — whether executives, engineering, customers, or cross-functional partners.' },
+        { text: 'User Research Synthesis', prompt: 'Help me synthesise user research from interviews, surveys, and feedback into structured insights, themes, personas, and opportunity areas.' },
+        { text: 'Metrics Tracking', prompt: 'Help me define, track, and analyse product metrics with frameworks for goal setting, OKRs, dashboard design, and trend identification.' },
+        { text: 'Competitive Analysis', prompt: 'Help me analyse competitors with feature comparison matrices, positioning analysis, and strategic implications for our product.' }
+      ]
+    },
+    'support': {
+      title: 'Customer Support',
+      skills: [
+        { text: 'Ticket Triage', prompt: 'Help me triage an incoming support ticket by categorising the issue, assigning priority (P1-P4), and recommending routing to the right team.' },
+        { text: 'Customer Research', prompt: 'Help me research a customer question by searching across documentation and knowledge bases, then synthesise a confidence-scored answer.' },
+        { text: 'Response Drafting', prompt: 'Help me draft a professional, empathetic customer-facing response adapted to the situation, urgency, and communication channel.' },
+        { text: 'Escalation', prompt: 'Help me structure and package a support escalation for engineering, product, or leadership with full context, reproduction steps, and business impact.' },
+        { text: 'Knowledge Management', prompt: 'Help me write a knowledge base article from a resolved support issue with clear steps, troubleshooting guidance, and FAQ entries.' }
+      ]
+    },
+    'enterprise-search': {
+      title: 'Enterprise Search',
+      skills: [
+        { text: 'Multi-Source Search', prompt: 'Help me search across all connected sources in one query, breaking down my question into targeted searches and ranking results by relevance.' },
+        { text: 'Knowledge Synthesis', prompt: 'Help me combine search results from multiple sources into a coherent, deduplicated answer with source attribution and confidence scoring.' },
+        { text: 'Activity Digest', prompt: 'Help me generate a daily or weekly digest of activity across all connected sources, highlighting what matters most.' }
+      ]
+    },
+    'documents': {
+      title: 'Documents',
+      skills: [
+        { text: 'Word Documents', prompt: 'Help me create, read, or edit a Word document (.docx) with professional formatting like tables of contents, headings, page numbers, or letterheads.' },
+        { text: 'Spreadsheets', prompt: 'Help me create or edit a spreadsheet (.xlsx) with formulas, formatting, data analysis, charts, and visualisations.' },
+        { text: 'Presentations', prompt: 'Help me create or edit a PowerPoint presentation (.pptx) with slide layouts, speaker notes, and professional design.' },
+        { text: 'PDFs', prompt: 'Help me work with PDF files — extracting text, merging, splitting, creating new PDFs, filling forms, or adding watermarks.' }
+      ]
+    },
+    'productivity': {
+      title: 'Productivity',
+      skills: [
+        { text: 'Task Management', prompt: 'Help me manage my tasks — add new tasks, mark items complete, review what is pending, and prioritise my to-do list.' },
+        { text: 'Memory & Context', prompt: 'Help me save important context, preferences, and working notes so I can recall them in future conversations.' }
+      ]
+    },
     'social': {
       title: 'Social',
       skills: [

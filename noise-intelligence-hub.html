@@ -4520,6 +4520,15 @@ function fmtChat(text) {
 }
 
 function showDoc(html) {
+    // Auto-navigate to document view when generating a document
+    var p0 = document.getElementById('page0');
+    var p1 = document.getElementById('page1');
+    if (p0 && p1 && !p1.classList.contains('active')) {
+      p0.classList.remove('active');
+      p0.style.display = 'none';
+      p1.classList.add('active');
+      p1.style.display = 'flex';
+    }
   html = stripCodeFences(html);
   /* Determine which panel to use — page 1 inline or page 2 workspace */
   var onPage1 = document.getElementById('page1').classList.contains('active');

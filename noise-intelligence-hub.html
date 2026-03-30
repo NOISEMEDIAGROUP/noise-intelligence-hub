@@ -1263,7 +1263,7 @@
       </div>
       <div class="search-input-wrap">
         <span class="search-input-icon">&#128269;</span>
-        <input type="text" class="search-input" id="searchInput" placeholder="Search chats, clients, projects..." autocomplete="off" oninput="performSearch(this.value)">
+        <input type="text" class="search-input" id="searchInput" placeholder="Search chats, clients, projects..." autocomplete="off" oninput="_debouncedSearch(this.value)">
       </div>
       <div class="search-filters">
         <button class="search-filter-chip active" onclick="setSearchFilter('all', this)">All</button>
@@ -1827,7 +1827,7 @@ function loadStore() {
   try { return JSON.parse(localStorage.getItem(STORE_KEY)) || {}; } catch(e) { return {}; }
 }
 function saveStore(data) {
-  try { localStorage.setItem(STORE_KEY, JSON.stringify(data)); } catch(e) {}
+  try { localStorage.setItem(STORE_KEY, JSON.stringify(data)); } catch(e) { console.warn("Caught error:", e); }
 }
 
 // Chat history per user
@@ -2200,8 +2200,11 @@ function addNewProject() {
 
   document.getElementById('createProjBtn').onclick = function() {
     var name = document.getElementById('newProjName').value.trim();
+    if (!name) return;
+    if (!name) return;
     if (!name) { alert('Please enter a project name'); return; }
     var client = document.getElementById('newProjClient').value || null;
+    if (!client) return;
     var colorEl = document.querySelector('#projColorPicker .color-dot.selected');
     var color = colorEl ? colorEl.getAttribute('data-color') : 'red';
     var proj = createProject(currentUser.name, name, client, color);
@@ -2254,6 +2257,7 @@ function shareProjectModal(projectId, ev) {
 
   document.getElementById('shareConfirmBtn').onclick = function() {
     var cbs = document.querySelectorAll('#shareTeamList .share-cb:checked');
+    if (!cbs) return;
     var count = 0;
     cbs.forEach(function(cb) {
       shareProjectWithUser(currentUser.name, projectId, cb.value);
@@ -2472,9 +2476,13 @@ function promptNewThread() {
 
   document.getElementById('createThreadBtn').onclick = function() {
     var name = document.getElementById('threadNameInput').value.trim();
+    if (!name) return;
+    if (!name) return;
     if (!name) { alert('Please enter a chat name'); return; }
     var client = document.getElementById('threadClientSelect').value || null;
+    if (!client) return;
     var projectId = document.getElementById('threadProjectSelect').value || null;
+    if (!projectId) return;
     if (projectId === '__new__') { modal.remove(); addNewProject(); return; }
     startNewThread(name, client);
     if (projectId && currentThreadId) {
@@ -2903,6 +2911,7 @@ async function googleApiFetch(url, options) {
 
 /* ============ GMAIL API ============ */
 async function gmailListInbox(maxResults) {
+    try {
   var n = maxResults || 10;
   var data = await googleApiFetch('https://gmail.googleapis.com/gmail/v1/users/me/messages?maxResults=' + n + '&labelIds=INBOX');
   if (!data || !data.messages) return [];
@@ -2916,9 +2925,12 @@ async function gmailListInbox(maxResults) {
     }
   }
   return emails;
-}
+
+    } catch(err) { console.error("gmailListInbox error:", err); showToast("Error: " + err.message, "error"); }
+  }
 
 async function gmailGetMessage(messageId) {
+    try {
   var data = await googleApiFetch('https://gmail.googleapis.com/gmail/v1/users/me/messages/' + messageId + '?format=full');
   if (!data) return null;
   var headers = {};
@@ -2933,9 +2945,12 @@ async function gmailGetMessage(messageId) {
     }
   }
   return { id: data.id, from: headers.From, to: headers.To, subject: headers.Subject, date: headers.Date, body: body, snippet: data.snippet };
-}
+
+    } catch(err) { console.error("gmailGetMessage error:", err); showToast("Error: " + err.message, "error"); }
+  }
 
 async function gmailSendEmail(to, subject, body) {
+    try {
   var raw = 'To: ' + to + '\r\nSubject: ' + subject + '\r\nContent-Type: text/html; charset=utf-8\r\n\r\n' + body;
   var encoded = btoa(unescape(encodeURIComponent(raw))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
   var res = await fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages/send', {
@@ -2946,9 +2961,12 @@ async function gmailSendEmail(to, subject, body) {
   if (!res.ok) { showToast('Failed to send email', 'error'); return null; }
   showToast('Email sent', 'success');
   return await res.json();
-}
+
+    } catch(err) { console.error("gmailSendEmail error:", err); showToast("Error: " + err.message, "error"); }
+  }
 
 async function gmailSearchEmails(query, maxResults) {
+    try {
   var n = maxResults || 10;
   var data = await googleApiFetch('https://gmail.googleapis.com/gmail/v1/users/me/messages?maxResults=' + n + '&q=' + encodeURIComponent(query));
   if (!data || !data.messages) return [];
@@ -2962,10 +2980,13 @@ async function gmailSearchEmails(query, maxResults) {
     }
   }
   return emails;
-}
+
+    } catch(err) { console.error("gmailSearchEmails error:", err); showToast("Error: " + err.message, "error"); }
+  }
 
 /* ============ GOOGLE CALENDAR API ============ */
 async function calendarListEvents(timeMin, timeMax, maxResults) {
+    try {
   var now = new Date();
   var tMin = timeMin || now.toISOString();
   var tMax = timeMax || new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString();
@@ -2983,9 +3004,12 @@ async function calendarListEvents(timeMin, timeMax, maxResults) {
       description: ev.description || ''
     };
   });
-}
+
+    } catch(err) { console.error("calendarListEvents error:", err); showToast("Error: " + err.message, "error"); }
+  }
 
 async function calendarCreateEvent(summary, startDateTime, endDateTime, description, attendees) {
+    try {
   var event = {
     summary: summary,
     start: { dateTime: startDateTime, timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone },
@@ -3001,24 +3025,33 @@ async function calendarCreateEvent(summary, startDateTime, endDateTime, descript
   if (!res.ok) { showToast('Failed to create event', 'error'); return null; }
   showToast('Event created', 'success');
   return await res.json();
-}
+
+    } catch(err) { console.error("calendarCreateEvent error:", err); showToast("Error: " + err.message, "error"); }
+  }
 
 async function calendarGetToday() {
+    try {
   var now = new Date();
   var startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
   var endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59).toISOString();
   return await calendarListEvents(startOfDay, endOfDay, 50);
-}
+
+    } catch(err) { console.error("calendarGetToday error:", err); showToast("Error: " + err.message, "error"); }
+  }
 
 /* ============ GOOGLE SHEETS API ============ */
 async function sheetsReadSpreadsheet(spreadsheetId, range) {
+    try {
   var r = range || 'Sheet1';
   var data = await googleApiFetch('https://sheets.googleapis.com/v4/spreadsheets/' + spreadsheetId + '/values/' + encodeURIComponent(r));
   if (!data) return null;
   return data.values || [];
-}
+
+    } catch(err) { console.error("sheetsReadSpreadsheet error:", err); showToast("Error: " + err.message, "error"); }
+  }
 
 async function sheetsWriteData(spreadsheetId, range, values) {
+    try {
   var r = range || 'Sheet1';
   var res = await fetch('https://sheets.googleapis.com/v4/spreadsheets/' + spreadsheetId + '/values/' + encodeURIComponent(r) + '?valueInputOption=USER_ENTERED', {
     method: 'PUT',
@@ -3028,9 +3061,12 @@ async function sheetsWriteData(spreadsheetId, range, values) {
   if (!res.ok) { showToast('Failed to write to sheet', 'error'); return null; }
   showToast('Data written to sheet', 'success');
   return await res.json();
-}
+
+    } catch(err) { console.error("sheetsWriteData error:", err); showToast("Error: " + err.message, "error"); }
+  }
 
 async function sheetsCreateSpreadsheet(title) {
+    try {
   var res = await fetch('https://sheets.googleapis.com/v4/spreadsheets', {
     method: 'POST',
     headers: { 'Authorization': 'Bearer ' + googleAccessToken, 'Content-Type': 'application/json' },
@@ -3040,7 +3076,9 @@ async function sheetsCreateSpreadsheet(title) {
   var data = await res.json();
   showToast('Spreadsheet created', 'success');
   return data;
-}
+
+    } catch(err) { console.error("sheetsCreateSpreadsheet error:", err); showToast("Error: " + err.message, "error"); }
+  }
 
 /* ============ GOOGLE SETUP MODAL ============ */
 function showGoogleSetupModal() {
@@ -3186,6 +3224,7 @@ async function scanDriveNow() {
 }
 
 async function listDriveFiles(folderId, pageToken) {
+    try {
   var url = 'https://www.googleapis.com/drive/v3/files?q=%27' + folderId + '%27+in+parents+and+trashed=false&fields=files(id,name,mimeType,modifiedTime)&pageSize=100';
   if (pageToken) url += '&pageToken=' + pageToken;
   var res = await fetch(url, { headers: { 'Authorization': 'Bearer ' + driveAccessToken } });
@@ -3197,9 +3236,12 @@ async function listDriveFiles(folderId, pageToken) {
     files = files.concat(more);
   }
   return files;
-}
+
+    } catch(err) { console.error("listDriveFiles error:", err); showToast("Error: " + err.message, "error"); }
+  }
 
 async function exportDriveFile(fileId, mimeType) {
+    try {
   var url;
   if (mimeType.includes('document')) {
     url = 'https://www.googleapis.com/drive/v3/files/' + fileId + '/export?mimeType=text/plain';
@@ -3213,7 +3255,9 @@ async function exportDriveFile(fileId, mimeType) {
   var res = await fetch(url, { headers: { 'Authorization': 'Bearer ' + driveAccessToken } });
   if (!res.ok) throw new Error('Export failed: ' + res.status);
   return await res.text();
-}
+
+    } catch(err) { console.error("exportDriveFile error:", err); showToast("Error: " + err.message, "error"); }
+  }
 
 function addScanLog(msg) {
   var log = document.getElementById('scanLog');
@@ -3481,7 +3525,8 @@ function addTypingTo(container) {
   container.scrollTop = container.scrollHeight;
 }
 
-function removeTyping() { var el = document.getElementById('typ'); if (el) el.remove(); }
+function removeTyping() { var el = document.getElementById('typ');
+    if (!el) return; if (el) el.remove(); }
 
 function quickFeedback(btn, type) {
   var msgDiv = btn.closest('.msg');
@@ -3781,6 +3826,7 @@ async function hubSend() {
   var resp = await processMsg(text);
   // Remove search indicator if present
   var si = document.getElementById('searchIndicator');
+    if (!si) return;
   if (si) si.remove();
   removeTyping();
   addMsgTo(hc, resp.chat, false);
@@ -4212,7 +4258,7 @@ async function coworkAgent(task, hc) {
           doneDiv.textContent = 'Complete — ' + (docReq.summary || docReq.doc_type + ' created for ' + dcn);
           planCard.appendChild(doneDiv);
         }
-      } catch(e) {}
+      } catch(e) { console.warn("Caught error:", e); }
     }
 
     // Small delay between steps for visual effect
@@ -4448,7 +4494,7 @@ async function callClaude(userMsg) {
           return { chat: chatMsg, doc: docHtml };
         }
       }
-    } catch(e) {}
+    } catch(e) { console.warn("Caught error:", e); }
     return { chat: reply, doc: null };
   } catch(e) {
     console.error('Claude API error:', e);
@@ -5740,6 +5786,7 @@ function showSettings() {
 
 function saveApiKey() {
   var key = document.getElementById('apiKeyInput').value.trim();
+    if (!key) return;
   AI_KEY = key;
   conversationHistory = [];
   document.querySelector('.modal-bg').remove();
@@ -5749,10 +5796,12 @@ function saveApiKey() {
 function saveSettings() {
   // Save AI key
   var key = document.getElementById('apiKeyInput').value.trim();
+    if (!key) return;
   AI_KEY = key;
   conversationHistory = [];
   // Save Google Client ID
   var gid = document.getElementById('googleClientIdSettings');
+    if (!gid) return;
   if (gid && gid.value.trim()) {
     saveGoogleClientId(gid.value.trim());
   }
@@ -5783,6 +5832,7 @@ function updateHomeView() {
   var hc = document.getElementById('hubChat');
   var skillsPanel = document.querySelector('#chatView .skills-panel');
   var intBar = document.getElementById('integrationBar');
+    if (!intBar) return;
   var hasMessages = hc && hc.children.length > 0;
 
   // Skills panel stays hidden in chat view — clean thread only
@@ -5820,6 +5870,7 @@ function switchTab(tab, fromTabClick) {
       input.placeholder = 'What can I help you with today?';
     }
     var cwInput = document.getElementById('cwInput');
+    if (!cwInput) return;
     if (cwInput) {
       cwInput.value = '';
     }
@@ -6139,8 +6190,10 @@ function switchSkillCategory(el, category) {
     html += '<button class="skill-sub-btn" onclick="startSkillChat(\'' + category + '\',\'' + skill.prompt.replace(/'/g, "\\'") + '\')">' + skill.text + '</button>';
   });
   var detail = document.getElementById('skillsDetail');
+    if (!detail) return;
   if (detail) detail.innerHTML = html;
   var cwDetail = document.getElementById('cwSkillsDetail');
+    if (!cwDetail) return;
   if (cwDetail) cwDetail.innerHTML = html;
 }
 
@@ -6158,6 +6211,7 @@ function getClientFavourites() {
 }
 function isClientFavourite(name) { return getClientFavourites().indexOf(name) !== -1; }
 function toggleClientFav(name, starEl) {
+    try {
   var favs = getClientFavourites();
   var idx = favs.indexOf(name);
   if (idx === -1) { favs.push(name); } else { favs.splice(idx, 1); }
@@ -6165,7 +6219,9 @@ function toggleClientFav(name, starEl) {
   if (starEl) { starEl.classList.toggle('active', idx === -1); }
   /* Re-sort to put favourites first */
   renderClientList();
-}
+
+    } catch(err) { console.warn("toggleClientFav storage error:", err); }
+  }
 
 function clientCategoryChat(clientName, category) {
   switchTab('chat');
@@ -6188,9 +6244,12 @@ function getClientFolders(clientName) {
 }
 
 function setClientFolders(clientName, folders) {
+    try {
   if (!currentUser) return;
   localStorage.setItem('nih_client_folders_' + currentUser.name + '_' + clientName, JSON.stringify(folders));
-}
+
+    } catch(err) { console.warn("setClientFolders storage error:", err); }
+  }
 
 function renameClientFolder(clientName, oldName) {
   var modal = document.createElement('div');
@@ -6206,6 +6265,7 @@ function renameClientFolder(clientName, oldName) {
     + '</div></div>';
   document.body.appendChild(modal);
   var inp = document.getElementById('renameFolderInput');
+    if (!inp) return;
   inp.focus();
   inp.select();
 }
@@ -6487,6 +6547,7 @@ function readFileAsText(file) {
 }
 
 async function extractPdfText(file) {
+    try {
   if (!window.pdfjsLib) return '[PDF.js not loaded — cannot extract PDF text]';
   var arrayBuffer = await file.arrayBuffer();
   var pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
@@ -6498,9 +6559,12 @@ async function extractPdfText(file) {
     allText += '\n--- Page ' + p + ' ---\n' + pageText;
   }
   return allText.trim();
-}
+
+    } catch(err) { console.error("extractPdfText error:", err); showToast("Error: " + err.message, "error"); }
+  }
 
 async function extractExcelText(file) {
+    try {
   var arrayBuffer = await file.arrayBuffer();
   var workbook = XLSX.read(arrayBuffer, { type: 'array' });
   var allText = '';
@@ -6510,7 +6574,9 @@ async function extractExcelText(file) {
     allText += '\n--- Sheet: ' + name + ' ---\n' + csv;
   });
   return allText.trim();
-}
+
+    } catch(err) { console.error("extractExcelText error:", err); showToast("Error: " + err.message, "error"); }
+  }
 
 // Integration connection status stored in localStorage
 function getIntegrationStatus(name) {
@@ -6518,9 +6584,12 @@ function getIntegrationStatus(name) {
   return JSON.parse(localStorage.getItem('nih_int_' + currentUser.name + '_' + name) || 'null');
 }
 function setIntegrationStatus(name, status) {
+    try {
   if (!currentUser) return;
   localStorage.setItem('nih_int_' + currentUser.name + '_' + name, JSON.stringify(status));
-}
+
+    } catch(err) { console.warn("setIntegrationStatus storage error:", err); }
+  }
 
 var integrationConfigs = {
   'gmail': {
@@ -6724,7 +6793,9 @@ function setSearchFilter(filter, btn) {
   performSearch(query);
 }
 
-function performSearch(query) {
+var _searchTimer = null;
+  function _debouncedSearch(val) { clearTimeout(_searchTimer); _searchTimer = setTimeout(function() { performSearch(val); }, 250); }
+  function performSearch(query) {
   query = (query || '').trim().toLowerCase();
   var results = [];
 

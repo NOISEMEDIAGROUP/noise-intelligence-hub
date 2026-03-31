@@ -7651,20 +7651,34 @@ function pcBuildFromGitHub() {
     var priority = labels.some(function(l){return l.name.toLowerCase().indexOf('critical')>=0})?'critical': labels.some(function(l){return l.name.toLowerCase().indexOf('high')>=0||l.name.toLowerCase().indexOf('urgent')>=0})?'high': labels.some(function(l){return l.name.toLowerCase().indexOf('low')>=0})?'low':'normal';
     return { id:i.id, identifier:'NXP-'+i.number, title:i.title, description:i.body||'', status:status, priority:priority, labels:labels, assignee:i.assignee?{name:i.assignee.login,avatar:i.assignee.avatar_url}:null, createdAt:i.created_at, updatedAt:i.updated_at };
   });
-  // Map contributors to agents
-  PC.data.agents = (gh.contributors||[]).map(function(c,idx) {
-    var roles = ['Engineer','Senior Engineer','Tech Lead','DevOps','Product Manager','Designer','QA Engineer','Data Scientist'];
-    var statuses = ['active','active','active','idle','running','active','paused','active'];
-    return { id:c.id, name:c.login, title:roles[idx%roles.length], status:statuses[idx%statuses.length], avatar:c.avatar_url, contributions:c.contributions, role:roles[idx%roles.length] };
-  });
-  // Build org hierarchy
-  PC.data.org = PC.data.agents.map(function(a,i) {
-    return { id:a.id, name:a.name, title:a.title, status:a.status, reportsTo:i===0?null:PC.data.agents[0].id, children:[] };
-  });
-  if(PC.data.org.length>0) {
-    var root = PC.data.org[0];
-    root.children = PC.data.org.slice(1);
+  // Map real TEAM members to agents (not random GitHub contributors)
+  if (typeof TEAM !== 'undefined' && TEAM.length > 0) {
+    PC.data.agents = TEAM.map(function(m, idx) {
+      var statuses = ['active','active','running','active','active','active','idle','active','active','active','idle','active','active','active'];
+      return { id:idx+1, name:m.name, title:m.role, status:statuses[idx%statuses.length], role:m.role, color:m.color, initials:m.init };
+    });
+  } else {
+    PC.data.agents = (gh.contributors||[]).map(function(c,idx) {
+      return { id:c.id, name:c.login, title:'Contributor', status:'active', avatar:c.avatar_url, contributions:c.contributions, role:'Contributor' };
+    });
   }
+  // Build org hierarchy — Co-Founders at top, Heads report to them, rest report to Heads
+  var coFounders = PC.data.agents.filter(function(a){return a.title&&a.title.indexOf('Co-Founder')>=0});
+  var heads = PC.data.agents.filter(function(a){return a.title&&(a.title.indexOf('Head')>=0||a.title.indexOf('Director')>=0)&&a.title.indexOf('Co-Founder')<0});
+  var rest = PC.data.agents.filter(function(a){return coFounders.indexOf(a)<0&&heads.indexOf(a)<0});
+  PC.data.org = PC.data.agents.map(function(a) {
+    var reportsTo = null;
+    if (coFounders.indexOf(a)>=0) reportsTo = null;
+    else if (heads.indexOf(a)>=0) reportsTo = coFounders.length>0?coFounders[0].id:null;
+    else reportsTo = heads.length>0?heads[Math.floor(Math.random()*heads.length)].id:coFounders.length>0?coFounders[0].id:null;
+    return { id:a.id, name:a.name, title:a.title, status:a.status, reportsTo:reportsTo, children:[] };
+  });
+  // Build tree structure
+  var orgMap = {};
+  PC.data.org.forEach(function(n){orgMap[n.id]=n; n.children=[]});
+  PC.data.org.forEach(function(n){if(n.reportsTo&&orgMap[n.reportsTo])orgMap[n.reportsTo].children.push(n)});
+  var orgRoots = PC.data.org.filter(function(n){return !n.reportsTo});
+  if(orgRoots.length>0) PC.data.org = orgRoots;
   // Build activity from commits + issues
   PC.data.activity = [];
   (gh.commits||[]).slice(0,20).forEach(function(c) {
@@ -7841,7 +7855,9 @@ function pcRenderAgents() {
     if (a.avatar) {
       html += '<img src="'+pcEsc(a.avatar)+'" style="width:42px;height:42px;border-radius:10px;" loading="lazy">';
     } else {
-      html += '<div class="pc-agent-avatar">'+pcInitials(a.name)+'</div>';
+      var avatarBg = a.color ? a.color+'18' : 'var(--accent-light)';
+      var avatarColor = a.color || 'var(--accent)';
+      html += '<div class="pc-agent-avatar" style="background:'+avatarBg+';color:'+avatarColor+';">'+(a.initials||pcInitials(a.name))+'</div>';
     }
     html += '<div class="pc-agent-info"><div class="pc-agent-name">'+pcEsc(a.name)+'</div><div class="pc-agent-role">'+pcEsc(a.title||a.role||'Agent')+'</div>';
     html += '<div class="pc-agent-meta">';
@@ -7998,17 +8014,24 @@ function pcApprovalAction(id, action) {
 /* -- Org Chart -- */
 function pcRenderOrgChart() {
   var org = PC.data.org||[];
-  var html = '<div class="pc-section-title">Organization Structure</div>';
+  var html = '<div class="pc-section-title">Organization Structure <span class="count">('+((typeof TEAM!=='undefined')?TEAM.length:org.length)+' members)</span></div>';
   if (org.length > 0) {
     html += '<div class="pc-org-tree">';
-    // Render root and children
-    var root = org[0];
-    html += pcOrgNode(root);
-    if (root.children && root.children.length > 0) {
-      html += '<div class="pc-org-children">';
-      root.children.forEach(function(c) { html += pcOrgNode(c); });
-      html += '</div>';
-    }
+    org.forEach(function(root) {
+      html += pcOrgNode(root);
+      if (root.children && root.children.length > 0) {
+        html += '<div class="pc-org-children">';
+        root.children.forEach(function(head) {
+          html += pcOrgNode(head);
+          if (head.children && head.children.length > 0) {
+            html += '<div class="pc-org-children">';
+            head.children.forEach(function(member) { html += pcOrgNode(member); });
+            html += '</div>';
+          }
+        });
+        html += '</div>';
+      }
+    });
     html += '</div>';
   } else {
     html += '<div class="pc-empty"><div class="pc-empty-icon">&#127970;</div><div class="pc-empty-text">No org structure</div></div>';

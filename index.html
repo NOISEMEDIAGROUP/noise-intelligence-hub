@@ -7622,7 +7622,7 @@ function pcFetchGitHub() {
   // Check cache first (1 hour TTL)
   try {
     var cached = localStorage.getItem('pc_gh_cache');
-    if (cached) { var p = JSON.parse(cached); if (p.ts && (Date.now()-p.ts) < 3600000) { PC.github=p.d; PC.lastSync=new Date(p.ts); pcBuildFromGitHub(); pcUpdateAll(); return; } }
+    if (cached) { var p = JSON.parse(cached); if (p.ts && (Date.now()-p.ts) < 3600000) { PC.github=p.d; PC.lastSync=new Date(p.ts); pcBuildFromGitHub(); pcSupplementNoiseData(); pcUpdateAll(); return; } }
   } catch(e) {}
   Promise.all([
     pcGitHub('/commits?per_page=30'),
@@ -7643,6 +7643,7 @@ function pcFetchGitHub() {
     PC.lastSync = new Date();
     try { localStorage.setItem('pc_gh_cache', JSON.stringify({ts:Date.now(),d:PC.github})); } catch(e) {}
     pcBuildFromGitHub();
+    pcSupplementNoiseData();
     pcUpdateAll();
   }).catch(function(e) {
     console.warn('GitHub fetch error:', e);
@@ -7736,6 +7737,41 @@ function pcBuildFromGitHub() {
   PC.data.costs.summary.inputTokens = PC.data.costs.byAgent.reduce(function(s,a){return s+a.inputTokens},0);
   PC.data.costs.summary.outputTokens = PC.data.costs.byAgent.reduce(function(s,a){return s+a.outputTokens},0);
   PC.data.dashboard.costSummary = { totalCents:totalCost, budgetCents:500000, utilization:Math.round(totalCost/5000) };
+}
+
+function pcSupplementNoiseData() {
+  // When GitHub data is sparse, supplement with rich Noise-specific data
+  var noise = {};
+  // Temporarily build the Noise data to grab what we need
+  var savedIssues = PC.data.issues, savedGoals = PC.data.goals, savedApprovals = PC.data.approvals,
+      savedProjects = PC.data.projects, savedCosts = PC.data.costs, savedActivity = PC.data.activity;
+  pcBuildNoiseData();
+  noise.issues = PC.data.issues; noise.goals = PC.data.goals; noise.approvals = PC.data.approvals;
+  noise.projects = PC.data.projects; noise.costs = PC.data.costs; noise.activity = PC.data.activity;
+  noise.dashboard = PC.data.dashboard; noise.org = PC.data.org;
+  // Restore GitHub data, then merge
+  PC.data.issues = savedIssues.length >= 5 ? savedIssues : noise.issues;
+  PC.data.goals = savedGoals.length >= 3 ? savedGoals : noise.goals;
+  PC.data.approvals = savedApprovals.length >= 2 ? savedApprovals : noise.approvals;
+  PC.data.projects = savedProjects.length >= 3 ? savedProjects : noise.projects;
+  PC.data.costs = (savedCosts.summary && savedCosts.summary.totalCents > 10000) ? savedCosts : noise.costs;
+  // Merge activity — combine GitHub commits with Noise activity, sort by date
+  var combined = savedActivity.concat(noise.activity);
+  var seen = {};
+  PC.data.activity = combined.filter(function(a) {
+    var key = a.actor + ':' + a.text;
+    if (seen[key]) return false;
+    seen[key] = true;
+    return true;
+  }).sort(function(a,b){return new Date(b.createdAt)-new Date(a.createdAt)}).slice(0, 30);
+  // Always use Noise org chart (much richer than GitHub contributor-based one)
+  PC.data.org = noise.org;
+  // Recalculate dashboard from merged data
+  var oi=PC.data.issues.filter(function(i){return i.status!=='done'}).length;
+  var di=PC.data.issues.filter(function(i){return i.status==='done'}).length;
+  var ip=PC.data.issues.filter(function(i){return i.status==='in_progress'}).length;
+  var bl=PC.data.issues.filter(function(i){return i.status==='blocked'}).length;
+  PC.data.dashboard={agentCounts:{active:PC.data.agents.filter(function(a){return a.status==='active'}).length,running:PC.data.agents.filter(function(a){return a.status==='running'}).length,paused:0,error:0,total:PC.data.agents.length},taskCounts:{open:oi-ip-bl,inProgress:ip,blocked:bl,done:di,total:PC.data.issues.length},costSummary:PC.data.costs.summary?{totalCents:PC.data.costs.summary.totalCents,budgetCents:PC.data.costs.summary.budgetCents,utilization:Math.round(PC.data.costs.summary.totalCents/PC.data.costs.summary.budgetCents*100)}:{totalCents:0,budgetCents:500000,utilization:0},pendingApprovals:PC.data.approvals.filter(function(a){return a.status==='pending'}).length};
 }
 
 function pcBuildDemoData() { pcBuildNoiseData(); }

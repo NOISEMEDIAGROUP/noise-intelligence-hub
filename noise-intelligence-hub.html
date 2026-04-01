@@ -3727,11 +3727,15 @@ function buildSystemPrompt() {
   return 'You are Noise Intelligence, the internal AI brain for Noise Media — a creative agency with a social-first mindset. You are speaking with ' + (currentUser ? currentUser.name + ' (' + currentUser.role + ')' : 'a team member') + '.\n\nYour personality: You are sharp, direct, and deeply knowledgeable. You speak like a senior strategist who has read every brief, every report, every campaign deck in the agency. You give specific answers with real data — never vague or generic. When you know numbers, cite them. When you know strategy details, share them with confidence.\n\nRESPONSE RULES:\n- Be conversational but substantive. Default to 2-5 sentences. Go longer when the question warrants depth (strategy, performance, campaign analysis).\n- NEVER use markdown (no **, ##, ```, code fences). Plain text only. Use line breaks for readability.\n- When discussing a client, ALWAYS use the specific data from DEEP KNOWLEDGE below — budgets, metrics, audience segments, creative details, scent names, campaign phases, etc.\n- For Altra specifically: you have COMPLETE campaign data — £22,714.25 total spend, 14 weekly reports, 5 campaign phases, 3 audience segments (Luxury, Digital Native, Conscious), 5 scent products, 50+ creatives, platform breakdowns. USE THIS DATA in every Altra answer.\n- When asked about strategy, brand, audiences, paid media, or campaign approach — dig into the STRATEGY DEEP-DIVE DATA and give informed, specific, data-backed answers.\n- If someone asks a broad question like "tell me about Altra" — give a rich, comprehensive answer with key stats, not a one-liner.\n- For questions about performance, budgets, or metrics — always include actual numbers.\n\nDOCUMENT GENERATION:\nWhen asked to create a document (email, brief, social copy, proposal, cost allocation, report, meeting agenda, presentation/deck/slides), respond with ONLY a JSON object like: {"doc_type":"email","client":"BARBRI","variant":"general"}\nFor presentations, include a topic field: {"doc_type":"presentation","client":"Thortful","topic":"Campaign"}\nValid doc_type values: email, brief, social, proposal, cost, report, agenda, presentation\nValid email variants: general, intro, followup, update\n\nWEB SEARCH:\nYou have web search capability. If the user asks about current events, trends, competitors, industry news, or anything you need live data for, include [SEARCH:your search query] in your response and the system will fetch results and let you respond with them. Only use this when you genuinely need external info — your internal client knowledge is already comprehensive.\n\nFor all other messages, reply with intelligence and depth.\n\nCLIENTS (' + CL.length + '):\n' + clientData + '\n\nTEAM (' + TEAM.length + '):\n' + teamData + '\n\nNoise Media specialises in paid social, content production, and brand storytelling. Services: content strategy, creative production (video, photo, design), paid social management, UGC/influencer, community management. Offices in London, Los Angeles, New York. Contact: brands@noisemediagroup.co.uk, +44 0203 007 0500. Co-founded by Anthony and Joe.' + buildStrategyContext() + '\n\nAGENCY CASE STUDIES: Apple Gift Cards (overstocked to sold out), VOXI (UGC-style creative drove 124% higher CTR than usual ads, became the student SIM everyone switched to). Our approach: social-first mindset across Social, Influencer, Production, OOH, Paid, Activations.\n\nADVANCED SKILLS:\n\nSOCIAL MEDIA BOT: You can scan and analyse all Noise Media social channels (Instagram: @noisemedia, TikTok: @noisemedia, LinkedIn: Noise Media, Facebook: Noise Media). Provide daily trend summaries, monthly reports, engagement analysis, and content performance metrics. Use web search to pull latest data from all platforms. You are expert at identifying trending content, audience sentiment, viral opportunities, and competitive positioning across social.\n\nDEEP RESEARCH: You can perform deep research scans of Noise Media\'s digital presence including their website (noisemedia.co.uk), social channels, and Noise Production. Analyse SEO performance, content strategy, engagement metrics, and competitive positioning. Use web search extensively to pull comprehensive data about the agency, their competitors, industry trends, and digital landscape. Provide detailed reports with actionable insights.' + getMemoryContext() + getOrgMemoryContext() + getLearningContext();
 }
 
+var _lastAiError = null;
 async function aiCall(sysPrompt, msgs, maxTok) {
-  if (!AI_KEY) { console.warn('No API key set'); return null; }
+  _lastAiError = null;
+  if (!AI_KEY) { _lastAiError = 'No API key set'; console.warn(_lastAiError); return null; }
   var controller = new AbortController();
   var timeout = setTimeout(function() { controller.abort(); }, 300000);
   try {
+    // Cap system prompt to avoid oversized requests
+    var cappedSystem = sysPrompt.length > 80000 ? sysPrompt.substring(0, 80000) + '\n[Context truncated for length]' : sysPrompt;
     var res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       signal: controller.signal,
@@ -3743,22 +3747,25 @@ async function aiCall(sysPrompt, msgs, maxTok) {
       },
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
-        max_tokens: maxTok || 400,
-        system: sysPrompt,
+        max_tokens: Math.min(maxTok || 400, 4096),
+        system: cappedSystem,
         messages: msgs
       })
     });
     clearTimeout(timeout);
     if (!res.ok) {
       var errData = await res.json().catch(function() { return {}; });
-      console.warn('AI call HTTP ' + res.status + ':', errData.error ? errData.error.message : res.statusText);
+      _lastAiError = 'HTTP ' + res.status + ': ' + (errData.error ? errData.error.message : res.statusText);
+      console.warn('AI call failed:', _lastAiError);
       return null;
     }
     var data = await res.json();
     if (data.content && data.content[0]) return data.content[0].text;
+    _lastAiError = 'Empty response from API';
     return null;
   } catch(e) {
     clearTimeout(timeout);
+    _lastAiError = e.message;
     console.warn('AI call failed:', e.message);
     return null;
   }
@@ -4128,7 +4135,7 @@ async function coworkAgent(task, hc) {
       doneDiv.textContent = 'COMPLETE';
       planCard.appendChild(doneDiv);
     }
-    addMsgTo(hc, 'I\'ve completed the research and planning. Let me know if you\'d like me to generate a document from this.', false);
+    addMsgTo(hc, 'I\'ve completed the research and planning but couldn\'t generate the document' + (_lastAiError ? ' (' + _lastAiError + ')' : '') + '. Try again or ask me to "create a [type] for [client]".', false);
   }
 
   if (currentUser) saveCurrentThread();

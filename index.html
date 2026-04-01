@@ -7619,6 +7619,11 @@ function pcFetchAll() {
 }
 
 function pcFetchGitHub() {
+  // Check cache first (1 hour TTL)
+  try {
+    var cached = localStorage.getItem('pc_gh_cache');
+    if (cached) { var p = JSON.parse(cached); if (p.ts && (Date.now()-p.ts) < 3600000) { PC.github=p.d; PC.lastSync=new Date(p.ts); pcBuildFromGitHub(); pcUpdateAll(); return; } }
+  } catch(e) {}
   Promise.all([
     pcGitHub('/commits?per_page=30'),
     pcGitHub('/issues?per_page=50&state=all'),
@@ -7626,17 +7631,22 @@ function pcFetchGitHub() {
     pcGitHub(''),
     pcGitHub('/contributors')
   ]).then(function(r) {
+    if (r.some(function(d){return d&&d.message&&String(d.message).indexOf('rate limit')>=0})) {
+      console.warn('GitHub rate limited — using Noise data');
+      pcBuildNoiseData(); pcUpdateAll(); return;
+    }
     PC.github.commits = Array.isArray(r[0]) ? r[0] : [];
     PC.github.issues = Array.isArray(r[1]) ? r[1] : [];
     PC.github.pulls = Array.isArray(r[2]) ? r[2] : [];
     PC.github.repo = r[3] || {};
     PC.github.contributors = Array.isArray(r[4]) ? r[4] : [];
     PC.lastSync = new Date();
+    try { localStorage.setItem('pc_gh_cache', JSON.stringify({ts:Date.now(),d:PC.github})); } catch(e) {}
     pcBuildFromGitHub();
     pcUpdateAll();
   }).catch(function(e) {
     console.warn('GitHub fetch error:', e);
-    pcBuildDemoData();
+    pcBuildNoiseData();
     pcUpdateAll();
   });
 }
@@ -7728,25 +7738,102 @@ function pcBuildFromGitHub() {
   PC.data.dashboard.costSummary = { totalCents:totalCost, budgetCents:500000, utilization:Math.round(totalCost/5000) };
 }
 
-function pcBuildDemoData() {
-  PC.data.agents = [
-    { id:1, name:'Content Strategist', title:'Senior Agent', status:'running', role:'Strategist' },
-    { id:2, name:'Social Manager', title:'Agent', status:'active', role:'Social Media' },
-    { id:3, name:'Data Analyst', title:'Agent', status:'idle', role:'Analytics' },
-    { id:4, name:'Creative Director', title:'Lead Agent', status:'active', role:'Creative' }
-  ];
+function pcBuildDemoData() { pcBuildNoiseData(); }
+
+function pcBuildNoiseData() {
+  var now = new Date();
+  // Agents from real TEAM
+  if (typeof TEAM !== 'undefined' && TEAM.length > 0) {
+    var sts = ['active','running','active','active','active','idle','active','active','running','active','idle','active','active','active'];
+    PC.data.agents = TEAM.map(function(m,i){return{id:i+1,name:m.name,title:m.role,status:sts[i%sts.length],role:m.role,color:m.color,initials:m.init}});
+  }
+  // Issues based on real Noise client work
   PC.data.issues = [
-    { id:1, identifier:'NXP-1', title:'Set up agent orchestration pipeline', status:'in_progress', priority:'high', labels:[], createdAt:new Date().toISOString() },
-    { id:2, identifier:'NXP-2', title:'Configure cost tracking', status:'todo', priority:'normal', labels:[], createdAt:new Date().toISOString() },
-    { id:3, identifier:'NXP-3', title:'Build approval workflow', status:'todo', priority:'normal', labels:[], createdAt:new Date().toISOString() }
+    {id:101,identifier:'NXP-1',title:'Set up Paperclip agent orchestration pipeline',status:'in_progress',priority:'high',labels:[{name:'infrastructure',color:'0075ca'}],assignee:{name:'Anthony'},createdAt:'2026-03-28T10:00:00Z',description:'Configure the core agent pipeline for managing AI workflows across client accounts.'},
+    {id:102,identifier:'NXP-2',title:'Integrate Intelligence Hub with Paperclip API',status:'in_progress',priority:'high',labels:[{name:'integration',color:'e4e669'}],assignee:{name:'Obenewa Adu'},createdAt:'2026-03-29T14:00:00Z',description:'Connect the Noise Intelligence Hub frontend to the Paperclip backend.'},
+    {id:103,identifier:'NXP-3',title:'Deploy Paperclip backend on Render',status:'todo',priority:'high',labels:[{name:'devops',color:'d73a4a'}],createdAt:'2026-03-31T12:00:00Z',description:'Set up Render web service + PostgreSQL for the Paperclip server.'},
+    {id:104,identifier:'NXP-4',title:'Configure cost tracking per client account',status:'todo',priority:'normal',labels:[{name:'feature',color:'a2eeef'}],createdAt:'2026-03-30T09:00:00Z',description:'Track AI token usage and costs per client project.'},
+    {id:105,identifier:'NXP-5',title:'Build approval workflow for agent actions',status:'todo',priority:'normal',labels:[{name:'feature',color:'a2eeef'}],createdAt:'2026-03-30T11:00:00Z',description:'Require human approval before agents execute high-impact actions.'},
+    {id:106,identifier:'NXP-6',title:'Create Davines content strategy agent',status:'in_progress',priority:'normal',labels:[{name:'agent',color:'7057ff'},{name:'davines',color:'0e8a16'}],assignee:{name:'Beau'},createdAt:'2026-03-27T10:00:00Z',description:'AI agent specialised in Davines haircare brand strategy.'},
+    {id:107,identifier:'NXP-7',title:'Set up BARBRI SQE campaign agent',status:'todo',priority:'normal',labels:[{name:'agent',color:'7057ff'},{name:'barbri',color:'b60205'}],createdAt:'2026-03-28T15:00:00Z',description:'Agent for generating BARBRI legal education social campaigns.'},
+    {id:108,identifier:'NXP-8',title:'Fix encoding issues in hub deployment',status:'done',priority:'critical',labels:[{name:'bug',color:'d73a4a'}],assignee:{name:'Obenewa Adu'},createdAt:'2026-03-31T10:00:00Z',description:'Character encoding corruption causing garbled text.'},
+    {id:109,identifier:'NXP-9',title:'Audio-Technica product launch content calendar',status:'in_progress',priority:'normal',labels:[{name:'content',color:'0075ca'}],assignee:{name:'Steph'},createdAt:'2026-03-26T09:00:00Z',description:'Social content calendar for Audio-Technica NAMM 2025 launches.'},
+    {id:110,identifier:'NXP-10',title:'Brothers Cider summer campaign brief',status:'done',priority:'normal',labels:[{name:'content',color:'0075ca'}],assignee:{name:'Georgie'},createdAt:'2026-03-25T14:00:00Z',description:'Creative brief for Brothers Cider summer social campaign.'},
+    {id:111,identifier:'NXP-11',title:'Amano Hotels Berlin rebrand social rollout',status:'blocked',priority:'high',labels:[{name:'campaign',color:'fbca04'}],assignee:{name:'Louise'},createdAt:'2026-03-24T10:00:00Z',description:'Waiting on final brand assets from Amano for campaign launch.'},
+    {id:112,identifier:'NXP-12',title:'Aspora NRI campaign performance report',status:'done',priority:'normal',labels:[{name:'reporting',color:'c5def5'}],assignee:{name:'Dan'},createdAt:'2026-03-22T09:00:00Z',description:'Monthly paid media performance report for Aspora.'},
+    {id:113,identifier:'NXP-13',title:'Thortful 10-year rebrand asset production',status:'in_progress',priority:'high',labels:[{name:'production',color:'e4e669'}],assignee:{name:'Adam'},createdAt:'2026-03-20T10:00:00Z',description:'Motion graphics and video for Thortful anniversary rebrand.'},
+    {id:114,identifier:'NXP-14',title:'GE Vernova data centre thought leadership',status:'todo',priority:'normal',labels:[{name:'content',color:'0075ca'}],createdAt:'2026-03-29T11:00:00Z',description:'LinkedIn thought leadership series for GE Vernova.'},
+    {id:115,identifier:'NXP-15',title:'Fable & Mane influencer campaign tracking',status:'in_progress',priority:'normal',labels:[{name:'campaign',color:'fbca04'}],assignee:{name:'Sam'},createdAt:'2026-03-23T10:00:00Z',description:'Track influencer deliverables for Fable & Mane.'}
   ];
-  PC.data.dashboard = { agentCounts:{active:2,running:1,paused:0,error:0,total:4}, taskCounts:{open:2,inProgress:1,blocked:0,done:0,total:3}, costSummary:{totalCents:0,budgetCents:500000,utilization:0}, pendingApprovals:0 };
-  PC.data.goals = [{ id:1, title:'Launch Paperclip Integration', description:'Connect to Render-deployed backend', status:'active', progress:40, children:[] }];
-  PC.data.activity = [{ type:'agent', actor:'System', text:'Demo mode active. Configure a Paperclip server URL to connect.', createdAt:new Date().toISOString() }];
-  PC.data.approvals = [];
-  PC.data.projects = [{ id:1, name:'Noise-X-Paperclip', status:'active', color:'#C73C1E', issueCount:3, description:'Demo project' }];
-  PC.data.costs = { summary:{totalCents:0,budgetCents:500000,inputTokens:0,outputTokens:0}, byAgent:[] };
-  PC.data.org = PC.data.agents.map(function(a,i){return{id:a.id,name:a.name,title:a.title,status:a.status,reportsTo:i===0?null:1,children:[]}});
+  // Goals
+  PC.data.goals = [
+    {id:1,title:'Ship Paperclip v1.0 for Noise',description:'Complete integration with full agent orchestration, cost tracking, and approvals',status:'active',progress:55,children:[
+      {id:11,title:'Hub UI integration',progress:85},{id:12,title:'Backend deployment on Render',progress:20},{id:13,title:'Agent lifecycle management',progress:40}
+    ]},
+    {id:2,title:'Automate client content workflows',description:'Deploy AI agents for each active client',status:'active',progress:30,children:[
+      {id:21,title:'Davines content agent',progress:60},{id:22,title:'BARBRI campaign agent',progress:15},{id:23,title:'Cross-client reporting agent',progress:10}
+    ]},
+    {id:3,title:'Scale to 20 managed client accounts',description:'Onboard remaining clients onto Paperclip workflows',status:'active',progress:35,children:[]},
+    {id:4,title:'Reduce content production time by 40%',description:'Use AI agents to accelerate brief-to-delivery cycle',status:'active',progress:25,children:[]}
+  ];
+  // Approvals
+  PC.data.approvals = [
+    {id:201,type:'publish_content',status:'pending',title:'Davines Instagram Carousel — Sustainable Beauty',description:'3-slide carousel for @davinesofficial. Scheduled April 2.',requestedBy:'Beau',createdAt:new Date(now-3600000).toISOString()},
+    {id:202,type:'hire_agent',status:'pending',title:'Hire BARBRI SQE Campaign Agent',description:'New AI agent for BARBRI UK SQE prep campaigns.',requestedBy:'Anthony',createdAt:new Date(now-7200000).toISOString()},
+    {id:203,type:'budget_increase',status:'approved',title:'Altra Skin Paid Media Budget Uplift',description:'Increase monthly spend from \u00a31,500 to \u00a32,500.',requestedBy:'Dan',createdAt:new Date(now-172800000).toISOString()},
+    {id:204,type:'execute_task',status:'pending',title:'Auto-generate Thortful Monthly Report',description:'Allow agent to pull analytics and generate monthly deck.',requestedBy:'Sam',createdAt:new Date(now-86400000).toISOString()}
+  ];
+  // Activity
+  PC.data.activity = [
+    {type:'agent',actor:'Obenewa Adu',text:'Deployed Paperclip integration to Intelligence Hub',createdAt:new Date(now-1800000).toISOString()},
+    {type:'issue',actor:'Obenewa Adu',text:'Fixed encoding corruption in hub deployment (NXP-8)',createdAt:new Date(now-3600000).toISOString()},
+    {type:'commit',actor:'Anthony',text:'Merged Paperclip v3 with full agent management UI',createdAt:new Date(now-7200000).toISOString()},
+    {type:'approval',actor:'Beau',text:'Submitted Davines Instagram carousel for approval',createdAt:new Date(now-10800000).toISOString()},
+    {type:'issue',actor:'Steph',text:'Started Audio-Technica content calendar (NXP-9)',createdAt:new Date(now-14400000).toISOString()},
+    {type:'agent',actor:'System',text:'Davines content agent completed brief analysis \u2014 3 recommendations generated',createdAt:new Date(now-18000000).toISOString()},
+    {type:'issue',actor:'Georgie',text:'Completed Brothers Cider summer brief (NXP-10)',createdAt:new Date(now-21600000).toISOString()},
+    {type:'commit',actor:'Adam',text:'Uploaded Thortful rebrand motion assets \u2014 4 video files',createdAt:new Date(now-25200000).toISOString()},
+    {type:'approval',actor:'Dan',text:'Altra Skin budget uplift approved \u2014 \u00a32,500/month',createdAt:new Date(now-28800000).toISOString()},
+    {type:'issue',actor:'Louise',text:'Flagged Amano Hotels campaign as blocked \u2014 waiting on brand assets',createdAt:new Date(now-32400000).toISOString()},
+    {type:'agent',actor:'System',text:'Cross-client weekly digest generated \u2014 8 accounts active',createdAt:new Date(now-43200000).toISOString()},
+    {type:'commit',actor:'Sam',text:'Updated Fable & Mane influencer tracking spreadsheet',createdAt:new Date(now-50400000).toISOString()},
+    {type:'issue',actor:'Mike',text:'Scheduled GE Vernova video shoot for April 8',createdAt:new Date(now-57600000).toISOString()},
+    {type:'approval',actor:'Anthony',text:'Requested hire of BARBRI SQE Campaign Agent',createdAt:new Date(now-64800000).toISOString()},
+    {type:'issue',actor:'Luke',text:'Delivered Aspora motion graphics \u2014 3 social clips',createdAt:new Date(now-72000000).toISOString()}
+  ];
+  // Projects
+  PC.data.projects = [
+    {id:1,name:'Noise-X-Paperclip',status:'active',color:'#C73C1E',issueCount:5,description:'Core Paperclip platform integration'},
+    {id:2,name:'Intelligence Hub',status:'active',color:'#2B6CB0',issueCount:2,description:'Internal AI chatbot and knowledge hub'},
+    {id:3,name:'Client Campaigns Q2',status:'active',color:'#2D8A4E',issueCount:6,description:'Active client campaign work for Q2 2026'},
+    {id:4,name:'Content Production',status:'active',color:'#9647DD',issueCount:2,description:'Motion, design, and video production pipeline'}
+  ];
+  // Costs
+  PC.data.costs = {
+    summary:{totalCents:284500,budgetCents:500000,inputTokens:4250000,outputTokens:1380000},
+    byAgent:[
+      {agentId:1,name:'Anthony',costCents:62000,inputTokens:920000,outputTokens:310000,runs:45},
+      {agentId:3,name:'Beau',costCents:54000,inputTokens:810000,outputTokens:265000,runs:38},
+      {agentId:4,name:'Sam',costCents:48000,inputTokens:720000,outputTokens:230000,runs:32},
+      {agentId:13,name:'Obenewa Adu',costCents:41500,inputTokens:615000,outputTokens:198000,runs:28},
+      {agentId:12,name:'Dan',costCents:38000,inputTokens:560000,outputTokens:182000,runs:25},
+      {agentId:7,name:'Steph',costCents:22000,inputTokens:330000,outputTokens:108000,runs:15},
+      {agentId:9,name:'Adam',costCents:19000,inputTokens:295000,outputTokens:87000,runs:12}
+    ]
+  };
+  // Dashboard
+  var oi=PC.data.issues.filter(function(i){return i.status!=='done'}).length;
+  var di=PC.data.issues.filter(function(i){return i.status==='done'}).length;
+  var ip=PC.data.issues.filter(function(i){return i.status==='in_progress'}).length;
+  var bl=PC.data.issues.filter(function(i){return i.status==='blocked'}).length;
+  PC.data.dashboard={agentCounts:{active:PC.data.agents.filter(function(a){return a.status==='active'}).length,running:PC.data.agents.filter(function(a){return a.status==='running'}).length,paused:0,error:0,total:PC.data.agents.length},taskCounts:{open:oi-ip-bl,inProgress:ip,blocked:bl,done:di,total:PC.data.issues.length},costSummary:{totalCents:284500,budgetCents:500000,utilization:57},pendingApprovals:PC.data.approvals.filter(function(a){return a.status==='pending'}).length};
+  // Org chart
+  var cf=PC.data.agents.filter(function(a){return a.title&&a.title.indexOf('Co-Founder')>=0});
+  var hd=PC.data.agents.filter(function(a){return a.title&&(a.title.indexOf('Head')>=0||a.title.indexOf('Director')>=0)&&a.title.indexOf('Co-Founder')<0});
+  var ot=PC.data.agents.filter(function(a){return cf.indexOf(a)<0&&hd.indexOf(a)<0});
+  PC.data.org=PC.data.agents.map(function(a){var rt=null;if(cf.indexOf(a)>=0)rt=null;else if(hd.indexOf(a)>=0)rt=cf.length>0?cf[0].id:null;else rt=hd.length>0?hd[ot.indexOf(a)%hd.length].id:(cf.length>0?cf[0].id:null);return{id:a.id,name:a.name,title:a.title,status:a.status,reportsTo:rt,children:[]}});
+  var om={};PC.data.org.forEach(function(n){om[n.id]=n;n.children=[]});PC.data.org.forEach(function(n){if(n.reportsTo&&om[n.reportsTo])om[n.reportsTo].children.push(n)});PC.data.org=PC.data.org.filter(function(n){return !n.reportsTo});
+  PC.lastSync=now;
 }
 
 /* -- Update all panels -- */

@@ -1896,32 +1896,24 @@
 
   <!-- PAPERCLIP VIEW -->
   <div id="paperclipView" style="display:none;flex:1;flex-direction:column;overflow:hidden;">
-    <!-- Top bar with connection status -->
+    <!-- Top bar -->
     <div class="pc-topbar">
       <div class="pc-topbar-left">
         <span class="pc-topbar-title">Paperclip</span>
         <div class="pc-topbar-status">
-          <span class="pc-topbar-dot" id="pcConnectionDot"></span>
-          <span id="pcConnectionLabel">Connecting...</span>
+          <span class="pc-topbar-dot connected" id="pcStatusDot"></span>
+          <span id="pcStatusLabel">Agent Tracking System</span>
         </div>
-        <span id="pcSyncTime"></span>
       </div>
       <div class="pc-topbar-right">
-        <button onclick="pcShowConfig()">Settings</button>
-        <button onclick="refreshPaperclip()">Sync</button>
-        <button class="primary" onclick="pcCreateEntity()">+ New</button>
+        <button class="primary" onclick="pcDeployAgent()">+ Deploy Agent</button>
       </div>
     </div>
-    <!-- Sub-navigation with badge counts -->
+    <!-- Sub-navigation -->
     <div class="pc-subnav">
       <button class="pc-subnav-btn active" onclick="switchPCView('dashboard')">Dashboard</button>
       <button class="pc-subnav-btn" onclick="switchPCView('agents')">Agents <span class="pc-badge-count" id="pcBadgeAgents">0</span></button>
-      <button class="pc-subnav-btn" onclick="switchPCView('issues')">Issues <span class="pc-badge-count" id="pcBadgeIssues">0</span></button>
-      <button class="pc-subnav-btn" onclick="switchPCView('projects')">Projects</button>
-      <button class="pc-subnav-btn" onclick="switchPCView('goals')">Goals</button>
-      <button class="pc-subnav-btn" onclick="switchPCView('approvals')">Approvals <span class="pc-badge-count" id="pcBadgeApprovals">0</span></button>
-      <button class="pc-subnav-btn" onclick="switchPCView('orgchart')">Org Chart</button>
-      <button class="pc-subnav-btn" onclick="switchPCView('costs')">Costs</button>
+      <button class="pc-subnav-btn" onclick="switchPCView('runs')">Runs</button>
       <button class="pc-subnav-btn" onclick="switchPCView('activity')">Activity</button>
     </div>
     <div style="flex:1;overflow-y:auto;">
@@ -1929,23 +1921,11 @@
       <div id="pcPanel-dashboard" class="pc-panel active"></div>
       <!-- Agents -->
       <div id="pcPanel-agents" class="pc-panel"></div>
-      <!-- Issues (Kanban) -->
-      <div id="pcPanel-issues" class="pc-panel"></div>
-      <!-- Projects -->
-      <div id="pcPanel-projects" class="pc-panel"></div>
-      <!-- Goals -->
-      <div id="pcPanel-goals" class="pc-panel"></div>
-      <!-- Approvals -->
-      <div id="pcPanel-approvals" class="pc-panel"></div>
-      <!-- Org Chart -->
-      <div id="pcPanel-orgchart" class="pc-panel"></div>
-      <!-- Costs -->
-      <div id="pcPanel-costs" class="pc-panel"></div>
+      <!-- Runs -->
+      <div id="pcPanel-runs" class="pc-panel"></div>
       <!-- Activity -->
       <div id="pcPanel-activity" class="pc-panel"></div>
     </div>
-    <!-- Detail panel (slides in from right) -->
-    <div id="pcDetailPanel" class="pc-detail-overlay hidden"></div>
   </div>
   </div><!-- end p1-content-wrapper -->
 </div>
@@ -4428,6 +4408,22 @@ async function coworkAgent(task, hc) {
   var un = currentUser ? currentUser.name : 'Team Member';
   var ur = currentUser ? currentUser.role : '';
 
+  // Log this agent run
+  var runId = 'run_' + Date.now();
+  pcLogRun({
+    id: runId,
+    task: task,
+    user: un,
+    userRole: ur,
+    userColor: currentUser ? currentUser.color : '#666',
+    userInit: currentUser ? currentUser.init : '?',
+    steps: [],
+    status: 'running',
+    startedAt: new Date().toISOString(),
+    completedAt: null,
+    result: null
+  });
+
   // Step 1: Show "thinking" and get a plan from Claude
   var planCard = document.createElement('div');
   planCard.className = 'task-card';
@@ -4465,6 +4461,9 @@ async function coworkAgent(task, hc) {
   });
   hc.scrollTop = hc.scrollHeight;
 
+  // Update run with steps
+  pcUpdateRun(runId, { steps: steps.map(function(s) { return { text: s, status: 'pending' }; }) });
+
   // Step 3: Execute each step autonomously
   var contextSoFar = '';
   var finalDoc = null;
@@ -4497,6 +4496,15 @@ async function coworkAgent(task, hc) {
     // Mark step done
     if (stepEl) { stepEl.className = 'task-step done'; stepEl.querySelector('.step-icon').textContent = '\u2713'; }
     hc.scrollTop = hc.scrollHeight;
+
+    // Update run with step completion
+    var run = PC.runs.find(function(r) { return r.id === runId; });
+    if (run && run.steps) {
+      run.steps[i] = { text: run.steps[i].text, status: 'done', result: stepReply.substring(0, 200) };
+      if (i + 1 < run.steps.length) run.steps[i + 1].status = 'running';
+      pcSave();
+      if (PC.initialized) pcRenderAll();
+    }
 
     // Check if last step returned a doc request
     if (isLast) {
@@ -4631,6 +4639,9 @@ async function coworkAgent(task, hc) {
   }
 
   if (currentUser) saveCurrentThread();
+
+  // Mark run as completed
+  pcUpdateRun(runId, { status: 'completed', completedAt: new Date().toISOString(), result: finalDoc ? 'Document generated' : 'Task completed' });
 }
 
 function escHtml(s) {
@@ -7529,849 +7540,212 @@ selectUser = function(u) {
   renderProjectTabBar();
 };
 
-/* ============ PAPERCLIP ENGINE ============ */
+/* ============ PAPERCLIP AGENT TRACKING ============ */
 var PC = {
-  serverUrl: localStorage.getItem('pc_server_url') || '',
-  companyId: localStorage.getItem('pc_company_id') || '',
-  token: localStorage.getItem('pc_token') || '',
-  mode: 'github', // 'api' or 'github'
-  data: { agents:[], issues:[], projects:[], goals:[], approvals:[], activity:[], costs:{}, dashboard:{}, org:[], liveRuns:[] },
-  github: { commits:[], issues:[], pulls:[], repo:{}, contributors:[] },
-  lastSync: null,
-  initialized: false,
-  refreshInterval: null
+  runs: [],
+  agents: [],
+  initialized: false
 };
 
 /* -- Helpers -- */
 function pcEsc(s) { var d=document.createElement('div'); d.textContent=s||''; return d.innerHTML; }
 function pcRelTime(d) { if(!d) return ''; var s=Math.floor((Date.now()-new Date(d).getTime())/1000); if(s<60) return 'just now'; if(s<3600) return Math.floor(s/60)+'m ago'; if(s<86400) return Math.floor(s/3600)+'h ago'; return Math.floor(s/86400)+'d ago'; }
 function pcInitials(name) { return (name||'?').split(' ').map(function(w){return w[0]||''}).join('').toUpperCase().substring(0,2); }
-function pcFmtCents(c) { return (c/100).toLocaleString('en-GB',{style:'currency',currency:'GBP',minimumFractionDigits:0}); }
-function pcFmtTokens(t) { return t>=1000000?(t/1000000).toFixed(1)+'M':t>=1000?(t/1000).toFixed(1)+'K':t+''; }
 
-/* -- API layer -- */
-function pcApi(path, opts) {
-  if (PC.mode !== 'api' || !PC.serverUrl) return Promise.reject('No server');
-  var url = PC.serverUrl.replace(/\/$/,'') + path;
-  var headers = { 'Content-Type': 'application/json' };
-  if (PC.token) headers['Authorization'] = 'Bearer ' + PC.token;
-  return fetch(url, Object.assign({ headers: headers }, opts || {}))
-    .then(function(r) { if (!r.ok) throw new Error(r.status); return r.json(); });
+/* -- Storage functions -- */
+function pcLoad() {
+  try {
+    var saved = localStorage.getItem('pc_runs');
+    if (saved) PC.runs = JSON.parse(saved);
+  } catch(e) { console.warn('Failed to load PC runs:', e); }
+  pcBuildAgents();
 }
 
-function pcGitHub(endpoint) {
-  return fetch('https://api.github.com/repos/NOISEMEDIAGROUP/Noise-X-Paperclip' + endpoint)
-    .then(function(r) { return r.json(); }).catch(function() { return []; });
+function pcSave() {
+  try { localStorage.setItem('pc_runs', JSON.stringify(PC.runs)); } catch(e) { console.warn('Failed to save PC runs:', e); }
+}
+
+function pcBuildAgents() {
+  var agentMap = {};
+  PC.runs.forEach(function(r) {
+    if (!agentMap[r.user]) {
+      agentMap[r.user] = { name: r.user, role: r.userRole || '', runs: 0, lastRun: null, successRate: 0, successes: 0 };
+    }
+    agentMap[r.user].runs++;
+    if (r.status === 'completed') agentMap[r.user].successes++;
+    if (!agentMap[r.user].lastRun || new Date(r.startedAt) > new Date(agentMap[r.user].lastRun)) {
+      agentMap[r.user].lastRun = r.startedAt;
+    }
+  });
+  Object.keys(agentMap).forEach(function(k) {
+    var a = agentMap[k];
+    a.successRate = a.runs > 0 ? Math.round(a.successes / a.runs * 100) : 0;
+  });
+  PC.agents = Object.values(agentMap);
+}
+
+function pcLogRun(runData) {
+  PC.runs.unshift(runData);
+  if (PC.runs.length > 200) PC.runs = PC.runs.slice(0, 200);
+  pcSave();
+  pcBuildAgents();
+  if (PC.initialized) pcRenderAll();
+}
+
+function pcUpdateRun(runId, updates) {
+  var run = PC.runs.find(function(r) { return r.id === runId; });
+  if (run) {
+    Object.keys(updates).forEach(function(k) { run[k] = updates[k]; });
+    pcSave();
+    if (PC.initialized) pcRenderAll();
+  }
 }
 
 /* -- Init -- */
 function initPaperclip() {
-  if (PC.initialized) { refreshPaperclip(); return; }
+  if (PC.initialized) { pcRenderAll(); return; }
   PC.initialized = true;
-  pcUpdateConnectionStatus();
-  if (PC.serverUrl) {
-    PC.mode = 'api';
-    pcFetchAll();
-  } else {
-    PC.mode = 'github';
-    pcFetchGitHub();
-  }
-  // Auto-refresh every 30s
-  if (PC.refreshInterval) clearInterval(PC.refreshInterval);
-  PC.refreshInterval = setInterval(function() { refreshPaperclip(); }, 30000);
+  pcLoad();
+  pcRenderAll();
 }
 
-function pcFetchAll() {
-  if (PC.mode === 'api' && PC.serverUrl && PC.companyId) {
-    var base = '/companies/' + PC.companyId;
-    Promise.all([
-      pcApi(base + '/dashboard'),
-      pcApi(base + '/agents'),
-      pcApi(base + '/issues?per_page=50'),
-      pcApi(base + '/projects'),
-      pcApi(base + '/goals'),
-      pcApi(base + '/approvals'),
-      pcApi(base + '/activity?per_page=30'),
-      pcApi(base + '/costs/summary'),
-      pcApi(base + '/costs/by-agent'),
-      pcApi(base + '/org'),
-      pcApi('/health')
-    ]).then(function(r) {
-      PC.data.dashboard = r[0] || {};
-      PC.data.agents = r[1] || [];
-      PC.data.issues = r[2] || [];
-      PC.data.projects = r[3] || [];
-      PC.data.goals = r[4] || [];
-      PC.data.approvals = r[5] || [];
-      PC.data.activity = r[6] || [];
-      PC.data.costs = { summary: r[7]||{}, byAgent: r[8]||[] };
-      PC.data.org = r[9] || [];
-      PC.lastSync = new Date();
-      pcUpdateAll();
-    }).catch(function(e) {
-      console.warn('Paperclip API error, falling back to GitHub:', e);
-      PC.mode = 'github';
-      pcFetchGitHub();
-    });
-  } else {
-    pcFetchGitHub();
-  }
+/* -- Deploy Agent (placeholder) -- */
+function pcDeployAgent() {
+  alert('Start a task in Co-Work mode to deploy and track an agent');
 }
 
-function pcFetchGitHub() {
-  // Check cache first (1 hour TTL)
-  try {
-    var cached = localStorage.getItem('pc_gh_cache');
-    if (cached) { var p = JSON.parse(cached); if (p.ts && (Date.now()-p.ts) < 3600000) { PC.github=p.d; PC.lastSync=new Date(p.ts); pcBuildFromGitHub(); pcSupplementNoiseData(); pcUpdateAll(); return; } }
-  } catch(e) {}
-  Promise.all([
-    pcGitHub('/commits?per_page=30'),
-    pcGitHub('/issues?per_page=50&state=all'),
-    pcGitHub('/pulls?per_page=20&state=all'),
-    pcGitHub(''),
-    pcGitHub('/contributors')
-  ]).then(function(r) {
-    if (r.some(function(d){return d&&d.message&&String(d.message).indexOf('rate limit')>=0})) {
-      console.warn('GitHub rate limited - using Noise data');
-      pcBuildNoiseData(); pcUpdateAll(); return;
-    }
-    PC.github.commits = Array.isArray(r[0]) ? r[0] : [];
-    PC.github.issues = Array.isArray(r[1]) ? r[1] : [];
-    PC.github.pulls = Array.isArray(r[2]) ? r[2] : [];
-    PC.github.repo = r[3] || {};
-    PC.github.contributors = Array.isArray(r[4]) ? r[4] : [];
-    PC.lastSync = new Date();
-    try { localStorage.setItem('pc_gh_cache', JSON.stringify({ts:Date.now(),d:PC.github})); } catch(e) {}
-    pcBuildFromGitHub();
-    pcSupplementNoiseData();
-    pcUpdateAll();
-  }).catch(function(e) {
-    console.warn('GitHub fetch error:', e);
-    pcBuildNoiseData();
-    pcUpdateAll();
-  });
-}
-
-/* -- Build unified data from GitHub -- */
-function pcBuildFromGitHub() {
-  var gh = PC.github;
-  // Map GitHub issues to Paperclip issue format
-  PC.data.issues = (gh.issues||[]).filter(function(i){return !i.pull_request}).map(function(i) {
-    var labels = (i.labels||[]).map(function(l){return{name:l.name,color:l.color}});
-    var status = i.state==='closed'?'done': labels.some(function(l){return l.name.toLowerCase().indexOf('progress')>=0})?'in_progress': labels.some(function(l){return l.name.toLowerCase().indexOf('block')>=0})?'blocked':'todo';
-    var priority = labels.some(function(l){return l.name.toLowerCase().indexOf('critical')>=0})?'critical': labels.some(function(l){return l.name.toLowerCase().indexOf('high')>=0||l.name.toLowerCase().indexOf('urgent')>=0})?'high': labels.some(function(l){return l.name.toLowerCase().indexOf('low')>=0})?'low':'normal';
-    return { id:i.id, identifier:'NXP-'+i.number, title:i.title, description:i.body||'', status:status, priority:priority, labels:labels, assignee:i.assignee?{name:i.assignee.login,avatar:i.assignee.avatar_url}:null, createdAt:i.created_at, updatedAt:i.updated_at };
-  });
-  // Map real TEAM members to agents (not random GitHub contributors)
-  if (typeof TEAM !== 'undefined' && TEAM.length > 0) {
-    PC.data.agents = TEAM.map(function(m, idx) {
-      var statuses = ['active','active','running','active','active','active','idle','active','active','active','idle','active','active','active'];
-      return { id:idx+1, name:m.name, title:m.role, status:statuses[idx%statuses.length], role:m.role, color:m.color, initials:m.init };
-    });
-  } else {
-    PC.data.agents = (gh.contributors||[]).map(function(c,idx) {
-      return { id:c.id, name:c.login, title:'Contributor', status:'active', avatar:c.avatar_url, contributions:c.contributions, role:'Contributor' };
-    });
-  }
-  // Build org hierarchy &mdash; Co-Founders at top, Heads report to them, rest report to Heads
-  var coFounders = PC.data.agents.filter(function(a){return a.title&&a.title.indexOf('Co-Founder')>=0});
-  var heads = PC.data.agents.filter(function(a){return a.title&&(a.title.indexOf('Head')>=0||a.title.indexOf('Director')>=0)&&a.title.indexOf('Co-Founder')<0});
-  var rest = PC.data.agents.filter(function(a){return coFounders.indexOf(a)<0&&heads.indexOf(a)<0});
-  PC.data.org = PC.data.agents.map(function(a) {
-    var reportsTo = null;
-    if (coFounders.indexOf(a)>=0) reportsTo = null;
-    else if (heads.indexOf(a)>=0) reportsTo = coFounders.length>0?coFounders[0].id:null;
-    else reportsTo = heads.length>0?heads[Math.floor(Math.random()*heads.length)].id:coFounders.length>0?coFounders[0].id:null;
-    return { id:a.id, name:a.name, title:a.title, status:a.status, reportsTo:reportsTo, children:[] };
-  });
-  // Build tree structure
-  var orgMap = {};
-  PC.data.org.forEach(function(n){orgMap[n.id]=n; n.children=[]});
-  PC.data.org.forEach(function(n){if(n.reportsTo&&orgMap[n.reportsTo])orgMap[n.reportsTo].children.push(n)});
-  var orgRoots = PC.data.org.filter(function(n){return !n.reportsTo});
-  if(orgRoots.length>0) PC.data.org = orgRoots;
-  // Build activity from commits + issues
-  PC.data.activity = [];
-  (gh.commits||[]).slice(0,20).forEach(function(c) {
-    PC.data.activity.push({ type:'commit', actor:c.author?c.author.login:(c.commit.author?c.commit.author.name:'Unknown'), text:c.commit.message.split('\n')[0], createdAt:c.commit.author?c.commit.author.date:'' });
-  });
-  (gh.issues||[]).slice(0,10).forEach(function(i) {
-    PC.data.activity.push({ type:'issue', actor:i.user?i.user.login:'Unknown', text:(i.state==='open'?'Opened':'Closed')+' issue: '+i.title, createdAt:i.created_at });
-  });
-  (gh.pulls||[]).slice(0,10).forEach(function(p) {
-    PC.data.activity.push({ type:'approval', actor:p.user?p.user.login:'Unknown', text:(p.merged_at?'Merged':p.state==='open'?'Opened':'Closed')+' PR: '+p.title, createdAt:p.created_at });
-  });
-  PC.data.activity.sort(function(a,b){return new Date(b.createdAt)-new Date(a.createdAt)});
-  // Dashboard metrics
-  var openIssues = PC.data.issues.filter(function(i){return i.status!=='done'}).length;
-  var doneIssues = PC.data.issues.filter(function(i){return i.status==='done'}).length;
-  var activeAgents = PC.data.agents.filter(function(a){return a.status==='active'||a.status==='running'}).length;
-  PC.data.dashboard = { agentCounts:{active:activeAgents,running:PC.data.agents.filter(function(a){return a.status==='running'}).length,paused:PC.data.agents.filter(function(a){return a.status==='paused'}).length,error:0,total:PC.data.agents.length}, taskCounts:{open:openIssues,inProgress:PC.data.issues.filter(function(i){return i.status==='in_progress'}).length,blocked:PC.data.issues.filter(function(i){return i.status==='blocked'}).length,done:doneIssues,total:PC.data.issues.length}, costSummary:{totalCents:0,budgetCents:500000,utilization:0}, pendingApprovals:(gh.pulls||[]).filter(function(p){return p.state==='open'}).length, stars:gh.repo.stargazers_count||0, forks:gh.repo.forks_count||0 };
-  // Map open PRs to approvals
-  PC.data.approvals = (gh.pulls||[]).filter(function(p){return p.state==='open'}).map(function(p) {
-    return { id:p.id, type:'pull_request', status:'pending', title:p.title, description:p.body||'', requestedBy:p.user?p.user.login:'Unknown', createdAt:p.created_at };
-  });
-  // Goals from milestones or generate defaults
-  PC.data.goals = [
-    { id:1, title:'Ship Paperclip v1.0', description:'Complete core agent orchestration platform', status:'active', progress:75, children:[
-      { id:11, title:'Agent lifecycle management', progress:90 },
-      { id:12, title:'Issue tracking & kanban', progress:85 },
-      { id:13, title:'Cost tracking & budgets', progress:60 }
-    ]},
-    { id:2, title:'Noise Intelligence Integration', description:'Connect Paperclip to Noise Media Group tools', status:'active', progress:45, children:[
-      { id:21, title:'Hub UI integration', progress:80 },
-      { id:22, title:'Live data sync', progress:40 },
-      { id:23, title:'Agent deployment pipeline', progress:15 }
-    ]},
-    { id:3, title:'Scale to 10 Active Agents', description:'Onboard and configure 10 autonomous AI agents', status:'active', progress:30, children:[] }
-  ];
-  // Projects
-  PC.data.projects = [
-    { id:1, name:'Noise-X-Paperclip', status:'active', color:'#C73C1E', issueCount:PC.data.issues.length, description:'Core Paperclip platform fork for Noise Media Group' },
-    { id:2, name:'Intelligence Hub', status:'active', color:'#2B6CB0', issueCount:0, description:'Noise Intelligence Hub web application' }
-  ];
-  // Costs from contributor activity
-  PC.data.costs = { summary:{ totalCents:0, budgetCents:500000, inputTokens:0, outputTokens:0 }, byAgent:(PC.data.agents||[]).slice(0,5).map(function(a){ var cost=Math.floor(Math.random()*15000)+2000; return { agentId:a.id, name:a.name, costCents:cost, inputTokens:Math.floor(cost*120), outputTokens:Math.floor(cost*40), runs:a.contributions||Math.floor(Math.random()*20)+1 }; }) };
-  var totalCost = PC.data.costs.byAgent.reduce(function(s,a){return s+a.costCents},0);
-  PC.data.costs.summary.totalCents = totalCost;
-  PC.data.costs.summary.inputTokens = PC.data.costs.byAgent.reduce(function(s,a){return s+a.inputTokens},0);
-  PC.data.costs.summary.outputTokens = PC.data.costs.byAgent.reduce(function(s,a){return s+a.outputTokens},0);
-  PC.data.dashboard.costSummary = { totalCents:totalCost, budgetCents:500000, utilization:Math.round(totalCost/5000) };
-}
-
-function pcSupplementNoiseData() {
-  // When GitHub data is sparse, supplement with rich Noise-specific data
-  var noise = {};
-  // Temporarily build the Noise data to grab what we need
-  var savedIssues = PC.data.issues, savedGoals = PC.data.goals, savedApprovals = PC.data.approvals,
-      savedProjects = PC.data.projects, savedCosts = PC.data.costs, savedActivity = PC.data.activity;
-  pcBuildNoiseData();
-  noise.issues = PC.data.issues; noise.goals = PC.data.goals; noise.approvals = PC.data.approvals;
-  noise.projects = PC.data.projects; noise.costs = PC.data.costs; noise.activity = PC.data.activity;
-  noise.dashboard = PC.data.dashboard; noise.org = PC.data.org;
-  // Restore GitHub data, then merge
-  PC.data.issues = savedIssues.length >= 5 ? savedIssues : noise.issues;
-  PC.data.goals = savedGoals.length >= 3 ? savedGoals : noise.goals;
-  PC.data.approvals = savedApprovals.length >= 2 ? savedApprovals : noise.approvals;
-  PC.data.projects = savedProjects.length >= 3 ? savedProjects : noise.projects;
-  PC.data.costs = (savedCosts.summary && savedCosts.summary.totalCents > 10000) ? savedCosts : noise.costs;
-  // Merge activity &mdash; combine GitHub commits with Noise activity, sort by date
-  var combined = savedActivity.concat(noise.activity);
-  var seen = {};
-  PC.data.activity = combined.filter(function(a) {
-    var key = a.actor + ':' + a.text;
-    if (seen[key]) return false;
-    seen[key] = true;
-    return true;
-  }).sort(function(a,b){return new Date(b.createdAt)-new Date(a.createdAt)}).slice(0, 30);
-  // Always use Noise org chart (much richer than GitHub contributor-based one)
-  PC.data.org = noise.org;
-  // Recalculate dashboard from merged data
-  var oi=PC.data.issues.filter(function(i){return i.status!=='done'}).length;
-  var di=PC.data.issues.filter(function(i){return i.status==='done'}).length;
-  var ip=PC.data.issues.filter(function(i){return i.status==='in_progress'}).length;
-  var bl=PC.data.issues.filter(function(i){return i.status==='blocked'}).length;
-  PC.data.dashboard={agentCounts:{active:PC.data.agents.filter(function(a){return a.status==='active'}).length,running:PC.data.agents.filter(function(a){return a.status==='running'}).length,paused:0,error:0,total:PC.data.agents.length},taskCounts:{open:oi-ip-bl,inProgress:ip,blocked:bl,done:di,total:PC.data.issues.length},costSummary:PC.data.costs.summary?{totalCents:PC.data.costs.summary.totalCents,budgetCents:PC.data.costs.summary.budgetCents,utilization:Math.round(PC.data.costs.summary.totalCents/PC.data.costs.summary.budgetCents*100)}:{totalCents:0,budgetCents:500000,utilization:0},pendingApprovals:PC.data.approvals.filter(function(a){return a.status==='pending'}).length};
-}
-
-function pcBuildDemoData() { pcBuildNoiseData(); }
-
-function pcBuildNoiseData() {
-  var now = new Date();
-  // Agents from real TEAM
-  if (typeof TEAM !== 'undefined' && TEAM.length > 0) {
-    var sts = ['active','running','active','active','active','idle','active','active','running','active','idle','active','active','active'];
-    PC.data.agents = TEAM.map(function(m,i){return{id:i+1,name:m.name,title:m.role,status:sts[i%sts.length],role:m.role,color:m.color,initials:m.init}});
-  }
-  // Issues based on real Noise client work
-  PC.data.issues = [
-    {id:101,identifier:'NXP-1',title:'Set up Paperclip agent orchestration pipeline',status:'in_progress',priority:'high',labels:[{name:'infrastructure',color:'0075ca'}],assignee:{name:'Anthony'},createdAt:'2026-03-28T10:00:00Z',description:'Configure the core agent pipeline for managing AI workflows across client accounts.'},
-    {id:102,identifier:'NXP-2',title:'Integrate Intelligence Hub with Paperclip API',status:'in_progress',priority:'high',labels:[{name:'integration',color:'e4e669'}],assignee:{name:'Obenewa Adu'},createdAt:'2026-03-29T14:00:00Z',description:'Connect the Noise Intelligence Hub frontend to the Paperclip backend.'},
-    {id:103,identifier:'NXP-3',title:'Deploy Paperclip backend on Render',status:'todo',priority:'high',labels:[{name:'devops',color:'d73a4a'}],createdAt:'2026-03-31T12:00:00Z',description:'Set up Render web service + PostgreSQL for the Paperclip server.'},
-    {id:104,identifier:'NXP-4',title:'Configure cost tracking per client account',status:'todo',priority:'normal',labels:[{name:'feature',color:'a2eeef'}],createdAt:'2026-03-30T09:00:00Z',description:'Track AI token usage and costs per client project.'},
-    {id:105,identifier:'NXP-5',title:'Build approval workflow for agent actions',status:'todo',priority:'normal',labels:[{name:'feature',color:'a2eeef'}],createdAt:'2026-03-30T11:00:00Z',description:'Require human approval before agents execute high-impact actions.'},
-    {id:106,identifier:'NXP-6',title:'Create Davines content strategy agent',status:'in_progress',priority:'normal',labels:[{name:'agent',color:'7057ff'},{name:'davines',color:'0e8a16'}],assignee:{name:'Beau'},createdAt:'2026-03-27T10:00:00Z',description:'AI agent specialised in Davines haircare brand strategy.'},
-    {id:107,identifier:'NXP-7',title:'Set up BARBRI SQE campaign agent',status:'todo',priority:'normal',labels:[{name:'agent',color:'7057ff'},{name:'barbri',color:'b60205'}],createdAt:'2026-03-28T15:00:00Z',description:'Agent for generating BARBRI legal education social campaigns.'},
-    {id:108,identifier:'NXP-8',title:'Fix encoding issues in hub deployment',status:'done',priority:'critical',labels:[{name:'bug',color:'d73a4a'}],assignee:{name:'Obenewa Adu'},createdAt:'2026-03-31T10:00:00Z',description:'Character encoding corruption causing garbled text.'},
-    {id:109,identifier:'NXP-9',title:'Audio-Technica product launch content calendar',status:'in_progress',priority:'normal',labels:[{name:'content',color:'0075ca'}],assignee:{name:'Steph'},createdAt:'2026-03-26T09:00:00Z',description:'Social content calendar for Audio-Technica NAMM 2025 launches.'},
-    {id:110,identifier:'NXP-10',title:'Brothers Cider summer campaign brief',status:'done',priority:'normal',labels:[{name:'content',color:'0075ca'}],assignee:{name:'Georgie'},createdAt:'2026-03-25T14:00:00Z',description:'Creative brief for Brothers Cider summer social campaign.'},
-    {id:111,identifier:'NXP-11',title:'Amano Hotels Berlin rebrand social rollout',status:'blocked',priority:'high',labels:[{name:'campaign',color:'fbca04'}],assignee:{name:'Louise'},createdAt:'2026-03-24T10:00:00Z',description:'Waiting on final brand assets from Amano for campaign launch.'},
-    {id:112,identifier:'NXP-12',title:'Aspora NRI campaign performance report',status:'done',priority:'normal',labels:[{name:'reporting',color:'c5def5'}],assignee:{name:'Dan'},createdAt:'2026-03-22T09:00:00Z',description:'Monthly paid media performance report for Aspora.'},
-    {id:113,identifier:'NXP-13',title:'Thortful 10-year rebrand asset production',status:'in_progress',priority:'high',labels:[{name:'production',color:'e4e669'}],assignee:{name:'Adam'},createdAt:'2026-03-20T10:00:00Z',description:'Motion graphics and video for Thortful anniversary rebrand.'},
-    {id:114,identifier:'NXP-14',title:'GE Vernova data centre thought leadership',status:'todo',priority:'normal',labels:[{name:'content',color:'0075ca'}],createdAt:'2026-03-29T11:00:00Z',description:'LinkedIn thought leadership series for GE Vernova.'},
-    {id:115,identifier:'NXP-15',title:'Fable & Mane influencer campaign tracking',status:'in_progress',priority:'normal',labels:[{name:'campaign',color:'fbca04'}],assignee:{name:'Sam'},createdAt:'2026-03-23T10:00:00Z',description:'Track influencer deliverables for Fable & Mane.'}
-  ];
-  // Goals
-  PC.data.goals = [
-    {id:1,title:'Ship Paperclip v1.0 for Noise',description:'Complete integration with full agent orchestration, cost tracking, and approvals',status:'active',progress:55,children:[
-      {id:11,title:'Hub UI integration',progress:85},{id:12,title:'Backend deployment on Render',progress:20},{id:13,title:'Agent lifecycle management',progress:40}
-    ]},
-    {id:2,title:'Automate client content workflows',description:'Deploy AI agents for each active client',status:'active',progress:30,children:[
-      {id:21,title:'Davines content agent',progress:60},{id:22,title:'BARBRI campaign agent',progress:15},{id:23,title:'Cross-client reporting agent',progress:10}
-    ]},
-    {id:3,title:'Scale to 20 managed client accounts',description:'Onboard remaining clients onto Paperclip workflows',status:'active',progress:35,children:[]},
-    {id:4,title:'Reduce content production time by 40%',description:'Use AI agents to accelerate brief-to-delivery cycle',status:'active',progress:25,children:[]}
-  ];
-  // Approvals
-  PC.data.approvals = [
-    {id:201,type:'publish_content',status:'pending',title:'Davines Instagram Carousel &mdash; Sustainable Beauty',description:'3-slide carousel for @davinesofficial. Scheduled April 2.',requestedBy:'Beau',createdAt:new Date(now-3600000).toISOString()},
-    {id:202,type:'hire_agent',status:'pending',title:'Hire BARBRI SQE Campaign Agent',description:'New AI agent for BARBRI UK SQE prep campaigns.',requestedBy:'Anthony',createdAt:new Date(now-7200000).toISOString()},
-    {id:203,type:'budget_increase',status:'approved',title:'Altra Skin Paid Media Budget Uplift',description:'Increase monthly spend from \u00a31,500 to \u00a32,500.',requestedBy:'Dan',createdAt:new Date(now-172800000).toISOString()},
-    {id:204,type:'execute_task',status:'pending',title:'Auto-generate Thortful Monthly Report',description:'Allow agent to pull analytics and generate monthly deck.',requestedBy:'Sam',createdAt:new Date(now-86400000).toISOString()}
-  ];
-  // Activity
-  PC.data.activity = [
-    {type:'agent',actor:'Obenewa Adu',text:'Deployed Paperclip integration to Intelligence Hub',createdAt:new Date(now-1800000).toISOString()},
-    {type:'issue',actor:'Obenewa Adu',text:'Fixed encoding corruption in hub deployment (NXP-8)',createdAt:new Date(now-3600000).toISOString()},
-    {type:'commit',actor:'Anthony',text:'Merged Paperclip v3 with full agent management UI',createdAt:new Date(now-7200000).toISOString()},
-    {type:'approval',actor:'Beau',text:'Submitted Davines Instagram carousel for approval',createdAt:new Date(now-10800000).toISOString()},
-    {type:'issue',actor:'Steph',text:'Started Audio-Technica content calendar (NXP-9)',createdAt:new Date(now-14400000).toISOString()},
-    {type:'agent',actor:'System',text:'Davines content agent completed brief analysis \u2014 3 recommendations generated',createdAt:new Date(now-18000000).toISOString()},
-    {type:'issue',actor:'Georgie',text:'Completed Brothers Cider summer brief (NXP-10)',createdAt:new Date(now-21600000).toISOString()},
-    {type:'commit',actor:'Adam',text:'Uploaded Thortful rebrand motion assets \u2014 4 video files',createdAt:new Date(now-25200000).toISOString()},
-    {type:'approval',actor:'Dan',text:'Altra Skin budget uplift approved \u2014 \u00a32,500/month',createdAt:new Date(now-28800000).toISOString()},
-    {type:'issue',actor:'Louise',text:'Flagged Amano Hotels campaign as blocked \u2014 waiting on brand assets',createdAt:new Date(now-32400000).toISOString()},
-    {type:'agent',actor:'System',text:'Cross-client weekly digest generated \u2014 8 accounts active',createdAt:new Date(now-43200000).toISOString()},
-    {type:'commit',actor:'Sam',text:'Updated Fable & Mane influencer tracking spreadsheet',createdAt:new Date(now-50400000).toISOString()},
-    {type:'issue',actor:'Mike',text:'Scheduled GE Vernova video shoot for April 8',createdAt:new Date(now-57600000).toISOString()},
-    {type:'approval',actor:'Anthony',text:'Requested hire of BARBRI SQE Campaign Agent',createdAt:new Date(now-64800000).toISOString()},
-    {type:'issue',actor:'Luke',text:'Delivered Aspora motion graphics \u2014 3 social clips',createdAt:new Date(now-72000000).toISOString()}
-  ];
-  // Projects
-  PC.data.projects = [
-    {id:1,name:'Noise-X-Paperclip',status:'active',color:'#C73C1E',issueCount:5,description:'Core Paperclip platform integration'},
-    {id:2,name:'Intelligence Hub',status:'active',color:'#2B6CB0',issueCount:2,description:'Internal AI chatbot and knowledge hub'},
-    {id:3,name:'Client Campaigns Q2',status:'active',color:'#2D8A4E',issueCount:6,description:'Active client campaign work for Q2 2026'},
-    {id:4,name:'Content Production',status:'active',color:'#9647DD',issueCount:2,description:'Motion, design, and video production pipeline'}
-  ];
-  // Costs
-  PC.data.costs = {
-    summary:{totalCents:284500,budgetCents:500000,inputTokens:4250000,outputTokens:1380000},
-    byAgent:[
-      {agentId:1,name:'Anthony',costCents:62000,inputTokens:920000,outputTokens:310000,runs:45},
-      {agentId:3,name:'Beau',costCents:54000,inputTokens:810000,outputTokens:265000,runs:38},
-      {agentId:4,name:'Sam',costCents:48000,inputTokens:720000,outputTokens:230000,runs:32},
-      {agentId:13,name:'Obenewa Adu',costCents:41500,inputTokens:615000,outputTokens:198000,runs:28},
-      {agentId:12,name:'Dan',costCents:38000,inputTokens:560000,outputTokens:182000,runs:25},
-      {agentId:7,name:'Steph',costCents:22000,inputTokens:330000,outputTokens:108000,runs:15},
-      {agentId:9,name:'Adam',costCents:19000,inputTokens:295000,outputTokens:87000,runs:12}
-    ]
-  };
-  // Dashboard
-  var oi=PC.data.issues.filter(function(i){return i.status!=='done'}).length;
-  var di=PC.data.issues.filter(function(i){return i.status==='done'}).length;
-  var ip=PC.data.issues.filter(function(i){return i.status==='in_progress'}).length;
-  var bl=PC.data.issues.filter(function(i){return i.status==='blocked'}).length;
-  PC.data.dashboard={agentCounts:{active:PC.data.agents.filter(function(a){return a.status==='active'}).length,running:PC.data.agents.filter(function(a){return a.status==='running'}).length,paused:0,error:0,total:PC.data.agents.length},taskCounts:{open:oi-ip-bl,inProgress:ip,blocked:bl,done:di,total:PC.data.issues.length},costSummary:{totalCents:284500,budgetCents:500000,utilization:57},pendingApprovals:PC.data.approvals.filter(function(a){return a.status==='pending'}).length};
-  // Org chart
-  var cf=PC.data.agents.filter(function(a){return a.title&&a.title.indexOf('Co-Founder')>=0});
-  var hd=PC.data.agents.filter(function(a){return a.title&&(a.title.indexOf('Head')>=0||a.title.indexOf('Director')>=0)&&a.title.indexOf('Co-Founder')<0});
-  var ot=PC.data.agents.filter(function(a){return cf.indexOf(a)<0&&hd.indexOf(a)<0});
-  PC.data.org=PC.data.agents.map(function(a){var rt=null;if(cf.indexOf(a)>=0)rt=null;else if(hd.indexOf(a)>=0)rt=cf.length>0?cf[0].id:null;else rt=hd.length>0?hd[ot.indexOf(a)%hd.length].id:(cf.length>0?cf[0].id:null);return{id:a.id,name:a.name,title:a.title,status:a.status,reportsTo:rt,children:[]}});
-  var om={};PC.data.org.forEach(function(n){om[n.id]=n;n.children=[]});PC.data.org.forEach(function(n){if(n.reportsTo&&om[n.reportsTo])om[n.reportsTo].children.push(n)});PC.data.org=PC.data.org.filter(function(n){return !n.reportsTo});
-  PC.lastSync=now;
-}
-
-/* -- Update all panels -- */
-function pcUpdateAll() {
-  pcUpdateConnectionStatus();
+/* -- Render all panels -- */
+function pcRenderAll() {
   pcUpdateBadges();
   pcRenderDashboard();
   pcRenderAgents();
-  pcRenderIssues();
-  pcRenderProjects();
-  pcRenderGoals();
-  pcRenderApprovals();
-  pcRenderOrgChart();
-  pcRenderCosts();
+  pcRenderRuns();
   pcRenderActivity();
-  if (PC.lastSync) document.getElementById('pcSyncTime').textContent = 'Synced ' + pcRelTime(PC.lastSync);
-}
-
-function pcUpdateConnectionStatus() {
-  var dot = document.getElementById('pcConnectionDot');
-  var label = document.getElementById('pcConnectionLabel');
-  if (!dot) return;
-  if (PC.mode === 'api' && PC.serverUrl) {
-    dot.className = 'pc-topbar-dot connected';
-    label.textContent = 'Connected to Paperclip';
-  } else if (PC.mode === 'github') {
-    dot.className = 'pc-topbar-dot demo';
-    label.textContent = 'GitHub Mode';
-  } else {
-    dot.className = 'pc-topbar-dot disconnected';
-    label.textContent = 'Disconnected';
-  }
 }
 
 function pcUpdateBadges() {
   var el;
-  el = document.getElementById('pcBadgeAgents'); if(el) el.textContent = PC.data.agents.length;
-  el = document.getElementById('pcBadgeIssues'); if(el) el.textContent = PC.data.issues.filter(function(i){return i.status!=='done'}).length;
-  el = document.getElementById('pcBadgeApprovals'); if(el) el.textContent = PC.data.approvals.filter(function(a){return a.status==='pending'}).length;
+  el = document.getElementById('pcBadgeAgents'); if(el) el.textContent = PC.agents.length;
 }
 
 /* -- Dashboard -- */
 function pcRenderDashboard() {
-  var d = PC.data.dashboard;
-  var ac = d.agentCounts||{}; var tc = d.taskCounts||{}; var cs = d.costSummary||{};
-  var html = '<div class="pc-stats-grid">';
-  html += pcStatCard('Agents', ac.total||0, 'active: '+(ac.active||0)+', running: '+(ac.running||0), 'var(--accent-light)', 'var(--accent)');
-  html += pcStatCard('Open Tasks', tc.open||0, 'in progress: '+(tc.inProgress||0), 'var(--blue-bg)', 'var(--blue)');
-  html += pcStatCard('Completed', tc.done||0, 'of '+(tc.total||0)+' total', 'var(--green-bg)', 'var(--green)');
-  html += pcStatCard('Blocked', tc.blocked||0, '', 'rgba(229,62,62,0.08)', '#E53E3E');
-  html += pcStatCard('Approvals', d.pendingApprovals||0, 'pending review', 'rgba(150,71,221,0.08)', '#9647DD');
-  html += pcStatCard('Budget', cs.utilization?cs.utilization+'%':'0%', cs.totalCents?pcFmtCents(cs.totalCents)+' of '+pcFmtCents(cs.budgetCents||0):'', 'var(--surface2)', 'var(--text)');
-  html += '</div>';
-  // Live runs section
-  html += '<div class="pc-live-runs"><div class="pc-section-title">Live Agent Runs <span class="count">('+(PC.data.agents.filter(function(a){return a.status==='running'}).length)+')</span></div>';
-  var runningAgents = PC.data.agents.filter(function(a){return a.status==='running'});
-  if (runningAgents.length > 0) {
-    runningAgents.forEach(function(a) {
-      html += '<div class="pc-live-run-item"><div class="pc-spinner"></div><div class="run-agent">'+pcEsc(a.name)+'</div><div class="run-task">'+pcEsc(a.title||a.role||'Processing...')+'</div><span class="pc-badge running">Running</span></div>';
-    });
-  } else {
-    html += '<div style="font-size:12px;color:var(--text-muted);padding:4px 0;">No agents currently running</div>';
+  var totalRuns = PC.runs.length;
+  var completedRuns = PC.runs.filter(function(r){return r.status==='completed'}).length;
+  var successRate = totalRuns > 0 ? Math.round(completedRuns / totalRuns * 100) : 0;
+
+  if (totalRuns === 0) {
+    // Show onboarding
+    var html = '<div class="pc-onboard">';
+    html += '<div class="pc-onboard-icon">&#9889;</div>';
+    html += '<h3>Deploy your first agent</h3>';
+    html += '<p>Switch to Co-Work mode and give a task. Paperclip will track every agent run, building your team\'s AI command centre.</p>';
+    html += '<button onclick="switchMode(\'cowork\')" style="margin-top:16px;padding:8px 16px;background:#C73C1E;color:white;border:none;border-radius:6px;cursor:pointer;">Go to Co-Work</button>';
+    html += '</div>';
+    document.getElementById('pcPanel-dashboard').innerHTML = html;
+    return;
   }
+
+  // Show stats
+  var html = '<div class="pc-stats-grid">';
+  html += '<div class="pc-stat-card"><div class="pc-stat-value" style="color:#C73C1E;">'+totalRuns+'</div><div class="pc-stat-label">Total Runs</div></div>';
+  html += '<div class="pc-stat-card"><div class="pc-stat-value" style="color:#2B6CB0;">'+PC.agents.length+'</div><div class="pc-stat-label">Team Members</div></div>';
+  html += '<div class="pc-stat-card"><div class="pc-stat-value" style="color:#2D8A4E;">'+successRate+'%</div><div class="pc-stat-label">Success Rate</div></div>';
   html += '</div>';
-  // Activity chart
-  html += '<div class="pc-chart-container"><div class="pc-chart-title">Activity (Last 30 Days)</div><div class="pc-mini-chart" id="pcDashChart"></div></div>';
+
   // Recent activity
-  html += '<div class="pc-section-title">Recent Activity</div>';
-  html += pcRenderActivityItems(PC.data.activity.slice(0,8));
+  html += '<div class="pc-section-title">Recent Runs</div>';
+  html += '<div style="display:flex;flex-direction:column;gap:8px;">';
+  PC.runs.slice(0, 5).forEach(function(r) {
+    var statusClass = r.status === 'completed' ? 'done' : 'running';
+    html += '<div style="padding:12px;background:var(--surface2);border-radius:8px;display:flex;justify-content:space-between;align-items:center;">';
+    html += '<div><div style="font-weight:600;font-size:13px;">'+pcEsc(r.task)+'</div><div style="font-size:11px;color:var(--text-muted);">'+pcEsc(r.user)+' - '+pcRelTime(r.startedAt)+'</div></div>';
+    html += '<span class="pc-badge '+statusClass+'">'+r.status+'</span>';
+    html += '</div>';
+  });
+  html += '</div>';
+
   document.getElementById('pcPanel-dashboard').innerHTML = html;
-  // Render mini chart
-  pcRenderMiniChart();
-}
-
-function pcStatCard(label, value, sub, bg, color) {
-  return '<div class="pc-stat-card"><div class="pc-stat-icon" style="background:'+bg+';color:'+color+'">'+label.charAt(0)+'</div><div class="pc-stat-value" style="color:'+color+'">'+value+'</div><div class="pc-stat-label">'+label+'</div>'+(sub?'<div class="pc-stat-change">'+pcEsc(sub)+'</div>':'')+'</div>';
-}
-
-function pcRenderMiniChart() {
-  var el = document.getElementById('pcDashChart');
-  if (!el) return;
-  // Build daily activity counts for last 14 days
-  var days = {};
-  for (var i=0;i<14;i++) { var dt=new Date(); dt.setDate(dt.getDate()-i); days[dt.toISOString().split('T')[0]]=0; }
-  PC.data.activity.forEach(function(a) { var dk=(a.createdAt||'').split('T')[0]; if(days[dk]!==undefined) days[dk]++; });
-  var vals = Object.values(days).reverse();
-  var max = Math.max.apply(null, vals)||1;
-  var html = '';
-  vals.forEach(function(v) { html += '<div class="pc-mini-bar" style="height:'+Math.max(4,Math.round(v/max*56))+'px;' + (v>0?'background:var(--accent-light)':'') + '" title="'+v+' events"></div>'; });
-  el.innerHTML = html;
 }
 
 /* -- Agents -- */
 function pcRenderAgents() {
-  var agents = PC.data.agents;
-  var html = '<div class="pc-filters">';
-  html += '<button class="pc-filter-tab active" onclick="pcFilterAgents(this,\'all\')">All <span class="pc-badge-count">'+agents.length+'</span></button>';
-  html += '<button class="pc-filter-tab" onclick="pcFilterAgents(this,\'active\')">Active</button>';
-  html += '<button class="pc-filter-tab" onclick="pcFilterAgents(this,\'running\')">Running</button>';
-  html += '<button class="pc-filter-tab" onclick="pcFilterAgents(this,\'paused\')">Paused</button>';
-  html += '<button class="pc-filter-tab" onclick="pcFilterAgents(this,\'error\')">Error</button>';
-  html += '</div>';
-  html += '<div class="pc-agents-grid" id="pcAgentsGrid">';
-  agents.forEach(function(a) {
-    html += '<div class="pc-agent-card '+pcEsc(a.status||'')+'" onclick="pcShowAgentDetail('+JSON.stringify(a).replace(/"/g,'&quot;')+')">';
-    if (a.avatar) {
-      html += '<img src="'+pcEsc(a.avatar)+'" style="width:42px;height:42px;border-radius:10px;" loading="lazy">';
-    } else {
-      var avatarBg = a.color ? a.color+'18' : 'var(--accent-light)';
-      var avatarColor = a.color || 'var(--accent)';
-      html += '<div class="pc-agent-avatar" style="background:'+avatarBg+';color:'+avatarColor+';">'+(a.initials||pcInitials(a.name))+'</div>';
-    }
-    html += '<div class="pc-agent-info"><div class="pc-agent-name">'+pcEsc(a.name)+'</div><div class="pc-agent-role">'+pcEsc(a.title||a.role||'Agent')+'</div>';
-    html += '<div class="pc-agent-meta">';
-    if(a.contributions) html += '<span>'+a.contributions+' contributions</span>';
-    html += '<span class="pc-badge '+pcEsc(a.status||'idle')+'">'+pcEsc(a.status||'idle')+'</span>';
-    html += '</div></div>';
-    html += '<div class="pc-agent-status-dot '+pcEsc(a.status||'idle')+'"></div>';
+  var html = '';
+  if (PC.agents.length === 0) {
+    html = '<div class="pc-empty"><div class="pc-empty-icon">&#9889;</div><div class="pc-empty-text">No agents have deployed yet</div></div>';
+  } else {
+    html = '<div style="display:flex;flex-direction:column;gap:12px;">';
+    PC.agents.forEach(function(a) {
+      html += '<div style="padding:16px;background:var(--surface2);border-radius:8px;">';
+      html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">';
+      html += '<div style="font-weight:600;font-size:14px;">'+pcEsc(a.name)+'</div>';
+      html += '<div style="font-size:11px;color:var(--text-muted);">'+a.role+'</div>';
+      html += '</div>';
+      html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12px;">';
+      html += '<div><strong>'+a.runs+'</strong> total runs</div>';
+      html += '<div><strong>'+a.successRate+'%</strong> success rate</div>';
+      html += '</div>';
+      html += '<div style="font-size:11px;color:var(--text-muted);margin-top:6px;">Last run '+pcRelTime(a.lastRun)+'</div>';
+      html += '</div>';
+    });
     html += '</div>';
-  });
-  html += '</div>';
-  if (agents.length === 0) html += '<div class="pc-empty"><div class="pc-empty-icon">&#129302;</div><div class="pc-empty-text">No agents configured</div><div class="pc-empty-sub">Deploy a Paperclip server to manage AI agents</div></div>';
+  }
   document.getElementById('pcPanel-agents').innerHTML = html;
 }
 
-function pcFilterAgents(btn, filter) {
-  document.querySelectorAll('#pcPanel-agents .pc-filter-tab').forEach(function(b){b.classList.remove('active')});
-  btn.classList.add('active');
-  var cards = document.querySelectorAll('#pcAgentsGrid .pc-agent-card');
-  cards.forEach(function(c) {
-    if (filter === 'all') { c.style.display = ''; }
-    else { c.style.display = c.classList.contains(filter) ? '' : 'none'; }
-  });
-}
-
-/* -- Issues Kanban -- */
-function pcRenderIssues() {
-  var issues = PC.data.issues;
-  var cols = {todo:[],in_progress:[],blocked:[],done:[]};
-  issues.forEach(function(i) { if(cols[i.status]) cols[i.status].push(i); else cols.todo.push(i); });
-  var html = '<div class="pc-filters"><input type="text" placeholder="Search issues..." oninput="pcSearchIssues(this.value)" style="width:200px;"><select onchange="pcSortIssues(this.value)"><option value="newest">Newest first</option><option value="priority">Priority</option><option value="alpha">A-Z</option></select></div>';
-  html += '<div class="pc-kanban">';
-  html += pcKanbanCol('Todo', 'todo', cols.todo);
-  html += pcKanbanCol('In Progress', 'progress', cols.in_progress);
-  html += pcKanbanCol('Blocked', 'blocked', cols.blocked);
-  html += pcKanbanCol('Done', 'done', cols.done);
-  html += '</div>';
-  document.getElementById('pcPanel-issues').innerHTML = html;
-}
-
-function pcKanbanCol(title, dotClass, items) {
-  var html = '<div class="pc-kanban-col"><div class="pc-kanban-col-header"><span><span class="col-dot '+dotClass+'"></span>'+title+'</span><span class="col-count">'+items.length+'</span></div><div class="pc-kanban-items">';
-  items.forEach(function(i) {
-    html += '<div class="pc-issue-card" onclick="pcShowIssueDetail('+JSON.stringify(i).replace(/"/g,'&quot;')+')">';
-    html += '<div class="issue-id">'+pcEsc(i.identifier||'')+'</div>';
-    html += '<div class="issue-title"><span class="pc-priority '+pcEsc(i.priority||'normal')+'"></span>'+pcEsc(i.title)+'</div>';
-    html += '<div class="issue-footer"><div class="issue-labels">';
-    (i.labels||[]).slice(0,3).forEach(function(l) {
-      html += '<span class="pc-label" style="'+(l.color?'background:#'+l.color+'20;color:#'+l.color:'')+'">'+pcEsc(l.name)+'</span>';
-    });
-    html += '</div>';
-    if(i.assignee) html += '<div class="issue-assignee" title="'+pcEsc(i.assignee.name||'')+'">'+pcInitials(i.assignee.name||'')+'</div>';
-    html += '</div></div>';
-  });
-  if(items.length===0) html += '<div style="font-size:11px;color:var(--text-muted);text-align:center;padding:20px;">No items</div>';
-  html += '</div></div>';
-  return html;
-}
-
-function pcSearchIssues(q) {
-  q = q.toLowerCase();
-  document.querySelectorAll('#pcPanel-issues .pc-issue-card').forEach(function(c) {
-    c.style.display = c.textContent.toLowerCase().indexOf(q) >= 0 ? '' : 'none';
-  });
-}
-function pcSortIssues() { pcRenderIssues(); }
-
-/* -- Projects -- */
-function pcRenderProjects() {
-  var projects = PC.data.projects||[];
-  var html = '<div class="pc-section-title">Projects <span class="count">('+projects.length+')</span></div>';
-  html += '<div class="pc-agents-grid">';
-  projects.forEach(function(p) {
-    html += '<div class="pc-agent-card" style="border-left:3px solid '+pcEsc(p.color||'var(--accent)')+'"><div class="pc-agent-info" style="padding:4px 0;">';
-    html += '<div class="pc-agent-name">'+pcEsc(p.name)+'</div>';
-    html += '<div class="pc-agent-role">'+pcEsc(p.description||'')+'</div>';
-    html += '<div class="pc-agent-meta"><span class="pc-badge '+pcEsc(p.status||'active')+'">'+pcEsc(p.status||'active')+'</span>';
-    if(p.issueCount!==undefined) html += '<span>'+p.issueCount+' issues</span>';
-    html += '</div></div></div>';
-  });
-  html += '</div>';
-  if(projects.length===0) html += '<div class="pc-empty"><div class="pc-empty-icon">&#128193;</div><div class="pc-empty-text">No projects yet</div></div>';
-  document.getElementById('pcPanel-projects').innerHTML = html;
-}
-
-/* -- Goals -- */
-function pcRenderGoals() {
-  var goals = PC.data.goals||[];
-  var html = '<div class="pc-section-title">Goals <span class="count">('+goals.length+')</span></div>';
-  html += '<div class="pc-goals-tree">';
-  goals.forEach(function(g) { html += pcGoalCard(g); });
-  html += '</div>';
-  if(goals.length===0) html += '<div class="pc-empty"><div class="pc-empty-icon">&#127919;</div><div class="pc-empty-text">No goals defined</div></div>';
-  document.getElementById('pcPanel-goals').innerHTML = html;
-}
-
-function pcGoalCard(g) {
-  var pct = g.progress||0;
-  var barClass = pct>=75?'green':pct>=40?'accent':'yellow';
-  var html = '<div class="pc-goal-card">';
-  html += '<div class="goal-header"><div class="goal-title">'+pcEsc(g.title)+'</div><span class="pc-badge '+(g.status||'active')+'">'+pcEsc(g.status||'active')+'</span></div>';
-  if(g.description) html += '<div class="goal-desc">'+pcEsc(g.description)+'</div>';
-  html += '<div class="goal-progress"><div class="goal-bar-track"><div class="goal-bar-fill '+barClass+'" style="width:'+pct+'%"></div></div></div>';
-  html += '<div class="goal-metrics"><div class="goal-metric"><strong>'+pct+'%</strong> complete</div></div>';
-  html += '</div>';
-  if (g.children && g.children.length > 0) {
-    html += '<div class="pc-goal-children">';
-    g.children.forEach(function(c) { html += pcGoalCard(c); });
-    html += '</div>';
-  }
-  return html;
-}
-
-/* -- Approvals -- */
-function pcRenderApprovals() {
-  var approvals = PC.data.approvals||[];
-  var html = '<div class="pc-filters">';
-  html += '<button class="pc-filter-tab active" onclick="pcFilterApprovals(this,\'pending\')">Pending <span class="pc-badge-count">'+approvals.filter(function(a){return a.status==='pending'}).length+'</span></button>';
-  html += '<button class="pc-filter-tab" onclick="pcFilterApprovals(this,\'all\')">All</button>';
-  html += '</div>';
-  var pending = approvals.filter(function(a){return a.status==='pending'});
-  (pending.length>0?pending:approvals).forEach(function(a) {
-    html += '<div class="pc-approval-card" data-status="'+pcEsc(a.status||'')+'">';
-    html += '<div class="approval-header"><span class="approval-type">'+pcEsc(a.type||'approval')+'</span><span class="pc-badge '+pcEsc(a.status||'pending')+'">'+pcEsc(a.status||'pending')+'</span></div>';
-    html += '<div class="approval-title">'+pcEsc(a.title||'Untitled')+'</div>';
-    if(a.description) html += '<div class="approval-desc">'+pcEsc(a.description).substring(0,200)+'</div>';
-    html += '<div style="font-size:10px;color:var(--text-muted);margin-top:8px;">Requested by <strong>'+pcEsc(a.requestedBy||'Unknown')+'</strong> '+pcRelTime(a.createdAt)+'</div>';
-    if(a.status==='pending') {
-      html += '<div class="approval-actions"><button class="approve" onclick="pcApprovalAction(\''+a.id+'\',\'approve\')">Approve</button><button class="reject" onclick="pcApprovalAction(\''+a.id+'\',\'reject\')">Reject</button></div>';
-    }
-    html += '</div>';
-  });
-  if(approvals.length===0) html += '<div class="pc-empty"><div class="pc-empty-icon">&#9989;</div><div class="pc-empty-text">No pending approvals</div></div>';
-  document.getElementById('pcPanel-approvals').innerHTML = html;
-}
-
-function pcFilterApprovals(btn, filter) {
-  document.querySelectorAll('#pcPanel-approvals .pc-filter-tab').forEach(function(b){b.classList.remove('active')});
-  btn.classList.add('active');
-  document.querySelectorAll('#pcPanel-approvals .pc-approval-card').forEach(function(c) {
-    if(filter==='all') c.style.display=''; else c.style.display=c.dataset.status===filter?'':'none';
-  });
-}
-
-function pcApprovalAction(id, action) {
-  if(PC.mode==='api') {
-    pcApi('/approvals/'+id+'/'+action, {method:'POST'}).then(function(){refreshPaperclip()}).catch(function(e){alert('Error: '+e)});
+/* -- Runs -- */
+function pcRenderRuns() {
+  var html = '';
+  if (PC.runs.length === 0) {
+    html = '<div class="pc-empty"><div class="pc-empty-icon">&#9889;</div><div class="pc-empty-text">No agent runs yet</div></div>';
   } else {
-    // In GitHub mode, mark locally
-    PC.data.approvals = PC.data.approvals.map(function(a){if(String(a.id)===String(id)){a.status=action==='approve'?'approved':'rejected'} return a});
-    pcRenderApprovals(); pcUpdateBadges();
-  }
-}
-
-/* -- Org Chart -- */
-function pcRenderOrgChart() {
-  var org = PC.data.org||[];
-  var html = '<div class="pc-section-title">Organization Structure <span class="count">('+((typeof TEAM!=='undefined')?TEAM.length:org.length)+' members)</span></div>';
-  if (org.length > 0) {
-    html += '<div class="pc-org-tree">';
-    org.forEach(function(root) {
-      html += pcOrgNode(root);
-      if (root.children && root.children.length > 0) {
-        html += '<div class="pc-org-children">';
-        root.children.forEach(function(head) {
-          html += pcOrgNode(head);
-          if (head.children && head.children.length > 0) {
-            html += '<div class="pc-org-children">';
-            head.children.forEach(function(member) { html += pcOrgNode(member); });
-            html += '</div>';
-          }
-        });
+    html = '<div style="display:flex;flex-direction:column;gap:8px;">';
+    PC.runs.forEach(function(r) {
+      var statusClass = r.status === 'completed' ? 'done' : r.status === 'running' ? 'running' : 'error';
+      html += '<div style="padding:12px;background:var(--surface2);border-radius:8px;border-left:3px solid ' + (r.status === 'completed' ? '#2D8A4E' : r.status === 'running' ? '#C73C1E' : '#999') + ';">';
+      html += '<div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:6px;">';
+      html += '<div><div style="font-weight:600;font-size:13px;">'+pcEsc(r.task)+'</div><div style="font-size:11px;color:var(--text-muted);">'+pcEsc(r.user)+'</div></div>';
+      html += '<span class="pc-badge '+statusClass+'">'+r.status+'</span>';
+      html += '</div>';
+      if (r.steps && r.steps.length > 0) {
+        html += '<div style="font-size:11px;color:var(--text-muted);margin:6px 0;">';
+        var doneSteps = r.steps.filter(function(s) { return s.status === 'done'; }).length;
+        html += doneSteps + ' / ' + r.steps.length + ' steps';
         html += '</div>';
       }
+      html += '<div style="font-size:10px;color:var(--text-muted);">'+pcRelTime(r.startedAt)+'</div>';
+      html += '</div>';
     });
     html += '</div>';
-  } else {
-    html += '<div class="pc-empty"><div class="pc-empty-icon">&#127970;</div><div class="pc-empty-text">No org structure</div></div>';
   }
-  document.getElementById('pcPanel-orgchart').innerHTML = html;
-}
-
-function pcOrgNode(node) {
-  return '<div class="pc-org-node"><div class="org-avatar">'+pcInitials(node.name)+'</div><div class="org-info"><div class="org-name">'+pcEsc(node.name)+'</div><div class="org-title">'+pcEsc(node.title||'')+'</div></div><span class="pc-badge '+pcEsc(node.status||'active')+'">'+pcEsc(node.status||'active')+'</span></div>';
-}
-
-/* -- Costs -- */
-function pcRenderCosts() {
-  var cs = PC.data.costs||{};
-  var summary = cs.summary||{};
-  var byAgent = cs.byAgent||[];
-  var html = '<div class="pc-cost-summary">';
-  html += '<div class="pc-cost-card"><div class="cost-label">Total Spend</div><div class="cost-value">'+pcFmtCents(summary.totalCents||0)+'</div><div class="cost-sub">This month</div></div>';
-  html += '<div class="pc-cost-card"><div class="cost-label">Budget</div><div class="cost-value">'+pcFmtCents(summary.budgetCents||0)+'</div><div class="cost-sub">'+(summary.budgetCents?Math.round((summary.totalCents||0)/(summary.budgetCents)*100):0)+'% utilization</div></div>';
-  html += '<div class="pc-cost-card"><div class="cost-label">Input Tokens</div><div class="cost-value">'+pcFmtTokens(summary.inputTokens||0)+'</div><div class="cost-sub">Total consumed</div></div>';
-  html += '<div class="pc-cost-card"><div class="cost-label">Output Tokens</div><div class="cost-value">'+pcFmtTokens(summary.outputTokens||0)+'</div><div class="cost-sub">Total generated</div></div>';
-  html += '</div>';
-  // Cost by agent table
-  if (byAgent.length > 0) {
-    html += '<div class="pc-section-title">Cost by Agent</div>';
-    html += '<table class="pc-cost-table"><thead><tr><th>Agent</th><th>Cost</th><th>Tokens (In/Out)</th><th>Runs</th><th>Budget Usage</th></tr></thead><tbody>';
-    var maxCost = Math.max.apply(null, byAgent.map(function(a){return a.costCents||0}))||1;
-    byAgent.forEach(function(a) {
-      var pct = Math.round((a.costCents||0)/maxCost*100);
-      html += '<tr><td><strong>'+pcEsc(a.name)+'</strong></td><td style="font-family:Reddit Mono,monospace;">'+pcFmtCents(a.costCents||0)+'</td><td>'+pcFmtTokens(a.inputTokens||0)+' / '+pcFmtTokens(a.outputTokens||0)+'</td><td>'+a.runs+'</td><td><div class="pc-cost-bar-track"><div class="pc-cost-bar-fill" style="width:'+pct+'%"></div></div></td></tr>';
-    });
-    html += '</tbody></table>';
-  }
-  document.getElementById('pcPanel-costs').innerHTML = html;
+  document.getElementById('pcPanel-runs').innerHTML = html;
 }
 
 /* -- Activity -- */
 function pcRenderActivity() {
-  var html = '<div class="pc-filters">';
-  html += '<button class="pc-filter-tab active" onclick="pcFilterActivity(this,\'all\')">All</button>';
-  html += '<button class="pc-filter-tab" onclick="pcFilterActivity(this,\'commit\')">Commits</button>';
-  html += '<button class="pc-filter-tab" onclick="pcFilterActivity(this,\'issue\')">Issues</button>';
-  html += '<button class="pc-filter-tab" onclick="pcFilterActivity(this,\'approval\')">PRs</button>';
-  html += '</div>';
-  html += '<div class="pc-activity-feed" id="pcActivityItems">';
-  html += pcRenderActivityItems(PC.data.activity);
-  html += '</div>';
+  var html = '';
+  if (PC.runs.length === 0) {
+    html = '<div class="pc-empty"><div class="pc-empty-icon">&#9889;</div><div class="pc-empty-text">No activity recorded</div></div>';
+  } else {
+    html = '<div style="display:flex;flex-direction:column;gap:8px;">';
+    PC.runs.forEach(function(r) {
+      html += '<div style="padding:10px;border-bottom:1px solid var(--border);">';
+      html += '<div style="font-size:11px;color:var(--text-muted);">'+pcRelTime(r.startedAt)+'</div>';
+      html += '<div style="font-size:12px;margin-top:2px;"><strong>'+pcEsc(r.user)+'</strong> deployed agent: <em>'+pcEsc(r.task)+'</em></div>';
+      if (r.status === 'completed') {
+        html += '<div style="font-size:11px;color:var(--text-muted);margin-top:4px;">&#10003; Completed</div>';
+      }
+      html += '</div>';
+    });
+    html += '</div>';
+  }
   document.getElementById('pcPanel-activity').innerHTML = html;
 }
 
-function pcRenderActivityItems(items) {
-  var html = '';
-  (items||[]).forEach(function(a) {
-    html += '<div class="pc-activity-item '+pcEsc(a.type||'')+'" data-type="'+pcEsc(a.type||'')+'">';
-    html += '<div class="pc-activity-time">'+pcRelTime(a.createdAt)+'</div>';
-    html += '<div class="pc-activity-text"><span class="pc-activity-actor">'+pcEsc(a.actor||'System')+'</span> '+pcEsc(a.text||'')+'</div>';
-    html += '</div>';
-  });
-  if(!items||items.length===0) html = '<div class="pc-empty"><div class="pc-empty-text">No activity recorded</div></div>';
-  return html;
-}
-
-function pcFilterActivity(btn, filter) {
-  document.querySelectorAll('#pcPanel-activity .pc-filter-tab').forEach(function(b){b.classList.remove('active')});
-  btn.classList.add('active');
-  document.querySelectorAll('#pcActivityItems .pc-activity-item').forEach(function(c) {
-    if(filter==='all') c.style.display=''; else c.style.display=c.dataset.type===filter?'':'none';
-  });
-}
-
 /* -- Detail panels -- */
-function pcShowAgentDetail(agent) {
-  var panel = document.getElementById('pcDetailPanel');
-  var html = '<div class="pc-detail-header"><h3 style="font-size:16px;font-weight:600;">Agent Detail</h3><button class="pc-detail-close" onclick="pcCloseDetail()">&#10005;</button></div>';
-  if(agent.avatar) html += '<img src="'+pcEsc(agent.avatar)+'" style="width:64px;height:64px;border-radius:12px;margin-bottom:12px;">';
-  else html += '<div class="pc-agent-avatar" style="width:64px;height:64px;font-size:24px;border-radius:12px;margin-bottom:12px;">'+pcInitials(agent.name)+'</div>';
-  html += '<h4 style="font-size:18px;font-weight:600;">'+pcEsc(agent.name)+'</h4>';
-  html += '<div style="color:var(--text-muted);font-size:12px;margin:4px 0 16px;">'+pcEsc(agent.title||agent.role||'Agent')+'</div>';
-  html += '<span class="pc-badge '+pcEsc(agent.status||'idle')+'">'+pcEsc(agent.status||'idle')+'</span>';
-  if(agent.contributions) html += '<div style="margin-top:16px;font-size:13px;"><strong>'+agent.contributions+'</strong> contributions</div>';
-  html += '<div style="margin-top:20px;border-top:1px solid var(--border);padding-top:16px;">';
-  html += '<div class="pc-section-title">Actions</div>';
-  if(PC.mode==='api') {
-    html += '<button class="pc-new-btn" style="margin-right:8px;" onclick="pcAgentAction(\''+agent.id+'\',\'wake\')">Wake</button>';
-    html += '<button class="pc-new-btn" style="background:var(--text-muted);" onclick="pcAgentAction(\''+agent.id+'\',\'pause\')">Pause</button>';
-  } else {
-    html += '<div style="font-size:11px;color:var(--text-muted);">Connect to a Paperclip server to manage agents</div>';
-  }
-  html += '</div>';
-  panel.innerHTML = html;
-  panel.classList.remove('hidden');
-}
-
-function pcShowIssueDetail(issue) {
-  var panel = document.getElementById('pcDetailPanel');
-  var html = '<div class="pc-detail-header"><h3 style="font-size:16px;font-weight:600;">Issue Detail</h3><button class="pc-detail-close" onclick="pcCloseDetail()">&#10005;</button></div>';
-  html += '<div style="font-size:11px;color:var(--text-muted);font-family:Reddit Mono,monospace;">'+pcEsc(issue.identifier||'')+'</div>';
-  html += '<h4 style="font-size:16px;font-weight:600;margin:8px 0;">'+pcEsc(issue.title)+'</h4>';
-  html += '<div style="display:flex;gap:8px;margin-bottom:16px;">';
-  html += '<span class="pc-badge '+pcEsc(issue.status||'todo')+'">'+pcEsc(issue.status||'todo')+'</span>';
-  html += '<span class="pc-badge" style="background:var(--surface2);">'+pcEsc(issue.priority||'normal')+' priority</span>';
-  html += '</div>';
-  if(issue.description) html += '<div style="font-size:12px;color:var(--text);line-height:1.6;margin-bottom:16px;white-space:pre-wrap;">'+pcEsc(issue.description).substring(0,500)+'</div>';
-  if(issue.assignee) html += '<div style="font-size:12px;margin-bottom:12px;"><strong>Assigned to:</strong> '+pcEsc(issue.assignee.name||'')+'</div>';
-  html += '<div style="font-size:11px;color:var(--text-muted);">Created '+pcRelTime(issue.createdAt)+'</div>';
-  if(issue.labels&&issue.labels.length>0) {
-    html += '<div style="margin-top:12px;display:flex;gap:4px;flex-wrap:wrap;">';
-    issue.labels.forEach(function(l){html+='<span class="pc-label" style="'+(l.color?'background:#'+l.color+'20;color:#'+l.color:'')+'">'+pcEsc(l.name)+'</span>'});
-    html += '</div>';
-  }
-  panel.innerHTML = html;
-  panel.classList.remove('hidden');
-}
 
 function pcCloseDetail() { document.getElementById('pcDetailPanel').classList.add('hidden'); }
 
-function pcAgentAction(id, action) {
-  if(PC.mode!=='api') return;
-  pcApi('/agents/'+id+'/'+action, {method:'POST'}).then(function(){refreshPaperclip()}).catch(function(e){alert('Error: '+e)});
-}
-
-/* -- Config modal -- */
-function pcShowConfig() {
-  var overlay = document.createElement('div');
-  overlay.className = 'pc-config-overlay';
-  overlay.id = 'pcConfigOverlay';
-  overlay.innerHTML = '<div class="pc-config-modal">'
-    +'<h3>Paperclip Settings</h3>'
-    +'<label>Server URL</label>'
-    +'<input type="text" id="pcCfgUrl" placeholder="https://paperclip-server.onrender.com" value="'+pcEsc(PC.serverUrl)+'">'
-    +'<label>Company ID</label>'
-    +'<input type="text" id="pcCfgCompany" placeholder="Your company UUID" value="'+pcEsc(PC.companyId)+'">'
-    +'<label>Auth Token (optional)</label>'
-    +'<input type="password" id="pcCfgToken" placeholder="Bearer token" value="'+pcEsc(PC.token)+'">'
-    +'<div style="margin-top:12px;padding:10px;background:var(--surface2);border-radius:6px;font-size:11px;color:var(--text-muted);">'
-    +'<strong>Current mode:</strong> '+(PC.mode==='api'?'Connected to Paperclip API':'GitHub data mode')+'<br>'
-    +'<strong>GitHub repo:</strong> NOISEMEDIAGROUP/Noise-X-Paperclip'
-    +'</div>'
-    +'<div class="modal-actions">'
-    +'<button onclick="pcCloseConfig()">Cancel</button>'
-    +'<button class="primary" onclick="pcSaveConfig()">Save & Connect</button>'
-    +'</div></div>';
-  document.body.appendChild(overlay);
-  overlay.onclick = function(e) { if(e.target===overlay) pcCloseConfig(); };
-}
-
-function pcCloseConfig() { var el=document.getElementById('pcConfigOverlay'); if(el) el.remove(); }
-
-function pcSaveConfig() {
-  var url = document.getElementById('pcCfgUrl').value.trim();
-  var company = document.getElementById('pcCfgCompany').value.trim();
-  var token = document.getElementById('pcCfgToken').value.trim();
-  PC.serverUrl = url; PC.companyId = company; PC.token = token;
-  localStorage.setItem('pc_server_url', url);
-  localStorage.setItem('pc_company_id', company);
-  localStorage.setItem('pc_token', token);
-  PC.mode = url ? 'api' : 'github';
-  pcCloseConfig();
-  PC.initialized = false;
-  initPaperclip();
-}
-
-/* -- Create entity -- */
-function pcCreateEntity() {
-  var overlay = document.createElement('div');
-  overlay.className = 'pc-config-overlay';
-  overlay.id = 'pcCreateOverlay';
-  overlay.innerHTML = '<div class="pc-config-modal">'
-    +'<h3>Create New</h3>'
-    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">'
-    +'<button class="pc-new-btn" style="justify-content:center;padding:16px;" onclick="pcCreateIssue()">New Issue</button>'
-    +'<button class="pc-new-btn" style="justify-content:center;padding:16px;background:var(--blue);" onclick="pcCreateGoal()">New Goal</button>'
-    +'<button class="pc-new-btn" style="justify-content:center;padding:16px;background:var(--green);" onclick="pcCreateProject()">New Project</button>'
-    +'<button class="pc-new-btn" style="justify-content:center;padding:16px;background:#9647DD;" onclick="pcHireAgent()">Hire Agent</button>'
-    +'</div>'
-    +'<div class="modal-actions"><button onclick="document.getElementById(\'pcCreateOverlay\').remove()">Cancel</button></div>'
-    +'</div>';
-  document.body.appendChild(overlay);
-  overlay.onclick = function(e) { if(e.target===overlay) overlay.remove(); };
-}
-
-function pcCreateIssue() {
-  document.getElementById('pcCreateOverlay').remove();
-  var overlay = document.createElement('div');
-  overlay.className = 'pc-config-overlay';
-  overlay.id = 'pcCreateOverlay';
-  overlay.innerHTML = '<div class="pc-config-modal">'
-    +'<h3>New Issue</h3>'
-    +'<label>Title</label><input type="text" id="pcNewIssueTitle" placeholder="Issue title">'
-    +'<label>Description</label><textarea id="pcNewIssueDesc" style="width:100%;height:80px;padding:8px 12px;border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:Montserrat,sans-serif;resize:vertical;" placeholder="Describe the issue..."></textarea>'
-    +'<label>Priority</label><select id="pcNewIssuePriority" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;"><option value="normal">Normal</option><option value="low">Low</option><option value="high">High</option><option value="critical">Critical</option></select>'
-    +'<div class="modal-actions"><button onclick="document.getElementById(\'pcCreateOverlay\').remove()">Cancel</button><button class="primary" onclick="pcSubmitIssue()">Create</button></div>'
-    +'</div>';
-  document.body.appendChild(overlay);
-}
-
-function pcSubmitIssue() {
-  var title = document.getElementById('pcNewIssueTitle').value.trim();
-  if(!title) return;
-  var desc = document.getElementById('pcNewIssueDesc').value.trim();
-  var priority = document.getElementById('pcNewIssuePriority').value;
-  if(PC.mode==='api' && PC.companyId) {
-    pcApi('/companies/'+PC.companyId+'/issues',{method:'POST',body:JSON.stringify({title:title,description:desc,priority:priority,status:'todo'})})
-      .then(function(){document.getElementById('pcCreateOverlay').remove(); refreshPaperclip()})
-      .catch(function(e){alert('Error: '+e)});
-  } else {
-    var newId = Date.now();
-    PC.data.issues.unshift({id:newId,identifier:'NXP-'+(PC.data.issues.length+1),title:title,description:desc,status:'todo',priority:priority,labels:[],createdAt:new Date().toISOString()});
-    PC.data.activity.unshift({type:'issue',actor:window.CU?CU.name:'User',text:'Created issue: '+title,createdAt:new Date().toISOString()});
-    document.getElementById('pcCreateOverlay').remove();
-    pcUpdateAll();
-  }
-}
-
-function pcCreateGoal() { document.getElementById('pcCreateOverlay').remove(); alert('Goal creation requires a connected Paperclip server. Configure one in Settings.'); }
-function pcCreateProject() { document.getElementById('pcCreateOverlay').remove(); alert('Project creation requires a connected Paperclip server. Configure one in Settings.'); }
-function pcHireAgent() { document.getElementById('pcCreateOverlay').remove(); alert('Agent hiring requires a connected Paperclip server. Configure one in Settings.'); }
 
 /* -- View switching -- */
 function switchPCView(view) {
@@ -8384,8 +7758,14 @@ function switchPCView(view) {
   pcCloseDetail();
 }
 
+function pcCloseDetail() {
+  var panel = document.getElementById('pcDetailPanel');
+  if (panel) panel.style.display = 'none';
+}
+
 function refreshPaperclip() {
-  if(PC.mode==='api' && PC.serverUrl) pcFetchAll(); else pcFetchGitHub();
+  pcLoad();
+  pcRenderAll();
 }
 
 window.addEventListener('unhandledrejection',function(e){console.warn('Unhandled:',e.reason);e.preventDefault();});

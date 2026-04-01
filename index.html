@@ -4481,39 +4481,25 @@ async function coworkAgent(task, hc) {
 
     // Check if last step returned a doc request
     if (isLast) {
+      // Always generate a document from the agent work
+      var detectedDocType = 'report';
+      if (task.match(/presentation|deck|slides|pptx/i)) detectedDocType = 'presentation';
+      else if (task.match(/email|template/i)) detectedDocType = 'email';
+      else if (task.match(/brief/i)) detectedDocType = 'brief';
+      else if (task.match(/social|copy|post/i)) detectedDocType = 'social';
+      else if (task.match(/proposal/i)) detectedDocType = 'proposal';
+      else if (task.match(/strategy|plan/i)) detectedDocType = 'strategy';
+      else if (task.match(/audit/i)) detectedDocType = 'report';
+
+      // Try to extract JSON doc request from step reply
       try {
         var trimmed = stepReply.trim();
-        // Extract JSON from response even if wrapped in text
         var jsonMatch = trimmed.match(/\{[^{}]*"doc_type"[^{}]*\}/);
         if (jsonMatch) {
           var docReq = safeJSON(jsonMatch[0]);
-          var dcn = docReq.client || 'Client';
-          var fcm = CL.find(function(c) { return c.n.toLowerCase() === dcn.toLowerCase(); });
-          if (fcm) { dcn = fcm.n; }
-          var dcc = fcm ? fcm.cat : '';
-
-          var writePrompt = docWriterPrompt(docReq.doc_type);
-          // Build rich context from client knowledge + strategy KB
-          var agentClientCtx = '';
-          if (fcm && fcm.knowledge) agentClientCtx += '\n\nCLIENT KNOWLEDGE: ' + fcm.knowledge;
-          var agentStrat = getStrategyInfo(dcn);
-          if (agentStrat) {
-            agentClientCtx += '\n\nSTRATEGY DATA:';
-            for (var asp in agentStrat) { if (typeof agentStrat[asp] === 'string') agentClientCtx += '\n- ' + asp.replace(/_/g,' ') + ': ' + agentStrat[asp]; }
-          }
-          var writeMsg = 'Write a ' + docReq.doc_type + ' for ' + dcn + (dcc ? ' (' + dcc + ')' : '') + '. Original task: "' + task + '". Context from research: ' + contextSoFar + agentClientCtx + '. Return ONLY raw HTML &mdash; no markdown, no code fences, no ```. Start with an HTML tag.';
-          if (docReq.topic) writeMsg += ' Topic: ' + docReq.topic + '.';
-
-          var docHtml = await aiCall(writePrompt, [{ role: 'user', content: writeMsg }], 4000);
-          if (docHtml) finalDoc = stripCodeFences(docHtml);
-
-          // Update card with completion summary
-          var doneDiv = document.createElement('div');
-          doneDiv.className = 'task-card-done';
-          doneDiv.textContent = 'Complete  -  ' + (docReq.summary || docReq.doc_type + ' created for ' + dcn);
-          planCard.appendChild(doneDiv);
+          if (docReq && docReq.doc_type) detectedDocType = docReq.doc_type;
         }
-      } catch(e) { console.warn("Caught error:", e); }
+      } catch(e) { /* use detected type */ }
     }
 
     // Small delay between steps for visual effect
@@ -4528,67 +4514,51 @@ async function coworkAgent(task, hc) {
   var headerText = planCard.querySelector('.task-card-header');
   if (headerText) headerText.childNodes[1].textContent = 'Agent complete';
 
-  // If no doc was generated from the last step, force-generate one as a fallback
-  if (!finalDoc) {
-    // Detect doc type and client from the original task
-    var fallbackDocType = 'report';
-    if (task.match(/presentation|deck|slides|pptx/i)) fallbackDocType = 'presentation';
-    else if (task.match(/email|template/i)) fallbackDocType = 'email';
-    else if (task.match(/brief/i)) fallbackDocType = 'brief';
-    else if (task.match(/social|copy|post/i)) fallbackDocType = 'social';
-    else if (task.match(/proposal/i)) fallbackDocType = 'proposal';
-    else if (task.match(/strategy|plan/i)) fallbackDocType = 'strategy';
-    else if (task.match(/audit/i)) fallbackDocType = 'report';
+  // Generate the document from agent research
+  var docClient = '';
+  CL.forEach(function(c) {
+    if (task.toLowerCase().indexOf(c.n.toLowerCase()) !== -1) docClient = c.n;
+  });
+  if (!docClient) docClient = 'Client';
+  var docCl = CL.find(function(c) { return c.n === docClient; });
+  var docCat = docCl ? (docCl.cat || '') : '';
+  var useDocType = (typeof detectedDocType !== 'undefined') ? detectedDocType : 'brief';
 
-    // Try to extract client name from task
-    var fallbackClient = '';
-    CL.forEach(function(c) {
-      if (task.toLowerCase()?.indexOf(c.n.toLowerCase()) !== -1) fallbackClient = c.n;
-    });
-    if (!fallbackClient) fallbackClient = 'Client';
-    var fallbackCat = '';
-    var fallbackCl = CL.find(function(c) { return c.n === fallbackClient; });
-    if (fallbackCl) fallbackCat = fallbackCl.cat || '';
+  // Show generating step
+  var genStep = document.createElement('div');
+  genStep.className = 'task-step active';
+  var gIcon = document.createElement('span'); gIcon.className = 'step-icon'; gIcon.textContent = '\u25CF';
+  var gText = document.createElement('span'); gText.textContent = 'Generating document...';
+  genStep.appendChild(gIcon); genStep.appendChild(gText);
+  var stepsContainer = planCard.querySelector('.task-steps') || planCard;
+  stepsContainer.appendChild(genStep);
+  hc.scrollTop = hc.scrollHeight;
 
-    // Build rich context for document generation
-    var fbClientCtx = '';
-    if (fallbackCl && fallbackCl.knowledge) fbClientCtx += '\n\nCLIENT KNOWLEDGE: ' + fallbackCl.knowledge;
-    var fbStrat = getStrategyInfo(fallbackClient);
-    if (fbStrat) {
-      fbClientCtx += '\n\nSTRATEGY DATA:';
-      for (var fbp in fbStrat) { if (typeof fbStrat[fbp] === 'string') fbClientCtx += '\n- ' + fbp.replace(/_/g,' ') + ': ' + fbStrat[fbp]; }
+  // Build a compact write prompt (keep context short to avoid API limits)
+  var compactContext = contextSoFar.substring(0, 3000);
+  var clientKnowledge = (docCl && docCl.knowledge) ? docCl.knowledge.substring(0, 1000) : '';
+  var docSysPrompt = docWriterPrompt(useDocType);
+  var docUserMsg = 'Write a ' + useDocType + ' for ' + docClient + (docCat ? ' (' + docCat + ')' : '') + '. Task: "' + task + '".\n\nAgent research:\n' + compactContext + (clientKnowledge ? '\n\nClient info: ' + clientKnowledge : '') + '\n\nReturn ONLY raw HTML. No markdown, no code fences. Start with an HTML tag.';
+
+  try {
+    var docHtml = await aiCall(docSysPrompt, [{ role: 'user', content: docUserMsg }], 4000);
+    if (docHtml) {
+      finalDoc = stripCodeFences(docHtml);
+    } else {
+      console.warn('Doc generation returned null, retrying with shorter context...');
+      // Retry with even shorter context
+      var shortMsg = 'Write a ' + useDocType + ' for ' + docClient + '. Task: "' + task + '". Return ONLY raw HTML. No markdown. Start with an HTML tag.' + (clientKnowledge ? '\n\nClient: ' + clientKnowledge.substring(0, 500) : '');
+      var retryHtml = await aiCall(docSysPrompt, [{ role: 'user', content: shortMsg }], 4000);
+      if (retryHtml) finalDoc = stripCodeFences(retryHtml);
     }
-
-    // Include uploaded file contents if available
-    var fbFileCtx = '';
-    if (window.uploadedFileContents && window.uploadedFileContents.length > 0) {
-      fbFileCtx = '\n\nUPLOADED FILES:\n';
-      window.uploadedFileContents.forEach(function(fc) {
-        fbFileCtx += '\n=== FILE: ' + fc.name + ' ===\n' + fc.content + '\n';
-      });
-    }
-
-    var fbWritePrompt = docWriterPrompt(fallbackDocType);
-    var fbWriteMsg = 'Write a ' + fallbackDocType + ' for ' + fallbackClient + (fallbackCat ? ' (' + fallbackCat + ')' : '') + '. Original task: "' + task + '". Research context from agent steps: ' + contextSoFar + fbClientCtx + fbFileCtx + '. Return ONLY raw HTML &mdash; no markdown, no code fences, no ```. Start with an HTML tag.';
-
-    // Update card to show document generation
-    var genStep = document.createElement('div');
-    genStep.className = 'task-step active';
-    var gIcon = document.createElement('span'); gIcon.className = 'step-icon'; gIcon.textContent = '\u25CF';
-    var gText = document.createElement('span'); gText.textContent = 'Generating document...';
-    genStep.appendChild(gIcon); genStep.appendChild(gText);
-    var stepsContainer = planCard.querySelector('.task-steps') || planCard;
-    stepsContainer.appendChild(genStep);
-    hc.scrollTop = hc.scrollHeight;
-
-    var fbDocHtml = await aiCall(fbWritePrompt, [{ role: 'user', content: fbWriteMsg }], 4000);
-    if (fbDocHtml) finalDoc = stripCodeFences(fbDocHtml);
-
-    // Mark generation step done
-    genStep.className = 'task-step done';
-    genStep.querySelector('.step-icon').textContent = '\u2713';
-    genStep.querySelector('span:last-child').textContent = 'Document generated';
+  } catch(e) {
+    console.error('Doc generation error:', e);
   }
+
+  // Mark generation step done
+  genStep.className = 'task-step done';
+  genStep.querySelector('.step-icon').textContent = '\u2713';
+  genStep.querySelector('span:last-child').textContent = finalDoc ? 'Document generated' : 'Generation attempted';
 
   // Show final result
   if (finalDoc) {

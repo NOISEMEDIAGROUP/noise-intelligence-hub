@@ -3730,12 +3730,10 @@ function buildSystemPrompt() {
 var _lastAiError = null;
 async function aiCall(sysPrompt, msgs, maxTok) {
   _lastAiError = null;
-  if (!AI_KEY) { _lastAiError = 'No API key set'; console.warn(_lastAiError); return null; }
+  if (!AI_KEY) { _lastAiError = 'No API key set'; return null; }
   var controller = new AbortController();
   var timeout = setTimeout(function() { controller.abort(); }, 300000);
   try {
-    // Cap system prompt to avoid oversized requests
-    var cappedSystem = sysPrompt.length > 80000 ? sysPrompt.substring(0, 80000) + '\n[Context truncated for length]' : sysPrompt;
     var res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       signal: controller.signal,
@@ -3748,7 +3746,7 @@ async function aiCall(sysPrompt, msgs, maxTok) {
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
         max_tokens: Math.min(maxTok || 400, 4096),
-        system: cappedSystem,
+        system: sysPrompt,
         messages: msgs
       })
     });
@@ -3761,7 +3759,7 @@ async function aiCall(sysPrompt, msgs, maxTok) {
     }
     var data = await res.json();
     if (data.content && data.content[0]) return data.content[0].text;
-    _lastAiError = 'Empty response from API';
+    _lastAiError = 'Empty response';
     return null;
   } catch(e) {
     clearTimeout(timeout);

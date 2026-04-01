@@ -2016,10 +2016,6 @@ function sanitize(h){return typeof DOMPurify!=='undefined'?DOMPurify.sanitize(h,
 function safeJSON(s){try{return JSON.parse(s)}catch(e){console.warn('JSON parse error:',e);return null;}}
 function safeLS(k,v){try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v);}catch(e){console.warn('localStorage error:',e);return null;}}
 
-function sanitize(h){return typeof DOMPurify!=='undefined'?DOMPurify.sanitize(h,{ADD_ATTR:['onclick','onchange','oninput','style']}):h;}
-function safeJSON(s){try{return JSON.parse(s)}catch(e){console.warn('JSON parse error:',e);return null;}}
-function safeLS(k,v){try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v);}catch(e){console.warn('localStorage error:',e);return null;}}
-
 /* ============ TEAM DATA (matching your screenshot exactly) ============ */
 const TEAM = [
   { name:"Anthony", init:"AN", role:"Co-Founder", color:"#E74C3C" },
@@ -4437,7 +4433,7 @@ async function coworkAgent(task, hc) {
   planCard.className = 'task-card';
   planCard.innerHTML = '<div class="task-card-header"><div class="pulse"></div><span>Agent working</span></div>'
     + '<div class="task-card-title">' + escHtml(task) + '</div>'
-    + '<div class="task-steps" id="agentSteps"><div class="task-step active"><span class="step-icon">●</span><span>Planning approach...</span></div></div>';
+    + '<div class="task-steps" id="agentSteps"><div class="task-step active"><span class="step-icon">&#9679;</span><span>Planning approach...</span></div></div>';
   hc.appendChild(planCard);
   hc.scrollTop = hc.scrollHeight;
 
@@ -4462,7 +4458,9 @@ async function coworkAgent(task, hc) {
     var div = document.createElement('div');
     div.className = 'task-step' + (i === 0 ? ' active' : '');
     div.id = 'agentStep_' + i;
-    div.innerHTML = sanitize('<span class="step-icon">' + (i === 0 ? '●' : '○') + '</span><span>' + escHtml(s) + '</span>');
+    var iconSpan = document.createElement('span'); iconSpan.className = 'step-icon'; iconSpan.textContent = i === 0 ? '\u25CF' : '\u25CB';
+    var textSpan = document.createElement('span'); textSpan.textContent = s;
+    div.appendChild(iconSpan); div.appendChild(textSpan);
     stepsEl.appendChild(div);
   });
   hc.scrollTop = hc.scrollHeight;
@@ -4474,7 +4472,7 @@ async function coworkAgent(task, hc) {
   for (var i = 0; i < steps.length; i++) {
     // Mark current step active
     var stepEl = document.getElementById('agentStep_' + i);
-    if (stepEl) { stepEl.className = 'task-step active'; stepEl.querySelector('.step-icon').innerHTML = '●'; }
+    if (stepEl) { stepEl.className = 'task-step active'; stepEl.querySelector('.step-icon').textContent = '\u25CF'; }
 
     var isLast = (i === steps.length - 1);
     var stepPrompt = 'You are an autonomous AI agent for Noise Media agency, working for ' + un + ' (' + ur + ').\n\n'
@@ -4497,7 +4495,7 @@ async function coworkAgent(task, hc) {
     contextSoFar += '\nStep ' + (i + 1) + ': ' + stepReply;
 
     // Mark step done
-    if (stepEl) { stepEl.className = 'task-step done'; stepEl.querySelector('.step-icon').innerHTML = '✓'; }
+    if (stepEl) { stepEl.className = 'task-step done'; stepEl.querySelector('.step-icon').textContent = '\u2713'; }
     hc.scrollTop = hc.scrollHeight;
 
     // Check if last step returned a doc request
@@ -4595,7 +4593,9 @@ async function coworkAgent(task, hc) {
     // Update card to show document generation
     var genStep = document.createElement('div');
     genStep.className = 'task-step active';
-    genStep.innerHTML = '<span class="step-icon">●</span><span>Generating document...</span>';
+    var gIcon = document.createElement('span'); gIcon.className = 'step-icon'; gIcon.textContent = '\u25CF';
+    var gText = document.createElement('span'); gText.textContent = 'Generating document...';
+    genStep.appendChild(gIcon); genStep.appendChild(gText);
     var stepsContainer = planCard.querySelector('.task-steps') || planCard;
     stepsContainer.appendChild(genStep);
     hc.scrollTop = hc.scrollHeight;
@@ -4605,7 +4605,7 @@ async function coworkAgent(task, hc) {
 
     // Mark generation step done
     genStep.className = 'task-step done';
-    genStep.querySelector('.step-icon').innerHTML = '✓';
+    genStep.querySelector('.step-icon').textContent = '\u2713';
     genStep.querySelector('span:last-child').textContent = 'Document generated';
   }
 
